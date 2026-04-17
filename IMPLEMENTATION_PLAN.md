@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:24 Europe/Warsaw
+**Last updated:** 2026-04-17 18:31 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -24,13 +24,14 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | 14 real records are stored; broader backfill leaves 16 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
+| 4 | Manual extraction loop | [~] | 15 real records are stored; broader backfill leaves 15 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
+- `58f872f` Record second-half 2024 media settlement extraction.
 - `1de5c04` Record DACH BUD resolution ballot extraction.
 - `1a86bc4` Record September 2024 garage washing extraction.
 - `e1684eb` Record 2024 media settlement extraction.
@@ -57,8 +58,8 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Continue broader-backfill extraction queue; 16 documents remain after
-  extracting `2ca33ef...`.
+- Continue broader-backfill extraction queue; 15 documents remain after
+  extracting `07c2aa6...`.
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
@@ -67,7 +68,7 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the second-half 2024 media settlement.
+Updated 2026-04-17 after extracting the late-payment interest note.
 
 #### Vault state
 
@@ -78,13 +79,13 @@ Updated 2026-04-17 after extracting the second-half 2024 media settlement.
 - Full Locator backfill has run: 30 emails in the vault, 65 messages seen total,
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
-- `reports/inbox.md` up to date; 31 open anomalies.
-- Current records: 14.
-- Current extraction queue: 16 documents.
+- `reports/inbox.md` up to date; 30 open anomalies.
+- Current records: 15.
+- Current extraction queue: 15 documents.
 - New broader-backfill extraction completed this step:
-  `2ca33ef...` second-half 2024 media settlement (`media_settlement`, `ok`):
-  water/sewage and utilities settlement with 739.16 PLN net overpayment,
-  booked 2024-12-31.
+  `07c2aa6...` late-payment interest note (`interest_note`, `ok`): five
+  overdue 2024 payments, 10.92 PLN total interest, 11.25% rate, and 14-day
+  payment window.
 
 #### Documents (6 total)
 
@@ -114,7 +115,7 @@ Updated 2026-04-17 after extracting the second-half 2024 media settlement.
 
 - `PAYMENT_DEADLINE_UNCONFIRMED` - 2025 shared-property settlement result has
   a past payment date, but payment/booked status is unknown.
-- `EXTRACTION_MISSING` - 16 documents from the broader Gmail backfill still
+- `EXTRACTION_MISSING` - 15 documents from the broader Gmail backfill still
   need extraction or asset classification.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
