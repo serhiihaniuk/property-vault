@@ -8,7 +8,7 @@ deadlines, anomalies, or property history.
 ## Inputs
 
 - User question.
-- `pnpm vault context`.
+- `npm run vault -- context`.
 - Search results, SQL results, records, notes, and source files.
 
 ## Steps
@@ -33,6 +33,6 @@ deadlines, anomalies, or property history.
 ## Examples
 
 ```text
-pnpm vault search "uchwala"
-pnpm vault sql --select "select * from financial_rows limit 10"
+npm run vault -- search "uchwala"
+npm run vault -- sql --select "select * from financial_rows limit 10"
 ```

@@ -36,6 +36,6 @@ Run after Gmail OAuth is configured and the local vault core is stable.
 ## Examples
 
 ```text
-pnpm gmail sync
-pnpm gmail sync --backfill-from 2023-01-01
+npm run gmail -- sync
+npm run gmail -- sync --backfill-from 2023-01-01
 ```

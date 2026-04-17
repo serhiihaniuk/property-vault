@@ -32,6 +32,6 @@ the user inbox report.
 ## Examples
 
 ```text
-pnpm vault detect-anomalies
-pnpm vault list-work --kind anomaly
+npm run vault -- detect-anomalies
+npm run vault -- list-work --kind anomaly
 ```

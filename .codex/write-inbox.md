@@ -36,5 +36,5 @@ needs the user's attention.
 ## Examples
 
 ```text
-pnpm vault write-inbox
+npm run vault -- write-inbox
 ```

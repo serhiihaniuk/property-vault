@@ -28,7 +28,7 @@ type CommandContext = {
 const HELP_TEXT = `Dabrowskiego Vault CLI
 
 Usage:
-  pnpm vault <command> [options]
+  npm run vault -- <command> [options]
 
 Commands:
   setup                         Create vault, index, reports, state, and DB schema

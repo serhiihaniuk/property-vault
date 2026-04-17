@@ -17,20 +17,20 @@ import, reports, anomalies, and backup verification.
 ## Requirements
 
 - Node.js 22.6 or newer
-- pnpm
+- npm
 - Windows PowerShell for the initial local workflow
 
 ## Planned Commands
 
 ```text
-pnpm install
-pnpm vault setup
-pnpm vault validate
-pnpm vault reindex
-pnpm vault register-document "zawiad po zebraniu.pdf"
-pnpm vault search <query>
-pnpm gmail auth
-pnpm gmail sync
+npm install
+npm run vault -- setup
+npm run vault -- validate
+npm run vault -- reindex
+npm run vault -- register-document "zawiad po zebraniu.pdf"
+npm run vault -- search <query>
+npm run gmail -- auth
+npm run gmail -- sync
 ```
 
 Some commands are placeholders until the implementation phases add the matching

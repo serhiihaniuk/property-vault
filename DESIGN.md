@@ -131,7 +131,7 @@ complexity.
 - Node.js 22.6+.
 - TypeScript syntax stripped at runtime with `--experimental-strip-types`.
 - No bundler, no `ts-node`, no server framework in v1.
-- `pnpm` as the package manager.
+- `npm` as the package manager.
 
 ### 5.2 Core Dependencies
 
@@ -164,12 +164,12 @@ type locally.
 | Package | Role |
 | --- | --- |
 | `pdf-parse` | Page count, text-layer check, PDF page rendering. |
-| `node-tesseract-ocr` | Optional wrapper for native Tesseract. |
 
 v1 decision: PDFs are treated as scanned-first. Node performs deterministic
 inspection and rendering; Codex/vision performs the primary reading and
-extraction. Tesseract is optional fallback for cheap searchable text, not a
-required blocker for understanding documents.
+extraction. Native Tesseract can be added later as an optional fallback for
+cheap searchable text, but it is not a required blocker for understanding
+documents.
 
 PDF processing rules:
 
@@ -215,12 +215,11 @@ No Jest or Vitest in v1.
     "test": "node --test --experimental-strip-types tools/**/*.test.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^11",
+    "better-sqlite3": "^12.9.0",
     "zod": "^3",
     "zod-to-json-schema": "^3",
     "pdf-parse": "^2",
-    "file-type": "^19",
-    "node-tesseract-ocr": "^2",
+    "file-type": "^22.0.1",
     "googleapis": "^144",
     "google-auth-library": "^9",
     "open": "^10",
@@ -874,20 +873,20 @@ library mutation has a command-shaped wrapper. The CLI is thin; it calls
 Required v1 commands:
 
 ```text
-pnpm vault setup
-pnpm vault validate
-pnpm vault reindex
-pnpm vault backup --dest <path>
-pnpm vault register-document <path> [--source manual_drop]
-pnpm vault put-record <hash> <record-json-path>
-pnpm vault put-note <hash> <note-md-path>
-pnpm vault list-work --kind extraction|ocr|anomaly
-pnpm vault search <query>
-pnpm vault sql --select "<SQL>"
-pnpm vault detect-anomalies
-pnpm vault write-inbox
-pnpm gmail auth
-pnpm gmail sync [--backfill-from YYYY-MM-DD]
+npm run vault -- setup
+npm run vault -- validate
+npm run vault -- reindex
+npm run vault -- backup --dest <path>
+npm run vault -- register-document <path> [--source manual_drop]
+npm run vault -- put-record <hash> <record-json-path>
+npm run vault -- put-note <hash> <note-md-path>
+npm run vault -- list-work --kind extraction|ocr|anomaly
+npm run vault -- search <query>
+npm run vault -- sql --select "<SQL>"
+npm run vault -- detect-anomalies
+npm run vault -- write-inbox
+npm run gmail -- auth
+npm run gmail -- sync [--backfill-from YYYY-MM-DD]
 ```
 
 Automation rule: scheduled Codex runs should end by opening or updating
@@ -937,7 +936,7 @@ One-time setup:
 6. Create a Desktop OAuth client.
 7. Save downloaded JSON as:
    `C:\Users\Serge\.config\dabrowskiego\credentials.json`.
-8. Run `pnpm run auth`.
+8. Run `npm run auth`.
 
 The token is cached at:
 
@@ -1115,8 +1114,8 @@ Codex answers questions by using structured data first, then notes/text search.
 New Codex chats should start with:
 
 1. Read `AGENT.md`.
-2. Run `pnpm vault context`.
-3. Use `pnpm vault search` or read cited records/notes before answering.
+2. Run `npm run vault -- context`.
+3. Use `npm run vault -- search` or read cited records/notes before answering.
 
 For a financial aggregate:
 
@@ -1302,7 +1301,7 @@ Tracked:
 - `README.md`
 - `DESIGN.md`
 - `package.json`
-- `pnpm-lock.yaml`
+- `package-lock.json`
 
 If a public/example report is needed, track `reports.example.md` with fake data
 instead of tracking `reports/inbox.md`.
@@ -1317,12 +1316,12 @@ v1 backup strategy:
 - backup manifest: `manifest.json` containing every canonical file path, size,
   SHA-256, and creation timestamp
 - verification: after writing the archive, read it back and validate every hash
-- restore drill: `pnpm vault backup --verify <zip>` must confirm the archive can
+- restore drill: `npm run vault -- backup --verify <zip>` must confirm the archive can
   rebuild `index/vault.db`
 
 Do not include Gmail tokens in unencrypted backups.
 
-Before the first Gmail backfill, `pnpm gmail sync --backfill-from ...` should
+Before the first Gmail backfill, `npm run gmail -- sync --backfill-from ...` should
 warn if no verified backup location has been configured. The user may override
 for the first run, but the warning should be loud.
 
@@ -1448,7 +1447,7 @@ If access should be removed:
 ### Phase 5: Reports and Q&A
 
 - Build `reports/inbox.md`.
-- Build `pnpm vault context` to print the current property summary, recent
+- Build `npm run vault -- context` to print the current property summary, recent
   documents, open anomalies, and where to look next.
 - Implement `vault.search`.
 - Add SQL-first Q&A runbook.
@@ -1496,8 +1495,8 @@ Important follow-up:
 
 ## 24. Acceptance Checklist for v1
 
-- [ ] `pnpm install` works.
-- [ ] `pnpm run setup` creates folder layout and DB.
+- [ ] `npm install` works.
+- [ ] `npm run setup` creates folder layout and DB.
 - [ ] Registering the same file twice is idempotent.
 - [ ] `zawiad po zebraniu.pdf` is registered by hash.
 - [ ] Scanned PDF pages can be rendered/OCRed.
@@ -1507,8 +1506,8 @@ Important follow-up:
 - [ ] Visible passwords are redacted and produce `SECRET_VISIBLE`.
 - [ ] CLI commands exist for setup, register, put-record, put-note, search,
       list-work, detect-anomalies, write-inbox, and Gmail sync.
-- [ ] `pnpm run reindex` rebuilds SQLite.
-- [ ] `pnpm run validate` reports no structural errors.
+- [ ] `npm run reindex` rebuilds SQLite.
+- [ ] `npm run validate` reports no structural errors.
 - [ ] Gmail OAuth completes.
 - [ ] Gmail importer saves accounting PDFs despite `application/octet-stream`.
 - [ ] Gmail sync uses 14-day lookback and Gmail-id dedupe.

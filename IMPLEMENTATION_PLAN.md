@@ -63,12 +63,12 @@ wrong.
 
 - Create `package.json` from `DESIGN.md`.
 - Add scripts:
-  - `pnpm vault ...`
-  - `pnpm gmail ...`
-  - `pnpm run setup`
-  - `pnpm run validate`
-  - `pnpm run reindex`
-  - `pnpm test`
+  - `npm run vault -- ...`
+  - `npm run gmail -- ...`
+  - `npm run setup`
+  - `npm run validate`
+  - `npm run reindex`
+  - `npm test`
 - Add `.gitignore`:
 
 ```gitignore
@@ -82,7 +82,7 @@ node_modules/
 
 - Add `AGENT.md` with instructions for new Codex chats:
   - read `DESIGN.md`,
-  - run `pnpm vault context`,
+  - run `npm run vault -- context`,
   - never copy raw passwords,
   - cite local sources,
   - use CLI wrappers for mutations.
@@ -90,9 +90,9 @@ node_modules/
 
 ### Acceptance
 
-- `pnpm install` succeeds.
-- `pnpm vault --help` prints available command groups.
-- `pnpm run setup` can be wired later but the script exists.
+- `npm install` succeeds.
+- `npm run vault -- --help` prints available command groups.
+- `npm run setup` can be wired later but the script exists.
 - Private folders are ignored by Git.
 
 ---
@@ -164,15 +164,15 @@ Important behavior:
 Implement:
 
 ```text
-pnpm vault setup
-pnpm vault validate
-pnpm vault reindex
-pnpm vault register-document <path>
-pnpm vault put-record <hash> <record-json-path>
-pnpm vault put-note <hash> <note-md-path>
-pnpm vault search <query>
-pnpm vault sql --select "<SQL>"
-pnpm vault context
+npm run vault -- setup
+npm run vault -- validate
+npm run vault -- reindex
+npm run vault -- register-document <path>
+npm run vault -- put-record <hash> <record-json-path>
+npm run vault -- put-note <hash> <note-md-path>
+npm run vault -- search <query>
+npm run vault -- sql --select "<SQL>"
+npm run vault -- context
 ```
 
 ### Tests
@@ -185,10 +185,10 @@ pnpm vault context
 
 ### Acceptance
 
-- `pnpm vault setup` creates `vault/`, `index/`, and `reports/`.
-- `pnpm vault register-document "zawiad po zebraniu.pdf"` stores one hashed PDF.
+- `npm run vault -- setup` creates `vault/`, `index/`, and `reports/`.
+- `npm run vault -- register-document "zawiad po zebraniu.pdf"` stores one hashed PDF.
 - Re-running registration is a no-op except for safe source observation logic.
-- `pnpm vault reindex` succeeds.
+- `npm run vault -- reindex` succeeds.
 
 ---
 
@@ -236,8 +236,8 @@ Implementation decision:
 ### CLI commands
 
 ```text
-pnpm vault inspect-pdf <hash-or-path>
-pnpm vault render-pdf <hash>
+npm run vault -- inspect-pdf <hash-or-path>
+npm run vault -- render-pdf <hash>
 ```
 
 ### Tests
@@ -250,7 +250,7 @@ pnpm vault render-pdf <hash>
 
 - The existing `zawiad po zebraniu.pdf` renders to page images under
   `index/renders/<hash>/`.
-- `pnpm vault context` can report that the document needs extraction.
+- `npm run vault -- context` can report that the document needs extraction.
 
 ---
 
@@ -307,8 +307,8 @@ Validation helpers:
 ### CLI commands
 
 ```text
-pnpm vault export-schema
-pnpm vault validate-record <record-json-path>
+npm run vault -- export-schema
+npm run vault -- validate-record <record-json-path>
 ```
 
 ### Tests
@@ -334,7 +334,7 @@ Create malformed variants that fail:
 ### Acceptance
 
 - `tools/schemas/record.v1.json` is generated from Zod.
-- `pnpm vault validate-record <fixture>` succeeds for valid fixtures.
+- `npm run vault -- validate-record <fixture>` succeeds for valid fixtures.
 - Invalid fixture tests fail predictably with useful Zod issues.
 
 ---
@@ -357,9 +357,9 @@ Flow:
 2. Render pages if needed.
 3. Codex reads page images.
 4. Codex writes extraction JSON to a temp file.
-5. Run `pnpm vault validate-record`.
-6. Run `pnpm vault put-record`.
-7. Run `pnpm vault put-note`.
+5. Run `npm run vault -- validate-record`.
+6. Run `npm run vault -- put-record`.
+7. Run `npm run vault -- put-note`.
 8. Reindex/search.
 
 First target:
@@ -436,10 +436,10 @@ Sync logic:
 ### CLI commands
 
 ```text
-pnpm gmail auth
-pnpm gmail sync
-pnpm gmail sync --backfill-from 2023-01-01
-pnpm gmail list-locator --max 20
+npm run gmail -- auth
+npm run gmail -- sync
+npm run gmail -- sync --backfill-from 2023-01-01
+npm run gmail -- list-locator --max 20
 ```
 
 ### Tests
@@ -519,9 +519,9 @@ Privacy:
 ### CLI commands
 
 ```text
-pnpm vault detect-anomalies
-pnpm vault list-work --kind anomaly
-pnpm vault write-inbox
+npm run vault -- detect-anomalies
+npm run vault -- list-work --kind anomaly
+npm run vault -- write-inbox
 ```
 
 ### Tests
@@ -533,8 +533,8 @@ pnpm vault write-inbox
 
 ### Acceptance
 
-- `pnpm vault detect-anomalies` creates idempotent anomalies.
-- `pnpm vault write-inbox` creates `reports/inbox.md`.
+- `npm run vault -- detect-anomalies` creates idempotent anomalies.
+- `npm run vault -- write-inbox` creates `reports/inbox.md`.
 - Re-running both commands does not create duplicate anomalies.
 
 ---
@@ -569,9 +569,9 @@ Validation:
 ### CLI commands
 
 ```text
-pnpm vault backup --dest <path>
-pnpm vault backup --verify <zip>
-pnpm vault validate --strict
+npm run vault -- backup --dest <path>
+npm run vault -- backup --verify <zip>
+npm run vault -- validate --strict
 ```
 
 ### Tests
@@ -583,7 +583,7 @@ pnpm vault validate --strict
 ### Acceptance
 
 - A verified backup can be created.
-- `pnpm vault validate --strict` passes on a clean repo.
+- `npm run vault -- validate --strict` passes on a clean repo.
 - Full v1 checklist in `DESIGN.md` passes.
 
 ---
@@ -595,11 +595,11 @@ The implementation must support future Codex app automations.
 Automation command sequence:
 
 ```text
-pnpm gmail sync
-pnpm vault list-work --kind extraction
-pnpm vault detect-anomalies
-pnpm vault write-inbox
-pnpm vault context
+npm run gmail -- sync
+npm run vault -- list-work --kind extraction
+npm run vault -- detect-anomalies
+npm run vault -- write-inbox
+npm run vault -- context
 ```
 
 Automation rules:
@@ -615,7 +615,7 @@ Automation rules:
 New chat readiness:
 
 - `AGENT.md` tells Codex how to start.
-- `pnpm vault context` gives property identity, latest state, open anomalies,
+- `npm run vault -- context` gives property identity, latest state, open anomalies,
   and next useful files.
 - Search and SQL commands expose local context without requiring prior chat
   history.
@@ -626,8 +626,8 @@ New chat readiness:
 
 v1 is done when:
 
-- `pnpm install` works on the target machine.
-- `pnpm vault setup` initializes the repo.
+- `npm install` works on the target machine.
+- `npm run vault -- setup` initializes the repo.
 - The local sample PDF can be registered by hash.
 - The sample scanned PDF renders to page images.
 - At least one valid record and note are stored.
@@ -637,16 +637,16 @@ v1 is done when:
   - `interest_note`
   - `account_statement`
   - `monthly_charges`
-- `pnpm gmail auth` works.
-- `pnpm gmail sync --backfill-from <date>` imports Locator messages and raw
+- `npm run gmail -- auth` works.
+- `npm run gmail -- sync --backfill-from <date>` imports Locator messages and raw
   attachments.
 - `application/octet-stream` PDFs are saved correctly after byte sniffing.
-- `pnpm vault reindex` rebuilds SQLite from canonical files.
-- `pnpm vault search` returns cited results.
-- `pnpm vault detect-anomalies` is idempotent.
-- `pnpm vault write-inbox` creates a private report.
-- `pnpm vault backup --verify <zip>` verifies a backup.
-- `pnpm test` passes.
+- `npm run vault -- reindex` rebuilds SQLite from canonical files.
+- `npm run vault -- search` returns cited results.
+- `npm run vault -- detect-anomalies` is idempotent.
+- `npm run vault -- write-inbox` creates a private report.
+- `npm run vault -- backup --verify <zip>` verifies a backup.
+- `npm test` passes.
 
 ---
 

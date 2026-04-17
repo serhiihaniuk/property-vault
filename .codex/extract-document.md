@@ -2,7 +2,7 @@
 
 ## When to run
 
-Run when `pnpm vault list-work --kind extraction` reports documents with missing,
+Run when `npm run vault -- list-work --kind extraction` reports documents with missing,
 failed, or outdated records.
 
 ## Inputs
@@ -38,7 +38,7 @@ failed, or outdated records.
 ## Examples
 
 ```text
-pnpm vault validate-record tmp/record.json
-pnpm vault put-record <hash> tmp/record.json
-pnpm vault put-note <hash> tmp/note.md
+npm run vault -- validate-record tmp/record.json
+npm run vault -- put-record <hash> tmp/record.json
+npm run vault -- put-note <hash> tmp/note.md
 ```

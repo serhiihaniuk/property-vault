@@ -6,7 +6,7 @@ Read this file first in every new Codex session for this repo.
 
 1. Read `DESIGN.md`.
 2. Read `IMPLEMENTATION_PLAN.md` if the task involves implementation.
-3. Run `pnpm vault context` once that command exists.
+3. Run `npm run vault -- context` once that command exists.
 4. Use local records, notes, SQLite, or cited source files before answering
    factual questions.
 
@@ -26,16 +26,16 @@ Read this file first in every new Codex session for this repo.
 ## Useful Commands
 
 ```text
-pnpm vault setup
-pnpm vault context
-pnpm vault validate
-pnpm vault reindex
-pnpm vault register-document <path>
-pnpm vault search <query>
-pnpm vault sql --select "<SQL>"
-pnpm gmail sync
-pnpm vault detect-anomalies
-pnpm vault write-inbox
+npm run vault -- setup
+npm run vault -- context
+npm run vault -- validate
+npm run vault -- reindex
+npm run vault -- register-document <path>
+npm run vault -- search <query>
+npm run vault -- sql --select "<SQL>"
+npm run gmail -- sync
+npm run vault -- detect-anomalies
+npm run vault -- write-inbox
 ```
 
 These commands are implemented progressively according to

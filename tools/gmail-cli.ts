@@ -4,7 +4,7 @@ import { buildLocatorQuery, listLocatorMessages } from './gmail.ts';
 const HELP_TEXT = `Dabrowskiego Gmail CLI
 
 Usage:
-  pnpm gmail <command> [options]
+  npm run gmail -- <command> [options]
 
 Commands:
   auth                     Authorize Gmail readonly access and save a local token
