@@ -6,6 +6,12 @@ import {
   type DetectAnomaliesResult,
   type StoredAnomaly,
 } from './anomalies.ts';
+import {
+  createBackup,
+  verifyBackup,
+  type BackupCreateResult,
+  type BackupVerifyResult,
+} from './backup.ts';
 import { inspectPdf, renderPdfPages, resolvePdfPathOrHash } from './pdf.ts';
 import { writeInboxReport, type WriteInboxResult } from './reports.ts';
 import { exportRecordJsonSchema } from './schemas/export-json-schema.ts';
@@ -59,6 +65,8 @@ Commands:
   detect-anomalies [--json]     Detect deterministic anomalies
   list-work --kind extraction|anomaly
   write-inbox [--json]          Write reports/inbox.md
+  backup --dest <path>          Create a ZIP backup of canonical vault data
+  backup --verify <zip>         Verify a ZIP backup manifest and file hashes
   sql --select "<SQL>"           Run a read-only SELECT query
   inspect-pdf <hash-or-path>     Inspect PDF page count and text layer
   render-pdf <hash>              Render canonical PDF pages to index/renders
@@ -68,6 +76,8 @@ Commands:
 Options:
   --source <kind>               Source kind for register-document (default: manual_drop)
   --kind <kind>                 Work kind for list-work
+  --dest <path>                 Destination directory for backup
+  --verify <zip>                Backup archive to verify
   --select <SQL>                SQL SELECT statement for the sql command
   --limit <number>              Maximum search results (default: 20)
   --scale <number>              Render scale for render-pdf (default: 1.5)
@@ -88,6 +98,7 @@ const COMMANDS = new Set([
   'detect-anomalies',
   'list-work',
   'write-inbox',
+  'backup',
   'sql',
   'inspect-pdf',
   'render-pdf',
@@ -138,6 +149,8 @@ async function main(argv: string[]): Promise<number> {
       return runListWork(context);
     case 'write-inbox':
       return runWriteInbox(context);
+    case 'backup':
+      return runBackup(context);
     case 'sql':
       return runSql(context);
     case 'inspect-pdf':
@@ -216,6 +229,38 @@ async function runWriteInbox(context: CommandContext): Promise<number> {
     printJson(result);
   } else {
     printWriteInboxResult(result);
+  }
+
+  return 0;
+}
+
+async function runBackup(context: CommandContext): Promise<number> {
+  const verifyPath = stringFlag(context.args, 'verify');
+  const destPath = stringFlag(context.args, 'dest');
+
+  if (verifyPath) {
+    const result = await verifyBackup(verifyPath);
+
+    if (context.json) {
+      printJson(result);
+    } else {
+      printBackupVerifyResult(result);
+    }
+
+    return result.ok ? 0 : 1;
+  }
+
+  if (!destPath) {
+    console.error('backup requires --dest <path> or --verify <zip>');
+    return 2;
+  }
+
+  const result = await createBackup(destPath);
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    printBackupCreateResult(result);
   }
 
   return 0;
@@ -521,6 +566,8 @@ function flagExpectsValue(name: string): boolean {
     name === 'source' ||
     name === 'kind' ||
     name === 'select' ||
+    name === 'dest' ||
+    name === 'verify' ||
     name === 'limit' ||
     name === 'scale' ||
     name === 'desired-width'
@@ -612,6 +659,22 @@ function printContext(result: VaultContext): void {
 function printWriteInboxResult(result: WriteInboxResult): void {
   console.log(`Wrote inbox report to ${result.relativePath}`);
   console.log(`Bytes: ${result.bytes}`);
+}
+
+function printBackupCreateResult(result: BackupCreateResult): void {
+  console.log(`Created backup ${result.path}`);
+  console.log(`Files: ${result.files}`);
+  console.log(`Bytes: ${result.bytes}`);
+}
+
+function printBackupVerifyResult(result: BackupVerifyResult): void {
+  console.log(`Backup verification: ${result.ok ? 'ok' : 'failed'}`);
+  console.log(`Path: ${result.path}`);
+  console.log(`Files: ${result.files}`);
+
+  for (const error of result.errors) {
+    console.log(`ERROR: ${error}`);
+  }
 }
 
 function printExtractionWork(items: ExtractionWorkItem[]): void {
