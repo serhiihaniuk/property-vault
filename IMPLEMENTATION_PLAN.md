@@ -409,8 +409,8 @@ Implement direct Gmail REST import.
 
 OAuth:
 
-- Read credentials from `~/.config/property-vault/credentials.json`.
-- Cache token at `~/.config/property-vault/gmail-token.json`.
+- Read credentials from `~/.config/dabrowskiego/credentials.json`.
+- Cache token at `~/.config/dabrowskiego/gmail-token.json`.
 - Use Gmail readonly scope only.
 - Do not store tokens in repo.
 

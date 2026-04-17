@@ -42,7 +42,7 @@ test('RecordSchema rejects malformed records', () => {
 });
 
 test('exportRecordJsonSchema writes a JSON schema file', async () => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'property-vault-schema-test-'));
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dabrowskiego-schema-test-'));
 
   try {
     const outputPath = path.join(root, 'record.v1.json');
@@ -59,7 +59,7 @@ test('exportRecordJsonSchema writes a JSON schema file', async () => {
 });
 
 test('validate-record CLI accepts valid record files', async () => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'property-vault-record-cli-test-'));
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dabrowskiego-record-cli-test-'));
 
   try {
     const recordPath = path.join(root, 'record.json');

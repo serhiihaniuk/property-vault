@@ -25,7 +25,7 @@ type CommandContext = {
   json: boolean;
 };
 
-const HELP_TEXT = `Property Vault CLI
+const HELP_TEXT = `Dabrowskiego Vault CLI
 
 Usage:
   pnpm vault <command> [options]

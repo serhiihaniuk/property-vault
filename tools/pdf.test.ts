@@ -122,7 +122,7 @@ function escapePdfText(text: string): string {
 }
 
 async function createFixture(): Promise<{ root: string; remove: () => Promise<void> }> {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'property-vault-pdf-test-'));
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dabrowskiego-pdf-test-'));
 
   return {
     root,

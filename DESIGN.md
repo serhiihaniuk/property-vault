@@ -200,7 +200,7 @@ No Jest or Vitest in v1.
 
 ```json
 {
-  "name": "property-vault",
+  "name": "dabrowskiego",
   "type": "module",
   "engines": {
     "node": ">=22.6.0"
@@ -309,7 +309,7 @@ dabrowskiego/
 Auth credentials live outside the repo:
 
 ```text
-~/.config/property-vault/
+~/.config/dabrowskiego/
 |-- credentials.json
 `-- gmail-token.json
 ```
@@ -317,7 +317,7 @@ Auth credentials live outside the repo:
 On Windows this resolves to:
 
 ```text
-C:\Users\Serge\.config\property-vault\
+C:\Users\Serge\.config\dabrowskiego\
 ```
 
 ### 6.1 Path Conventions
@@ -936,13 +936,13 @@ One-time setup:
 5. Add the Gmail address as a test user.
 6. Create a Desktop OAuth client.
 7. Save downloaded JSON as:
-   `C:\Users\Serge\.config\property-vault\credentials.json`.
+   `C:\Users\Serge\.config\dabrowskiego\credentials.json`.
 8. Run `pnpm run auth`.
 
 The token is cached at:
 
 ```text
-C:\Users\Serge\.config\property-vault\gmail-token.json
+C:\Users\Serge\.config\dabrowskiego\gmail-token.json
 ```
 
 ### 11.2 Gmail Client Surface
@@ -1330,8 +1330,8 @@ for the first run, but the warning should be loud.
 
 | File | Purpose | Location |
 | --- | --- | --- |
-| `credentials.json` | Google OAuth desktop client | `~/.config/property-vault/` |
-| `gmail-token.json` | Cached OAuth refresh/access token | `~/.config/property-vault/` |
+| `credentials.json` | Google OAuth desktop client | `~/.config/dabrowskiego/` |
+| `gmail-token.json` | Cached OAuth refresh/access token | `~/.config/dabrowskiego/` |
 
 Never commit these files.
 

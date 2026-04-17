@@ -235,7 +235,7 @@ function escapePdfText(text: string): string {
 }
 
 async function createFixture(): Promise<{ root: string; remove: () => Promise<void> }> {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'property-vault-test-'));
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dabrowskiego-test-'));
 
   return {
     root,
