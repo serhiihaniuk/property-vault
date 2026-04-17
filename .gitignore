@@ -1,0 +1,6 @@
+vault/
+index/
+reports/
+node_modules/
+.lock
+.env
