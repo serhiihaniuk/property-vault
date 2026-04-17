@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:34 Europe/Warsaw
+**Last updated:** 2026-04-17 18:35 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -31,6 +31,7 @@ Legend:
 
 ### Latest Completed Commits
 
+- `a4151a3` Record July 2025 monthly charge extraction.
 - `8d8166e` Record March 2025 meeting notice extraction.
 - `5876b97` Record April 2025 monthly charge extraction.
 - `5c84cc2` Record 2024 shared-property annual-cost settlement extraction.
@@ -73,7 +74,7 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the March 2025 voting card.
+Updated 2026-04-17 after extracting the July 2025 monthly charge notice.
 
 #### Vault state
 
