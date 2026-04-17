@@ -31,7 +31,8 @@ Legend:
 
 ### Latest Completed Commits
 
-- `b35587a` Record second-half 2025 media settlement extraction.
+- `33646e0` Mark broader backfill queue complete.
+- `e08561c` Note February 2026 meeting commit hash.
 - `b4a6071` Record February 2026 annual meeting notice extraction.
 - `dd0b8d6` Note December 2025 LAF commit hash.
 - `9eff85c` Record December 2025 LAF refinancing resolution extraction.
@@ -91,7 +92,7 @@ Updated 2026-04-17 after extracting the second-half 2025 media settlement.
   `C:\Users\Serge\.config\dabrowskiego\gmail-token.json`.
 - Verified backup at
   `C:\Users\Serge\Desktop\dabrowskiego-backups\vault-2026-04-17.zip`.
-- Full Locator backfill has run: 30 emails in the vault, 65 messages seen total,
+- Full Locator backfill has run: 30 emails in the vault, 97 messages seen total,
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
 - `reports/inbox.md` up to date; 30 open anomalies.
@@ -101,7 +102,8 @@ Updated 2026-04-17 after extracting the second-half 2025 media settlement.
   `b35587a...` second-half 2025 media settlement (`media_settlement`, `ok`):
   the settlement shows a 754.66 PLN underpayment with a 2026-03-31 payment
   deadline and the usual redacted personal and bank details.
-- Commit for this step: `b35587a`, `b4a6071`, `dd0b8d6`, and `9eff85c`.
+- Commit for this step: `33646e0`, `b4a6071`, `e08561c`, `dd0b8d6`, and
+  `9eff85c`.
 
 #### Documents (6 total)
 
