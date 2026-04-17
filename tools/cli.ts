@@ -1,0 +1,259 @@
+import path from 'node:path';
+import {
+  init,
+  registerDocument,
+  reindex,
+  validate,
+  type RegisterDocumentResult,
+  type ReindexResult,
+  type ValidationReport,
+} from './vault.ts';
+
+type ParsedArgs = {
+  command: string | null;
+  positional: string[];
+  flags: Map<string, string | boolean>;
+};
+
+type CommandContext = {
+  args: ParsedArgs;
+  json: boolean;
+};
+
+const HELP_TEXT = `Property Vault CLI
+
+Usage:
+  pnpm vault <command> [options]
+
+Commands:
+  setup                         Create vault, index, reports, state, and DB schema
+  validate [--json]             Validate vault structure and derived index
+  reindex [--json]              Rebuild SQLite index from canonical vault files
+  register-document <path>      Register a local file by content hash
+
+Options:
+  --source <kind>               Source kind for register-document (default: manual_drop)
+  --json                        Print machine-readable JSON
+  -h, --help                    Show help
+`;
+
+const COMMANDS = new Set(['setup', 'validate', 'reindex', 'register-document']);
+
+async function main(argv: string[]): Promise<number> {
+  const args = parseArgs(argv);
+
+  if (args.flags.has('help') || args.flags.has('h') || args.command === null) {
+    console.log(HELP_TEXT);
+    return 0;
+  }
+
+  if (!COMMANDS.has(args.command)) {
+    console.error(`Unknown command: ${args.command}`);
+    console.error('');
+    console.error(HELP_TEXT);
+    return 2;
+  }
+
+  const context: CommandContext = {
+    args,
+    json: args.flags.has('json'),
+  };
+
+  switch (args.command) {
+    case 'setup':
+      return runSetup(context);
+    case 'validate':
+      return runValidate(context);
+    case 'reindex':
+      return runReindex(context);
+    case 'register-document':
+      return runRegisterDocument(context);
+    default:
+      unreachable(args.command);
+  }
+}
+
+async function runSetup(context: CommandContext): Promise<number> {
+  const result = await init();
+
+  if (context.json) {
+    printJson(result);
+    return 0;
+  }
+
+  console.log(`Vault initialized at ${result.root}`);
+  console.log(`Created directories: ${result.createdDirectories.length}`);
+  console.log(`Created files: ${result.createdFiles.length}`);
+
+  return 0;
+}
+
+async function runValidate(context: CommandContext): Promise<number> {
+  const report = await validate();
+
+  if (context.json) {
+    printJson(report);
+  } else {
+    printValidationReport(report);
+  }
+
+  return report.ok ? 0 : 1;
+}
+
+async function runReindex(context: CommandContext): Promise<number> {
+  const result = await reindex();
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    printReindexResult(result);
+  }
+
+  return 0;
+}
+
+async function runRegisterDocument(context: CommandContext): Promise<number> {
+  const targetPath = context.args.positional[0];
+
+  if (!targetPath) {
+    console.error('register-document requires a file path');
+    return 2;
+  }
+
+  const sourceKind = stringFlag(context.args, 'source') ?? 'manual_drop';
+  const result = await registerDocument({
+    path: path.resolve(targetPath),
+    source: {
+      kind: sourceKind,
+    },
+  });
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    printRegisterDocumentResult(result);
+  }
+
+  return 0;
+}
+
+function parseArgs(argv: string[]): ParsedArgs {
+  const flags = new Map<string, string | boolean>();
+  const positional: string[] = [];
+  let command: string | null = null;
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+
+    if (arg === '--') {
+      positional.push(...argv.slice(index + 1));
+      break;
+    }
+
+    if (arg.startsWith('--')) {
+      const [rawName, inlineValue] = arg.slice(2).split('=', 2);
+      const name = rawName.trim();
+
+      if (inlineValue !== undefined) {
+        flags.set(name, inlineValue);
+        continue;
+      }
+
+      const next = argv[index + 1];
+      if (next && !next.startsWith('-') && flagExpectsValue(name)) {
+        flags.set(name, next);
+        index += 1;
+      } else {
+        flags.set(name, true);
+      }
+
+      continue;
+    }
+
+    if (arg.startsWith('-') && arg.length > 1) {
+      for (const flag of arg.slice(1)) {
+        flags.set(flag, true);
+      }
+
+      continue;
+    }
+
+    if (command === null) {
+      command = arg;
+    } else {
+      positional.push(arg);
+    }
+  }
+
+  return {
+    command,
+    positional,
+    flags,
+  };
+}
+
+function flagExpectsValue(name: string): boolean {
+  return name === 'source';
+}
+
+function stringFlag(args: ParsedArgs, name: string): string | null {
+  const value = args.flags.get(name);
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    return value;
+  }
+
+  return null;
+}
+
+function printRegisterDocumentResult(result: RegisterDocumentResult): void {
+  console.log(`Registered document ${result.hash}`);
+  console.log(`Path: ${result.relativePath}`);
+  console.log(`MIME: ${result.mime}`);
+  console.log(`Size: ${result.sizeBytes} bytes`);
+  console.log(`New document: ${yesNo(result.isNewDocument)}`);
+  console.log(`New source: ${yesNo(result.isNewSource)}`);
+}
+
+function printReindexResult(result: ReindexResult): void {
+  console.log(`Reindexed vault at ${result.root}`);
+  console.log(`Documents indexed: ${result.documentsIndexed}`);
+  console.log(`Sources indexed: ${result.sourcesIndexed}`);
+  console.log(`Sources skipped: ${result.sourcesSkipped}`);
+}
+
+function printValidationReport(report: ValidationReport): void {
+  console.log(`Vault validation: ${report.ok ? 'ok' : 'failed'}`);
+  console.log(`Root: ${report.root}`);
+  console.log(`Canonical documents: ${report.counts.canonicalDocuments}`);
+  console.log(`Source observations: ${report.counts.sourceObservations}`);
+  console.log(`DB documents: ${report.counts.dbDocuments ?? 'not checked'}`);
+  console.log(`DB sources: ${report.counts.dbSources ?? 'not checked'}`);
+
+  for (const issue of [...report.errors, ...report.warnings]) {
+    const pathSuffix = issue.path ? ` (${issue.path})` : '';
+    console.log(`${issue.severity.toUpperCase()} ${issue.code}: ${issue.message}${pathSuffix}`);
+  }
+}
+
+function printJson(value: unknown): void {
+  console.log(JSON.stringify(value, null, 2));
+}
+
+function yesNo(value: boolean): string {
+  return value ? 'yes' : 'no';
+}
+
+function unreachable(value: never): never {
+  throw new Error(`Unhandled command: ${value}`);
+}
+
+main(process.argv.slice(2)).then(
+  (exitCode) => {
+    process.exitCode = exitCode;
+  },
+  (error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  },
+);
