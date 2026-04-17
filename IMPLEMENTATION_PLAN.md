@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 15:37 Europe/Warsaw
+**Last updated:** 2026-04-17 17:00 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -31,6 +31,10 @@ Legend:
 
 ### Latest Completed Commits
 
+- `a7d0e39` Fix email attachment storage to match design spec.
+- `f8addd2` Update implementation plan: extraction queue cleared.
+- `7a019b6` Add tag-document command and extract 3 Gmail documents.
+- `fc17110` Add extraction handoff checkpoint.
 - `f59f0d2` Mark real Gmail sync progress.
 - `256a7a5` Add vault backup verification.
 - `61299ba` Add inbox report generation.
@@ -51,49 +55,61 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extraction session.
+Updated 2026-04-17 after extraction and bug-fix session.
 
-Done against real user data:
+#### Vault state
 
-- Gmail authorization is complete.
-- A verified backup exists at
+- Gmail authorization complete. Token at
+  `C:\Users\Serge\.config\dabrowskiego\gmail-token.json`.
+- Verified backup at
   `C:\Users\Serge\Desktop\dabrowskiego-backups\vault-2026-04-17.zip`.
-- A capped real Locator sync imported 5 messages and 9 attachments with 0
-  attachment failures.
-- Added `tag-document` CLI command to vault.ts/cli.ts.
-- Both Locator logo PNGs tagged as `asset_logo` and removed from extraction queue.
-- Extraction queue is now **0** (all 5 documents triaged or extracted).
-- 4 documents fully extracted (records + notes stored, FTS indexed):
-  - `6e9efc28...` – `shared_property_settlement` (rozliczenie kosztów 2025)
-  - `732269777...` – `monthly_charges` (opłaty kwiecień 2026, 537,75 zł, sum ✓)
-  - `dce27d56...` – `service_notice` (mycie garażu podziemnego kwiecień 2026)
-  - `0a50303e...` – `meeting_notice` (zawiadomienie po zebraniu, 6 uchwał pending)
-- `npm run vault -- validate --strict --json` passes.
-- `reports/inbox.md` refreshed (7 open anomalies).
+- Capped Locator sync: 5 messages, 9 attachments, 0 failures.
+- `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
+- `reports/inbox.md` up to date; 7 open anomalies.
 
-Pick up with:
+#### Documents (6 total)
+
+| Hash (prefix) | MIME | Type | Status |
+| --- | --- | --- | --- |
+| `6e9efc28...` | PDF | `shared_property_settlement` | `needs_review` |
+| `732269777...` | PDF | `monthly_charges` | `ok` – opłaty kwiecień 2026, 537,75 zł, sum verified |
+| `dce27d56...` | PDF | `service_notice` | `ok` – mycie garażu kwiecień 2026 |
+| `0a50303e...` | PDF | `meeting_notice` | `needs_review` – 6 uchwał `pending_vote` |
+| `f2dd30eb...` | PNG | — | tagged `asset_logo` |
+| `80a272dc...` | PNG | — | tagged `asset_logo` (duplicate) |
+
+#### Code changes this session
+
+- Added `tagDocument()` to `tools/vault.ts` and `tag-document <hash> <tag>`
+  to `tools/cli.ts` for marking non-document assets.
+- Fixed `tools/gmail-sync.ts`: attachment bytes now go only to
+  `vault/documents/<hash>.<ext>`. The importer previously also wrote
+  duplicate raw files under `vault/emails/<id>/attachments/<file>`.
+  New flow: bytes → `index/tmp/<id>-<n>.bin` → `registerDocument` → delete
+  temp. `storeEmail` now writes `vault/emails/<id>/attachments.json` (JSON
+  array of attachment metadata pointers) instead.
+- Migrated existing 5 email dirs: generated `attachments.json` from SQLite
+  and deleted the stale `attachments/` subdirectories.
+
+#### Open items
+
+- `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
+  2026-03-21. Outcomes unknown; confirm with Serhii and update records.
+- Full Locator Gmail backfill pending (29 messages known; only 5 synced).
+- Fixture records for `media_settlement`, `interest_note`, `account_statement`
+  still missing.
+- Remaining financial anomaly rules (`FEE_DELTA`, `MISSING_PERIOD`, etc.)
+  not yet implemented.
+
+#### Pick up with
 
 ```powershell
 npm run vault -- context --json
+npm run vault -- list-work --kind anomaly --json
 npm run gmail -- sync --backfill-from 2023-01-01
 ```
 
-Open anomalies to review:
-
-- `RESOLUTION_PENDING_VOTE` – 6 uchwały z marca 2026 bez wyniku głosowania.
-  Confirm outcomes with Serhii.
-- `EXTRACTION_MISSING` / `LOW_CONFIDENCE` – check `list-work --kind anomaly`.
-
-Completed extraction queue (no remaining items):
-
-- `f2dd30eb...` (`image/png`) – Locator logo, tagged `asset_logo`.
-- `80a272dc...` (`image/png`) – Locator logo (duplicate), tagged `asset_logo`.
-- `732269777...` – extracted as `monthly_charges`.
-- `0a50303e...` – extracted as `meeting_notice`.
-- `dce27d56...` (`application/pdf`, 2 pages) – extracted as `service_notice`.
-
-Important: do not commit private `vault/`, `index/`, or `reports/` contents.
-Only commit tracked code/docs/plan updates.
+Important: do not commit `vault/`, `index/`, or `reports/` contents.
 
 ---
 
