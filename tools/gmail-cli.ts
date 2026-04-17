@@ -1,5 +1,6 @@
 import { authenticateGmail } from './gmail-auth.ts';
 import { buildLocatorQuery, listLocatorMessages } from './gmail.ts';
+import { syncGmail } from './gmail-sync.ts';
 
 const HELP_TEXT = `Dabrowskiego Gmail CLI
 
@@ -8,9 +9,11 @@ Usage:
 
 Commands:
   auth                     Authorize Gmail readonly access and save a local token
+  sync                     Sync Locator emails and attachments into the vault
   list-locator [--max N]   List Locator message ids using Gmail REST
 
 Options:
+  --backfill-from YYYY-MM-DD  Start sync from a specific date
   --after YYYY-MM-DD       Add a Gmail after: date filter
   --max N                  Maximum messages to list
   --json                   Print machine-readable JSON
@@ -30,6 +33,8 @@ async function main(argv: string[]): Promise<number> {
       console.log(`Saved Gmail token to ${result.tokenPath}`);
       return 0;
     }
+    case 'sync':
+      return runSync(flags);
     case 'list-locator':
       return runListLocator(flags);
     default:
@@ -38,6 +43,28 @@ async function main(argv: string[]): Promise<number> {
       console.error(HELP_TEXT);
       return 2;
   }
+}
+
+async function runSync(flags: Map<string, string | boolean>): Promise<number> {
+  const max = stringFlag(flags, 'max');
+  const result = await syncGmail({
+    backfillFrom: stringFlag(flags, 'backfill-from') ?? undefined,
+    maxResults: max ? Number(max) : undefined,
+  });
+
+  if (flags.has('json')) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(`Query: ${result.query}`);
+    console.log(`Messages found: ${result.messagesFound}`);
+    console.log(`Messages stored: ${result.messagesStored}`);
+    console.log(`Attachments fetched: ${result.attachmentsFetched}`);
+    console.log(`Documents registered: ${result.documentsRegistered}`);
+    console.log(`Attachment failures: ${result.attachmentFailures}`);
+    console.log(`High watermark: ${result.highWatermarkDate ?? 'none'}`);
+  }
+
+  return result.attachmentFailures === 0 ? 0 : 1;
 }
 
 async function runListLocator(flags: Map<string, string | boolean>): Promise<number> {
@@ -77,7 +104,11 @@ function parseArgs(argv: string[]): {
       const name = arg.slice(2);
       const next = argv[index + 1];
 
-      if ((name === 'max' || name === 'after') && next && !next.startsWith('-')) {
+      if (
+        (name === 'max' || name === 'after' || name === 'backfill-from') &&
+        next &&
+        !next.startsWith('-')
+      ) {
         flags.set(name, next);
         index += 1;
       } else {
