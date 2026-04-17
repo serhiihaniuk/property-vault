@@ -82,6 +82,52 @@ export type SearchResult = {
   notePath: string | null;
 };
 
+export type ExtractionWorkItem = {
+  hash: string;
+  mime: string;
+  localPath: string;
+  pageCount: number | null;
+  needsOcr: boolean;
+  ocrStatus: string;
+  sourceKinds: string[];
+};
+
+export type VaultContext = {
+  root: string;
+  generatedAt: string;
+  counts: {
+    documents: number;
+    records: number;
+    emails: number;
+    openAnomalies: number;
+    extractionWork: number;
+  };
+  lastGmailSync: {
+    at: string | null;
+    highWatermarkDate: string | null;
+    lookbackDays: number;
+    messagesSeenTotal: number;
+  };
+  latestDocuments: Array<{
+    hash: string;
+    mime: string;
+    localPath: string;
+    ingestedAt: string;
+    pageCount: number | null;
+    needsOcr: boolean;
+  }>;
+  latestRecords: Array<{
+    hash: string;
+    title: string;
+    documentType: string;
+    status: string;
+    confidence: number;
+    recordPath: string;
+    notePath: string | null;
+  }>;
+  extractionWork: ExtractionWorkItem[];
+};
+
 export type ValidationIssue = {
   severity: 'error' | 'warning';
   code: string;
@@ -350,6 +396,140 @@ export async function search(
       query: ftsQuery(query),
       limit: Math.max(1, Math.min(options.limit ?? 20, 100)),
     }) as SearchResult[];
+  } finally {
+    db.close();
+  }
+}
+
+export async function listExtractionWork(
+  root = resolveRepoRoot(),
+  limit = 50,
+): Promise<ExtractionWorkItem[]> {
+  await init(root);
+
+  const db = await openVaultDatabase(root);
+
+  try {
+    const rows = db.prepare(`
+      SELECT
+        documents.hash,
+        documents.mime,
+        documents.local_path AS localPath,
+        documents.page_count AS pageCount,
+        documents.needs_ocr AS needsOcr,
+        documents.ocr_status AS ocrStatus,
+        group_concat(DISTINCT document_sources.source_kind) AS sourceKinds
+      FROM documents
+      LEFT JOIN records ON records.hash = documents.hash
+      LEFT JOIN document_sources ON document_sources.hash = documents.hash
+      WHERE records.hash IS NULL
+        AND documents.asset_tag IS NULL
+      GROUP BY documents.hash
+      ORDER BY documents.ingested_at DESC, documents.hash
+      LIMIT @limit
+    `).all({
+      limit: Math.max(1, Math.min(limit, 500)),
+    }) as Array<{
+      hash: string;
+      mime: string;
+      localPath: string;
+      pageCount: number | null;
+      needsOcr: number;
+      ocrStatus: string;
+      sourceKinds: string | null;
+    }>;
+
+    return rows.map((row) => ({
+      hash: row.hash,
+      mime: row.mime,
+      localPath: row.localPath,
+      pageCount: row.pageCount,
+      needsOcr: row.needsOcr === 1,
+      ocrStatus: row.ocrStatus,
+      sourceKinds: row.sourceKinds?.split(',').filter((value) => value !== '') ?? [],
+    }));
+  } finally {
+    db.close();
+  }
+}
+
+export async function context(root = resolveRepoRoot()): Promise<VaultContext> {
+  await init(root);
+
+  const state = await readState(root);
+  const db = await openVaultDatabase(root);
+
+  try {
+    const counts = db.prepare(`
+      SELECT
+        (SELECT count(*) FROM documents) AS documents,
+        (SELECT count(*) FROM records) AS records,
+        (SELECT count(*) FROM emails) AS emails,
+        (SELECT count(*) FROM anomalies WHERE status = 'open') AS openAnomalies,
+        (
+          SELECT count(*)
+          FROM documents
+          LEFT JOIN records ON records.hash = documents.hash
+          WHERE records.hash IS NULL
+            AND documents.asset_tag IS NULL
+        ) AS extractionWork
+    `).get() as {
+      documents: number;
+      records: number;
+      emails: number;
+      openAnomalies: number;
+      extractionWork: number;
+    };
+    const latestDocuments = db.prepare(`
+      SELECT
+        hash,
+        mime,
+        local_path AS localPath,
+        ingested_at AS ingestedAt,
+        page_count AS pageCount,
+        needs_ocr AS needsOcr
+      FROM documents
+      ORDER BY ingested_at DESC, hash
+      LIMIT 5
+    `).all() as Array<{
+      hash: string;
+      mime: string;
+      localPath: string;
+      ingestedAt: string;
+      pageCount: number | null;
+      needsOcr: number;
+    }>;
+    const latestRecords = db.prepare(`
+      SELECT
+        hash,
+        title,
+        document_type AS documentType,
+        status,
+        confidence,
+        record_path AS recordPath,
+        note_path AS notePath
+      FROM records
+      ORDER BY extracted_at DESC, hash
+      LIMIT 5
+    `).all() as VaultContext['latestRecords'];
+
+    return {
+      root,
+      generatedAt: new Date().toISOString(),
+      counts,
+      lastGmailSync: {
+        at: state.last_gmail_sync.at,
+        highWatermarkDate: state.last_gmail_sync.high_watermark_date,
+        lookbackDays: state.last_gmail_sync.lookback_days,
+        messagesSeenTotal: state.last_gmail_sync.messages_seen_total,
+      },
+      latestDocuments: latestDocuments.map((document) => ({
+        ...document,
+        needsOcr: document.needsOcr === 1,
+      })),
+      latestRecords,
+      extractionWork: await listExtractionWork(root, 10),
+    };
   } finally {
     db.close();
   }
@@ -727,7 +907,9 @@ export async function putNote(
 }
 
 export const vault = {
+  context,
   init,
+  listExtractionWork,
   reindex,
   search,
   sql,

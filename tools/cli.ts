@@ -10,7 +10,9 @@ import { inspectPdf, renderPdfPages, resolvePdfPathOrHash } from './pdf.ts';
 import { exportRecordJsonSchema } from './schemas/export-json-schema.ts';
 import { parseVaultRecord } from './schemas/record.ts';
 import {
+  context,
   init,
+  listExtractionWork,
   putNote,
   putRecord,
   registerDocument,
@@ -18,11 +20,13 @@ import {
   search,
   sql,
   validate,
+  type ExtractionWorkItem,
   type PutNoteResult,
   type PutRecordResult,
   type RegisterDocumentResult,
   type ReindexResult,
   type SearchResult,
+  type VaultContext,
   type ValidationReport,
 } from './vault.ts';
 
@@ -46,12 +50,13 @@ Commands:
   setup                         Create vault, index, reports, state, and DB schema
   validate [--json]             Validate vault structure and derived index
   reindex [--json]              Rebuild SQLite index from canonical vault files
+  context [--json]              Print current vault summary
   register-document <path>      Register a local file by content hash
   put-record <hash> <json>      Store and index a validated extraction record
   put-note <hash> <md>          Store a Markdown note for a document
   search <query>                Search indexed records and notes
   detect-anomalies [--json]     Detect deterministic anomalies
-  list-work --kind anomaly      List open anomaly work
+  list-work --kind extraction|anomaly
   sql --select "<SQL>"           Run a read-only SELECT query
   inspect-pdf <hash-or-path>     Inspect PDF page count and text layer
   render-pdf <hash>              Render canonical PDF pages to index/renders
@@ -73,6 +78,7 @@ const COMMANDS = new Set([
   'setup',
   'validate',
   'reindex',
+  'context',
   'register-document',
   'put-record',
   'put-note',
@@ -113,6 +119,8 @@ async function main(argv: string[]): Promise<number> {
       return runValidate(context);
     case 'reindex':
       return runReindex(context);
+    case 'context':
+      return runContext(context);
     case 'register-document':
       return runRegisterDocument(context);
     case 'put-record':
@@ -155,8 +163,21 @@ async function runDetectAnomalies(context: CommandContext): Promise<number> {
 async function runListWork(context: CommandContext): Promise<number> {
   const kind = stringFlag(context.args, 'kind');
 
+  if (kind === 'extraction') {
+    const limitFlag = stringFlag(context.args, 'limit');
+    const work = await listExtractionWork(undefined, limitFlag ? Number(limitFlag) : undefined);
+
+    if (context.json) {
+      printJson(work);
+    } else {
+      printExtractionWork(work);
+    }
+
+    return 0;
+  }
+
   if (kind !== 'anomaly') {
-    console.error('list-work currently requires --kind anomaly');
+    console.error('list-work requires --kind extraction or --kind anomaly');
     return 2;
   }
 
@@ -166,6 +187,18 @@ async function runListWork(context: CommandContext): Promise<number> {
     printJson(anomalies);
   } else {
     printOpenAnomalies(anomalies);
+  }
+
+  return 0;
+}
+
+async function runContext(contextArg: CommandContext): Promise<number> {
+  const result = await context();
+
+  if (contextArg.json) {
+    printJson(result);
+  } else {
+    printContext(result);
   }
 
   return 0;
@@ -524,6 +557,54 @@ function printSearchResults(results: SearchResult[]): void {
       console.log(result.snippet);
     }
     console.log('');
+  }
+}
+
+function printContext(result: VaultContext): void {
+  console.log(`Vault: ${result.root}`);
+  console.log(`Generated: ${result.generatedAt}`);
+  console.log('');
+  console.log('Counts');
+  console.log(`Documents: ${result.counts.documents}`);
+  console.log(`Records: ${result.counts.records}`);
+  console.log(`Emails: ${result.counts.emails}`);
+  console.log(`Open anomalies: ${result.counts.openAnomalies}`);
+  console.log(`Extraction work: ${result.counts.extractionWork}`);
+  console.log('');
+  console.log('Gmail');
+  console.log(`Last sync: ${result.lastGmailSync.at ?? 'never'}`);
+  console.log(`High watermark: ${result.lastGmailSync.highWatermarkDate ?? 'none'}`);
+  console.log(`Lookback days: ${result.lastGmailSync.lookbackDays}`);
+  console.log(`Messages seen: ${result.lastGmailSync.messagesSeenTotal}`);
+
+  if (result.latestRecords.length > 0) {
+    console.log('');
+    console.log('Latest Records');
+    for (const record of result.latestRecords) {
+      console.log(`${record.hash} ${record.documentType} ${record.status} ${record.title}`);
+    }
+  }
+
+  if (result.extractionWork.length > 0) {
+    console.log('');
+    console.log('Extraction Work');
+    printExtractionWork(result.extractionWork);
+  }
+}
+
+function printExtractionWork(items: ExtractionWorkItem[]): void {
+  if (items.length === 0) {
+    console.log('No extraction work.');
+    return;
+  }
+
+  for (const item of items) {
+    const ocr = item.needsOcr ? ` OCR:${item.ocrStatus}` : '';
+    console.log(`${item.hash} ${item.mime}${ocr}`);
+    console.log(`Path: ${item.localPath}`);
+    if (item.sourceKinds.length > 0) {
+      console.log(`Sources: ${item.sourceKinds.join(', ')}`);
+    }
   }
 }
 

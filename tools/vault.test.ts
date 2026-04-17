@@ -5,6 +5,8 @@ import path from 'node:path';
 import test from 'node:test';
 import { openVaultDatabase } from './db.ts';
 import {
+  context,
+  listExtractionWork,
   putNote,
   putRecord,
   registerDocument,
@@ -288,6 +290,70 @@ test('reindex rebuilds records, notes, and search index from canonical files', a
     assert.equal(rows[0]?.count, 1);
     assert.equal(results[0]?.hash, registered.hash);
     assert.equal(results[0]?.notePath, `vault/notes/${registered.hash}.md`);
+  } finally {
+    await fixture.remove();
+  }
+});
+
+test('listExtractionWork reports documents without records', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const firstPath = path.join(fixture.root, 'needs-extraction.txt');
+    const secondPath = path.join(fixture.root, 'has-record.txt');
+    await writeFile(firstPath, 'needs extraction document', 'utf8');
+    await writeFile(secondPath, 'already extracted document', 'utf8');
+
+    const needsExtraction = await registerDocument({ path: firstPath }, fixture.root);
+    const hasRecord = await registerDocument({ path: secondPath }, fixture.root);
+    await putRecord(
+      hasRecord.hash,
+      validMeetingNoticeRecord({
+        title: 'Already extracted',
+        summary: 'This record is already extracted.',
+      }),
+      fixture.root,
+    );
+
+    const work = await listExtractionWork(fixture.root);
+
+    assert.equal(work.length, 1);
+    assert.equal(work[0]?.hash, needsExtraction.hash);
+    assert.equal(work[0]?.localPath, `vault/documents/${needsExtraction.hash}.txt`);
+    assert.deepEqual(work[0]?.sourceKinds, ['manual_drop']);
+  } finally {
+    await fixture.remove();
+  }
+});
+
+test('context summarizes counts, Gmail state, records, and extraction work', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const firstPath = path.join(fixture.root, 'needs-extraction.txt');
+    const secondPath = path.join(fixture.root, 'has-record.txt');
+    await writeFile(firstPath, 'needs extraction document', 'utf8');
+    await writeFile(secondPath, 'already extracted document', 'utf8');
+
+    const needsExtraction = await registerDocument({ path: firstPath }, fixture.root);
+    const hasRecord = await registerDocument({ path: secondPath }, fixture.root);
+    await putRecord(
+      hasRecord.hash,
+      validMeetingNoticeRecord({
+        title: 'Context record',
+        summary: 'This record appears in context.',
+      }),
+      fixture.root,
+    );
+
+    const result = await context(fixture.root);
+
+    assert.equal(result.counts.documents, 2);
+    assert.equal(result.counts.records, 1);
+    assert.equal(result.counts.extractionWork, 1);
+    assert.equal(result.lastGmailSync.lookbackDays, 14);
+    assert.equal(result.latestRecords[0]?.hash, hasRecord.hash);
+    assert.equal(result.extractionWork[0]?.hash, needsExtraction.hash);
   } finally {
     await fixture.remove();
   }
