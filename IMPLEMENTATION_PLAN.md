@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:44 Europe/Warsaw
+**Last updated:** 2026-04-17 18:46 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -24,7 +24,7 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | 27 real records are stored; broader backfill leaves 3 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
+| 4 | Manual extraction loop | [~] | 28 real records are stored; broader backfill leaves 2 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
@@ -70,8 +70,8 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Continue broader-backfill extraction queue; 3 documents remain after
-  extracting `377e909...`.
+- Continue broader-backfill extraction queue; 2 documents remain after
+  extracting `195c972...`.
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
@@ -80,7 +80,7 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the November 2025 adopted-resolution notice.
+Updated 2026-04-17 after extracting the December 2025 LAF refinancing resolution.
 
 #### Vault state
 
@@ -91,14 +91,13 @@ Updated 2026-04-17 after extracting the November 2025 adopted-resolution notice.
 - Full Locator backfill has run: 30 emails in the vault, 65 messages seen total,
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
-- `reports/inbox.md` up to date; 36 open anomalies.
-- Current records: 27.
-- Current extraction queue: 3 documents.
+- `reports/inbox.md` up to date; 28 open anomalies.
+- Current records: 28.
+- Current extraction queue: 2 documents.
 - New broader-backfill extraction completed this step:
-  `377e909...` November 2025 adopted-resolution notice (`meeting_notice`, `ok`):
-  one resolution on the SAE program and energy-certificate workflow was adopted
-  by majority vote, resolving the earlier ballot-style materials for the same
-  issue.
+  `195c972...` December 2025 LAF refinancing resolution (`resolution`, `ok`):
+  the community approved refinancing 17,121.60 PLN gross from the renovation-
+  investment fund for the cost of preparing LAF coefficients for the building.
 
 #### Documents (6 total)
 
@@ -128,7 +127,7 @@ Updated 2026-04-17 after extracting the November 2025 adopted-resolution notice.
 
 - `PAYMENT_DEADLINE_UNCONFIRMED` - 2025 shared-property settlement result has
   a past payment date, but payment/booked status is unknown.
-- `EXTRACTION_MISSING` - 3 documents from the broader Gmail backfill still
+- `EXTRACTION_MISSING` - 2 documents from the broader Gmail backfill still
   need extraction or asset classification.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
