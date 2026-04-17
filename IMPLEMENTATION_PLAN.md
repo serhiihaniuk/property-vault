@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:36 Europe/Warsaw
+**Last updated:** 2026-04-17 18:42 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -24,13 +24,14 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | 12 real records are stored; broader backfill leaves 18 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
+| 4 | Manual extraction loop | [~] | 13 real records are stored; broader backfill leaves 17 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
+- `1a86bc4` Record September 2024 garage washing extraction.
 - `e1684eb` Record 2024 media settlement extraction.
 - `bacf782` Record August 2024 charge extraction.
 - `cf8ee3d` Record May 2024 statement extraction.
@@ -55,16 +56,17 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Continue broader-backfill extraction queue; 18 documents remain after
-  extracting `e41b1da...`.
+- Continue broader-backfill extraction queue; 17 documents remain after
+  extracting `a3f18ab...`.
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
-- Confirm voting outcomes for 6 pending uchwały from the March 2026 meeting notice.
+- Confirm voting outcomes for 6 pending uchwały from the March 2026 meeting
+  notice, plus the blank Resolution 6/2022 DACH BUD ballot.
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the September 2024 garage-washing notice.
+Updated 2026-04-17 after extracting the Resolution 6/2022 voting card.
 
 #### Vault state
 
@@ -76,12 +78,13 @@ Updated 2026-04-17 after extracting the September 2024 garage-washing notice.
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
 - `reports/inbox.md` up to date; 31 open anomalies.
-- Current records: 12.
-- Current extraction queue: 18 documents.
+- Current records: 13.
+- Current extraction queue: 17 documents.
 - New broader-backfill extraction completed this step:
-  `e41b1da...` scanned garage-washing notice dated 2024-09-04
-  (`service_notice`, `ok`, washing schedule 2024-09-09 through 2024-09-17,
-  extracted from rendered page image because the PDF has no text layer).
+  `a3f18ab...` voting card for Resolution 6/2022 (`resolution`,
+  `needs_review`): authorizes Locator to pursue warranty/damages claims
+  against DACH BUD for common-area defects; legal-services cap 25,000.00 PLN
+  gross; owner vote/signature and final outcome not shown.
 
 #### Documents (6 total)
 
@@ -111,11 +114,12 @@ Updated 2026-04-17 after extracting the September 2024 garage-washing notice.
 
 - `PAYMENT_DEADLINE_UNCONFIRMED` - 2025 shared-property settlement result has
   a past payment date, but payment/booked status is unknown.
-- `EXTRACTION_MISSING` - 18 documents from the broader Gmail backfill still
+- `EXTRACTION_MISSING` - 17 documents from the broader Gmail backfill still
   need extraction or asset classification.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
-  2026-03-21. Outcomes unknown; confirm with Serhii and update records.
+  2026-03-21, plus Resolution 6/2022 DACH BUD ballot from 2024-10-17.
+  Outcomes unknown; confirm with Serhii and update records.
 - Fixture records for `media_settlement`, `interest_note`, `account_statement`
   still missing.
 - Remaining financial anomaly rules (`FEE_DELTA`, `MISSING_PERIOD`, etc.)
