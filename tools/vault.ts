@@ -9,6 +9,7 @@ import {
   openVaultDatabase,
 } from './db.ts';
 import { isSha256Hex, normalizeSha256, sha256Buffer } from './hash.ts';
+import { inspectPdf } from './pdf.ts';
 import { getVaultPaths, resolveRepoRoot, type VaultPaths } from './paths.ts';
 import { createDefaultState, readState, writeState } from './state.ts';
 
@@ -311,10 +312,10 @@ export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> 
           @mime,
           @sizeBytes,
           @ingestedAt,
-          NULL,
-          0,
-          0,
-          'pending',
+          @pageCount,
+          @hasTextLayer,
+          @needsOcr,
+          @ocrStatus,
           NULL,
           NULL,
           @relativePath,
@@ -430,6 +431,7 @@ export async function registerDocument(
     detected?.ext ?? path.extname(sourcePath).replace(/^\./, '') ?? 'bin',
   );
   const mime = detected?.mime ?? mimeFromExtension(extension);
+  const metadata = await inspectDocumentMetadata(bytes, mime, extension);
   const canonicalPath = path.join(paths.documentsDir, `${hash}.${extension}`);
   const relativePath = toRepoRelativePath(paths.root, canonicalPath);
   const ingestedAt = new Date().toISOString();
@@ -475,10 +477,10 @@ export async function registerDocument(
           @mime,
           @sizeBytes,
           @ingestedAt,
-          NULL,
-          0,
-          0,
-          'pending',
+          @pageCount,
+          @hasTextLayer,
+          @needsOcr,
+          @ocrStatus,
           NULL,
           NULL,
           @relativePath,
@@ -487,6 +489,10 @@ export async function registerDocument(
         ON CONFLICT(hash) DO UPDATE SET
           mime = excluded.mime,
           size_bytes = excluded.size_bytes,
+          page_count = excluded.page_count,
+          has_text_layer = excluded.has_text_layer,
+          needs_ocr = excluded.needs_ocr,
+          ocr_status = excluded.ocr_status,
           local_path = excluded.local_path,
           updated_at = datetime('now')
       `).run({
@@ -494,6 +500,10 @@ export async function registerDocument(
         mime,
         sizeBytes: sourceStats.size,
         ingestedAt,
+        pageCount: metadata.pageCount,
+        hasTextLayer: metadata.hasTextLayer ? 1 : 0,
+        needsOcr: metadata.needsOcr ? 1 : 0,
+        ocrStatus: metadata.ocrStatus,
         relativePath,
       });
 
@@ -584,6 +594,10 @@ type DocumentIndexRow = {
   mime: string;
   sizeBytes: number;
   ingestedAt: string;
+  pageCount: number | null;
+  hasTextLayer: number;
+  needsOcr: number;
+  ocrStatus: string;
   relativePath: string;
 };
 
@@ -640,12 +654,17 @@ async function readCanonicalDocuments(paths: VaultPaths): Promise<DocumentIndexR
     const stats = await stat(filePath);
     const detected = await fileTypeFromBuffer(bytes);
     const mime = detected?.mime ?? mimeFromExtension(parsed.extension);
+    const metadata = await inspectDocumentMetadata(bytes, mime, parsed.extension);
 
     documents.push({
       hash: parsed.hash,
       mime,
       sizeBytes: stats.size,
       ingestedAt: stableFileDate(stats.birthtime, stats.mtime),
+      pageCount: metadata.pageCount,
+      hasTextLayer: metadata.hasTextLayer ? 1 : 0,
+      needsOcr: metadata.needsOcr ? 1 : 0,
+      ocrStatus: metadata.ocrStatus,
       relativePath: toRepoRelativePath(paths.root, filePath),
     });
   }
@@ -709,6 +728,37 @@ function mimeFromExtension(extension: string): string {
   }
 
   return 'application/octet-stream';
+}
+
+type DocumentMetadata = {
+  pageCount: number | null;
+  hasTextLayer: boolean;
+  needsOcr: boolean;
+  ocrStatus: string;
+};
+
+async function inspectDocumentMetadata(
+  bytes: Uint8Array,
+  mime: string,
+  extension: string,
+): Promise<DocumentMetadata> {
+  if (mime !== 'application/pdf' && extension !== 'pdf') {
+    return {
+      pageCount: null,
+      hasTextLayer: false,
+      needsOcr: false,
+      ocrStatus: 'not_needed',
+    };
+  }
+
+  const inspection = await inspectPdf(bytes);
+
+  return {
+    pageCount: inspection.pageCount,
+    hasTextLayer: inspection.hasTextLayer,
+    needsOcr: inspection.needsVision,
+    ocrStatus: inspection.needsVision ? 'pending' : 'not_needed',
+  };
 }
 
 function toRepoRelativePath(root: string, filePath: string): string {
