@@ -31,6 +31,7 @@ Legend:
 
 ### Latest Completed Commits
 
+- `9eff85c` Record December 2025 LAF refinancing resolution extraction.
 - `46e3260` Record October 2025 monthly charge extraction.
 - `a14fbe5` Note September 2025 resolutions commit hash.
 - `bd63aac` Record September 2025 adopted resolutions extraction.
@@ -98,6 +99,7 @@ Updated 2026-04-17 after extracting the December 2025 LAF refinancing resolution
   `195c972...` December 2025 LAF refinancing resolution (`resolution`, `ok`):
   the community approved refinancing 17,121.60 PLN gross from the renovation-
   investment fund for the cost of preparing LAF coefficients for the building.
+- Commit for this step: `9eff85c`.
 
 #### Documents (6 total)
 
