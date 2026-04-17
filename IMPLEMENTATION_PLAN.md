@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:41 Europe/Warsaw
+**Last updated:** 2026-04-17 18:47 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -24,13 +24,14 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | 17 real records are stored; broader backfill leaves 13 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
+| 4 | Manual extraction loop | [~] | 18 real records are stored; broader backfill leaves 12 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
+- `5c84cc2` Record 2024 shared-property annual-cost settlement extraction.
 - `8bd2a7d` Record 2024 shared-property settlement extraction.
 - `e90e2bd` Record late-payment interest extraction.
 - `58f872f` Record second-half 2024 media settlement extraction.
@@ -60,8 +61,8 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Continue broader-backfill extraction queue; 13 documents remain after
-  extracting `6cbaab2...`.
+- Continue broader-backfill extraction queue; 12 documents remain after
+  extracting `ba67054...`.
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
@@ -70,7 +71,7 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the 2024 shared-property annual-cost settlement.
+Updated 2026-04-17 after extracting the March 2025 post-meeting notice.
 
 #### Vault state
 
@@ -81,14 +82,13 @@ Updated 2026-04-17 after extracting the 2024 shared-property annual-cost settlem
 - Full Locator backfill has run: 30 emails in the vault, 65 messages seen total,
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
-- `reports/inbox.md` up to date; 30 open anomalies.
-- Current records: 17.
-- Current extraction queue: 13 documents.
+- `reports/inbox.md` up to date; 33 open anomalies.
+- Current records: 18.
+- Current extraction queue: 12 documents.
 - New broader-backfill extraction completed this step:
-  `6cbaab2...` 2024 shared-property annual-cost settlement
-  (`shared_property_settlement`, `needs_review`): total costs 1,153.69 PLN,
-  revenues 126.22 PLN, settlement result 41.94 PLN, payment deadline
-  2025-03-31; the "Do zaplaty 985,53" line is ambiguous in the source.
+  `ba67054...` March 2025 post-meeting notice (`meeting_notice`, `needs_review`):
+  annual meeting held 2025-02-26, four resolutions accepted for individual
+  voting, final outcomes not shown.
 
 #### Documents (6 total)
 
@@ -118,7 +118,7 @@ Updated 2026-04-17 after extracting the 2024 shared-property annual-cost settlem
 
 - `PAYMENT_DEADLINE_UNCONFIRMED` - 2025 shared-property settlement result has
   a past payment date, but payment/booked status is unknown.
-- `EXTRACTION_MISSING` - 13 documents from the broader Gmail backfill still
+- `EXTRACTION_MISSING` - 12 documents from the broader Gmail backfill still
   need extraction or asset classification.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
