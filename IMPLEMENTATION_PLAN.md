@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:54 Europe/Warsaw
+**Last updated:** 2026-04-17 18:33 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -24,7 +24,7 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | 19 real records are stored; broader backfill leaves 11 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
+| 4 | Manual extraction loop | [~] | 20 real records are stored; broader backfill leaves 10 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
@@ -62,8 +62,8 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Continue broader-backfill extraction queue; 11 documents remain after
-  extracting `2381f65...`.
+- Continue broader-backfill extraction queue; 10 documents remain after
+  extracting `91c482e...`.
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
@@ -84,12 +84,12 @@ Updated 2026-04-17 after extracting the March 2025 voting card.
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
 - `reports/inbox.md` up to date; 36 open anomalies.
-- Current records: 19.
-- Current extraction queue: 11 documents.
+- Current records: 20.
+- Current extraction queue: 10 documents.
 - New broader-backfill extraction completed this step:
-  `2381f65...` March 2025 voting card (`meeting_notice`, `needs_review`):
-  annual meeting held 2025-02-26, four resolutions routed to individual voting,
-  final outcomes not shown.
+  `91c482e...` April 2025 monthly charge notice (`monthly_charges`, `ok`):
+  charge schedule effective 2025-04-01, total monthly charge 388.95 PLN, rows
+  sum exactly to the stated total.
 
 #### Documents (6 total)
 
@@ -119,7 +119,7 @@ Updated 2026-04-17 after extracting the March 2025 voting card.
 
 - `PAYMENT_DEADLINE_UNCONFIRMED` - 2025 shared-property settlement result has
   a past payment date, but payment/booked status is unknown.
-- `EXTRACTION_MISSING` - 11 documents from the broader Gmail backfill still
+- `EXTRACTION_MISSING` - 10 documents from the broader Gmail backfill still
   need extraction or asset classification.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
