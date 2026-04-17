@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:46 Europe/Warsaw
+**Last updated:** 2026-04-17 18:48 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -24,13 +24,14 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | 28 real records are stored; broader backfill leaves 2 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
+| 4 | Manual extraction loop | [~] | 29 real records are stored; broader backfill leaves 1 document in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
+- `dd0b8d6` Note December 2025 LAF commit hash.
 - `9eff85c` Record December 2025 LAF refinancing resolution extraction.
 - `46e3260` Record October 2025 monthly charge extraction.
 - `a14fbe5` Note September 2025 resolutions commit hash.
@@ -71,8 +72,8 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Continue broader-backfill extraction queue; 2 documents remain after
-  extracting `195c972...`.
+- Continue broader-backfill extraction queue; 1 document remains after
+  extracting `77e2baf...`.
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
@@ -81,7 +82,7 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the December 2025 LAF refinancing resolution.
+Updated 2026-04-17 after extracting the February 2026 annual-meeting notice.
 
 #### Vault state
 
@@ -92,14 +93,15 @@ Updated 2026-04-17 after extracting the December 2025 LAF refinancing resolution
 - Full Locator backfill has run: 30 emails in the vault, 65 messages seen total,
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
-- `reports/inbox.md` up to date; 28 open anomalies.
-- Current records: 28.
-- Current extraction queue: 2 documents.
+- `reports/inbox.md` up to date; 30 open anomalies.
+- Current records: 29.
+- Current extraction queue: 1 document.
 - New broader-backfill extraction completed this step:
-  `195c972...` December 2025 LAF refinancing resolution (`resolution`, `ok`):
-  the community approved refinancing 17,121.60 PLN gross from the renovation-
-  investment fund for the cost of preparing LAF coefficients for the building.
-- Commit for this step: `9eff85c`.
+  `77e2baf...` February 2026 annual-meeting notice (`meeting_notice`,
+  `needs_review`): the notice announces the 2026-02-24 meeting, lists three
+  agenda resolutions, and includes historical background text; final vote
+  outcomes are not shown.
+- Commit for this step: `dd0b8d6` and `9eff85c`.
 
 #### Documents (6 total)
 
@@ -129,7 +131,7 @@ Updated 2026-04-17 after extracting the December 2025 LAF refinancing resolution
 
 - `PAYMENT_DEADLINE_UNCONFIRMED` - 2025 shared-property settlement result has
   a past payment date, but payment/booked status is unknown.
-- `EXTRACTION_MISSING` - 2 documents from the broader Gmail backfill still
+- `EXTRACTION_MISSING` - 1 document from the broader Gmail backfill still
   need extraction or asset classification.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
