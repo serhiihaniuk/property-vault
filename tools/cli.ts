@@ -1,5 +1,8 @@
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { inspectPdf, renderPdfPages, resolvePdfPathOrHash } from './pdf.ts';
+import { exportRecordJsonSchema } from './schemas/export-json-schema.ts';
+import { parseVaultRecord } from './schemas/record.ts';
 import {
   init,
   registerDocument,
@@ -35,6 +38,8 @@ Commands:
   sql --select "<SQL>"           Run a read-only SELECT query
   inspect-pdf <hash-or-path>     Inspect PDF page count and text layer
   render-pdf <hash>              Render canonical PDF pages to index/renders
+  export-schema [path]           Export record JSON Schema
+  validate-record <path>         Validate a record JSON file
 
 Options:
   --source <kind>               Source kind for register-document (default: manual_drop)
@@ -53,6 +58,8 @@ const COMMANDS = new Set([
   'sql',
   'inspect-pdf',
   'render-pdf',
+  'export-schema',
+  'validate-record',
 ]);
 
 async function main(argv: string[]): Promise<number> {
@@ -90,6 +97,10 @@ async function main(argv: string[]): Promise<number> {
       return runInspectPdf(context);
     case 'render-pdf':
       return runRenderPdf(context);
+    case 'export-schema':
+      return runExportSchema(context);
+    case 'validate-record':
+      return runValidateRecord(context);
     default:
       unreachable(args.command);
   }
@@ -222,6 +233,49 @@ async function runRenderPdf(context: CommandContext): Promise<number> {
     for (const page of pages) {
       console.log(`Page ${page.page}: ${page.path}`);
     }
+  }
+
+  return 0;
+}
+
+async function runExportSchema(context: CommandContext): Promise<number> {
+  const outputPath = context.args.positional[0]
+    ? path.resolve(context.args.positional[0])
+    : undefined;
+  const writtenPath = await exportRecordJsonSchema(outputPath);
+
+  if (context.json) {
+    printJson({ path: writtenPath });
+  } else {
+    console.log(`Exported record schema to ${writtenPath}`);
+  }
+
+  return 0;
+}
+
+async function runValidateRecord(context: CommandContext): Promise<number> {
+  const targetPath = context.args.positional[0];
+
+  if (!targetPath) {
+    console.error('validate-record requires a JSON file path');
+    return 2;
+  }
+
+  const raw = await readFile(path.resolve(targetPath), 'utf8');
+  const parsed = JSON.parse(raw) as unknown;
+  const record = parseVaultRecord(parsed);
+
+  if (context.json) {
+    printJson({
+      ok: true,
+      document_type: record.document_type,
+      title: record.title,
+      status: record.status,
+    });
+  } else {
+    console.log(`Record valid: ${record.title}`);
+    console.log(`Type: ${record.document_type}`);
+    console.log(`Status: ${record.status}`);
   }
 
   return 0;
