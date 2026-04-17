@@ -55,7 +55,7 @@ Usage:
 
 Commands:
   setup                         Create vault, index, reports, state, and DB schema
-  validate [--json]             Validate vault structure and derived index
+  validate [--json] [--strict]  Validate vault structure and derived index
   reindex [--json]              Rebuild SQLite index from canonical vault files
   context [--json]              Print current vault summary
   register-document <path>      Register a local file by content hash
@@ -79,6 +79,7 @@ Options:
   --dest <path>                 Destination directory for backup
   --verify <zip>                Backup archive to verify
   --select <SQL>                SQL SELECT statement for the sql command
+  --strict                      Treat hardening checks as validation errors
   --limit <number>              Maximum search results (default: 20)
   --scale <number>              Render scale for render-pdf (default: 1.5)
   --desired-width <px>          Target render width for render-pdf
@@ -282,7 +283,9 @@ async function runSetup(context: CommandContext): Promise<number> {
 }
 
 async function runValidate(context: CommandContext): Promise<number> {
-  const report = await validate();
+  const report = await validate(undefined, {
+    strict: context.args.flags.has('strict'),
+  });
 
   if (context.json) {
     printJson(report);
@@ -724,6 +727,7 @@ function printOpenAnomalies(anomalies: StoredAnomaly[]): void {
 function printValidationReport(report: ValidationReport): void {
   console.log(`Vault validation: ${report.ok ? 'ok' : 'failed'}`);
   console.log(`Root: ${report.root}`);
+  console.log(`Strict: ${yesNo(report.strict)}`);
   console.log(`Canonical documents: ${report.counts.canonicalDocuments}`);
   console.log(`Source observations: ${report.counts.sourceObservations}`);
   console.log(`DB documents: ${report.counts.dbDocuments ?? 'not checked'}`);

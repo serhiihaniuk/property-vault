@@ -139,6 +139,7 @@ export type ValidationReport = {
   ok: boolean;
   root: string;
   checkedAt: string;
+  strict: boolean;
   errors: ValidationIssue[];
   warnings: ValidationIssue[];
   counts: {
@@ -147,6 +148,10 @@ export type ValidationReport = {
     dbDocuments: number | null;
     dbSources: number | null;
   };
+};
+
+export type ValidationOptions = {
+  strict?: boolean;
 };
 
 type SourceObservation = {
@@ -181,8 +186,12 @@ export async function init(root = resolveRepoRoot()): Promise<InitResult> {
   };
 }
 
-export async function validate(root = resolveRepoRoot()): Promise<ValidationReport> {
+export async function validate(
+  root = resolveRepoRoot(),
+  options: ValidationOptions = {},
+): Promise<ValidationReport> {
   const paths = getVaultPaths(root);
+  const strict = options.strict === true;
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
   let canonicalDocuments: DocumentIndexRow[] = [];
@@ -207,6 +216,10 @@ export async function validate(root = resolveRepoRoot()): Promise<ValidationRepo
         path: directory,
       });
     }
+  }
+
+  if (strict) {
+    await validateStrictGitIgnore(paths, issue);
   }
 
   if (!(await pathExists(paths.sourcesJsonl))) {
@@ -337,6 +350,7 @@ export async function validate(root = resolveRepoRoot()): Promise<ValidationRepo
     ok: errors.length === 0,
     root: paths.root,
     checkedAt: new Date().toISOString(),
+    strict,
     errors,
     warnings,
     counts: {
@@ -977,6 +991,50 @@ type DbSourceRow = {
 };
 
 type IssueSink = (issue: ValidationIssue) => void;
+
+async function validateStrictGitIgnore(
+  paths: VaultPaths,
+  issue: IssueSink,
+): Promise<void> {
+  const gitignorePath = path.join(paths.root, '.gitignore');
+  const requiredPatterns = [
+    'vault/',
+    'index/',
+    'reports/',
+    'node_modules/',
+    '.lock',
+    '.env',
+  ];
+
+  if (!(await pathExists(gitignorePath))) {
+    issue({
+      severity: 'error',
+      code: 'GITIGNORE_MISSING',
+      message: 'Strict validation requires .gitignore to protect private/generated data',
+      path: gitignorePath,
+    });
+    return;
+  }
+
+  const gitignore = await readFile(gitignorePath, 'utf8');
+  const patterns = new Set(
+    gitignore
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line !== '' && !line.startsWith('#')),
+  );
+
+  for (const pattern of requiredPatterns) {
+    if (!patterns.has(pattern)) {
+      issue({
+        severity: 'error',
+        code: 'GITIGNORE_MISSING_ENTRY',
+        message: `.gitignore is missing required private/generated data pattern: ${pattern}`,
+        path: gitignorePath,
+      });
+    }
+  }
+}
 
 function indexRecord(
   db: Awaited<ReturnType<typeof openVaultDatabase>>,

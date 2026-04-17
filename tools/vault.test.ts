@@ -359,6 +359,32 @@ test('context summarizes counts, Gmail state, records, and extraction work', asy
   }
 });
 
+test('strict validation catches missing Git ignore protections', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const sourcePath = path.join(fixture.root, 'notice.txt');
+    await writeFile(sourcePath, 'strict validation bytes', 'utf8');
+    await registerDocument({ path: sourcePath }, fixture.root);
+
+    const missing = await validate(fixture.root, { strict: true });
+    assert.equal(missing.ok, false);
+    assert.ok(missing.errors.some((issue) => issue.code === 'GITIGNORE_MISSING'));
+
+    await writeFile(
+      path.join(fixture.root, '.gitignore'),
+      'vault/\nindex/\nreports/\nnode_modules/\n.lock\n.env\n',
+      'utf8',
+    );
+
+    const protectedReport = await validate(fixture.root, { strict: true });
+    assert.equal(protectedReport.ok, true);
+    assert.equal(protectedReport.strict, true);
+  } finally {
+    await fixture.remove();
+  }
+});
+
 function makePdf(text: string): Buffer {
   const objects: string[] = [];
   const content = text ? `BT /F1 24 Tf 72 720 Td (${escapePdfText(text)}) Tj ET` : '';
