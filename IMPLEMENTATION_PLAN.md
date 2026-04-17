@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 15:31 Europe/Warsaw
+**Last updated:** 2026-04-17 15:37 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -22,15 +22,16 @@ Legend:
 | --- | --- | --- | --- |
 | 0 | Project baseline | [x] | npm-based baseline, docs, ignores, runbooks, and scripts exist. |
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
-| 2 | PDF rendering | [~] | PDF inspection/rendering exist and are tested with generated PDFs; the named real PDF was not present. |
+| 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | `put-record`, `put-note`, search, context, and extraction work are implemented; no real local PDF has been extracted yet. |
+| 4 | Manual extraction loop | [~] | One real Gmail-imported PDF has a rendered page, valid record, note, and searchable FTS entry; 5 imported documents still need triage/extraction. |
 | 5 | Gmail import | [~] | OAuth, Locator listing, and a first real capped Locator sync have run; full historical backfill remains. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
+- `f59f0d2` Mark real Gmail sync progress.
 - `256a7a5` Add vault backup verification.
 - `61299ba` Add inbox report generation.
 - `ea8398e` Add vault context and extraction work listing.
@@ -41,11 +42,63 @@ Legend:
 
 ### Remaining High-Value Work
 
+- Triage the remaining imported Gmail attachments; classify inline/logo PNGs as
+  assets if they are not real documents.
+- Continue real extraction with `732269777adf41e87681ab52b3ec3b053b687144bc7749030106039bc28ba7f4`
+  or another remaining real document.
 - Run a broader verified Locator backfill after the first capped sync.
-- Register/render/extract the first real PDF once available.
 - Add fixture records for media settlements, interest notes, account statements,
   and monthly charges.
 - Implement remaining financial anomaly rules.
+
+### Current Handoff Checkpoint
+
+This checkpoint was written before switching to another AI because model limits
+were close.
+
+Done against real user data:
+
+- Gmail authorization is complete.
+- A verified backup exists at
+  `C:\Users\Serge\Desktop\dabrowskiego-backups\vault-2026-04-17.zip`.
+- A capped real Locator sync imported 5 messages and 9 attachments with 0
+  attachment failures.
+- First real extracted document:
+  `6e9efc283330689c599876f81ffeb1b561943d861a426bb1794808bc905ce22c`
+  - MIME: `application/pdf`
+  - pages: 1
+  - type: `shared_property_settlement`
+  - status: `needs_review`
+  - rendered page exists under `index/renders/.../page-001.png`
+  - record and note were stored in ignored `vault/` data
+  - `npm run vault -- search settlement --json` returns the record
+- `npm run vault -- validate --strict --json` passed after the extraction.
+- `npm run vault -- write-inbox --json` refreshed the ignored private report.
+- `git status --short` was clean after the private-data-only extraction because
+  `vault/`, `index/`, and `reports/` are ignored.
+
+Pick up with:
+
+```powershell
+npm run vault -- context --json
+npm run vault -- list-work --kind extraction --json
+```
+
+Remaining extraction queue at handoff:
+
+- `f2dd30eb7893164284d2adbafad1ce7044625a0c0271cc9f51471ad95aa19bfe`
+  (`image/png`) - inspect whether it is a real document or an inline/logo asset.
+- `732269777adf41e87681ab52b3ec3b053b687144bc7749030106039bc28ba7f4`
+  (`application/pdf`, 1 page) - likely a good next real extraction candidate.
+- `0a50303e7a2ef8a69e915e3f501bbb202bafac68ad2f7c1b1adfbceae0971e6d`
+  (`application/pdf`, 12 pages) - larger extraction target.
+- `80a272dc69e5cf1e6f447c1843581f5c5301bb68e58ba3c348cfb9bf0f0c1e59`
+  (`image/png`) - inspect whether it is a real document or an inline/logo asset.
+- `dce27d56aa14ee2a75e45abc6532845d2c13b0544e93c796d4fac8b98ad1277c`
+  (`application/pdf`, 2 pages).
+
+Important: do not commit private `vault/`, `index/`, or `reports/` contents.
+Only commit tracked code/docs/plan updates.
 
 ---
 
@@ -294,6 +347,8 @@ npm run vault -- render-pdf <hash>
 - [ ] The existing `zawiad po zebraniu.pdf` renders to page images under
   `index/renders/<hash>/`.
   The file was not present when attempted.
+- [x] A real Gmail-imported one-page PDF renders to page images under
+  `index/renders/<hash>/`.
 - [x] `npm run vault -- context` can report that a registered document needs extraction.
 
 ---
@@ -430,14 +485,15 @@ Sensitive data rule:
 
 ### Acceptance
 
-- [ ] At least one local PDF has:
+- [x] At least one real Gmail-imported PDF has:
   - stored document,
   - rendered pages,
   - valid record,
   - Markdown note,
   - searchable FTS entry,
   - local source citation.
-  The code path exists, but no real local PDF extraction has been completed.
+  Completed for
+  `6e9efc283330689c599876f81ffeb1b561943d861a426bb1794808bc905ce22c`.
 
 ---
 
@@ -679,8 +735,8 @@ v1 is done when:
 - [x] `npm run vault -- setup` initializes the repo.
 - [ ] The local sample PDF can be registered by hash.
 - [ ] The sample scanned PDF renders to page images.
-- [~] At least one valid record and note are stored.
-  Implemented and tested with generated fixtures, not real local property PDFs.
+- [x] At least one valid record and note are stored.
+  Completed for one real Gmail-imported property PDF; more documents remain.
 - [~] Record fixtures exist for:
   - `meeting_notice`
   - `media_settlement`
