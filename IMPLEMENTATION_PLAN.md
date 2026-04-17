@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 15:24 Europe/Warsaw
+**Last updated:** 2026-04-17 15:31 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -25,9 +25,9 @@ Legend:
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist and are tested with generated PDFs; the named real PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
 | 4 | Manual extraction loop | [~] | `put-record`, `put-note`, search, context, and extraction work are implemented; no real local PDF has been extracted yet. |
-| 5 | Gmail import | [~] | OAuth/client/sync code exists with mocked tests; real OAuth and real Locator backfill have not been run. |
+| 5 | Gmail import | [~] | OAuth, Locator listing, and a first real capped Locator sync have run; full historical backfill remains. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
-| 7 | Hardening | [~] | Backup create/verify exists; `validate --strict` and backup-warning gates remain. |
+| 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
@@ -41,14 +41,11 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Run real Gmail OAuth with `npm run gmail -- auth`.
-- Run a verified backup before first real Gmail backfill.
-- Import real Locator messages and attachments.
+- Run a broader verified Locator backfill after the first capped sync.
 - Register/render/extract the first real PDF once available.
 - Add fixture records for media settlements, interest notes, account statements,
   and monthly charges.
 - Implement remaining financial anomaly rules.
-- Add `validate --strict`.
 
 ---
 
@@ -501,12 +498,12 @@ npm run gmail -- list-locator --max 20
 
 ### Acceptance
 
-- [ ] OAuth completes.
-  OAuth code exists, but the interactive flow has not been run.
-- [ ] Locator messages can be listed.
-  Listing code exists, but it depends on completing OAuth.
+- [x] OAuth completes.
+- [x] Locator messages can be listed.
 - [ ] A real accounting PDF declared as `application/octet-stream` is saved as a
   local PDF after byte sniffing.
+  A first real sync imported PDFs and images from Locator; an
+  `application/octet-stream` real-world sample has not yet been confirmed.
 - [x] Re-running sync does not duplicate emails or documents in mocked sync tests.
 
 ---
@@ -635,7 +632,7 @@ npm run vault -- validate --strict
 ### Acceptance
 
 - [x] A verified backup can be created.
-- [ ] `npm run vault -- validate --strict` passes on a clean repo.
+- [x] `npm run vault -- validate --strict` passes on a clean repo.
 - [ ] Full v1 checklist in `DESIGN.md` passes.
 
 ---
@@ -691,8 +688,8 @@ v1 is done when:
   - `account_statement`
   - `monthly_charges`
   Meeting notice coverage exists; the other fixture families remain.
-- [ ] `npm run gmail -- auth` works.
-- [ ] `npm run gmail -- sync --backfill-from <date>` imports Locator messages and raw
+- [x] `npm run gmail -- auth` works.
+- [x] `npm run gmail -- sync --backfill-from <date>` imports Locator messages and raw
   attachments.
 - [~] `application/octet-stream` PDFs are saved correctly after byte sniffing.
   Implemented and tested with mocked Gmail attachment bytes; not yet tested with real Locator messages.
