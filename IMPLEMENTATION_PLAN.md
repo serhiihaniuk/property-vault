@@ -1,9 +1,54 @@
 # Property Vault: Implementation Plan
 
-**Status:** Ready for v1 implementation
+**Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-17 15:24 Europe/Warsaw
 **Owner:** Serhii
+
+---
+
+## 0. Implementation Progress
+
+Legend:
+
+- `[x]` implemented and tested in code.
+- `[~]` partially implemented or implemented but not yet exercised against real
+  user data.
+- `[ ]` not implemented yet.
+
+### Phase Status
+
+| Phase | Name | Status | Notes |
+| --- | --- | --- | --- |
+| 0 | Project baseline | [x] | npm-based baseline, docs, ignores, runbooks, and scripts exist. |
+| 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
+| 2 | PDF rendering | [~] | PDF inspection/rendering exist and are tested with generated PDFs; the named real PDF was not present. |
+| 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
+| 4 | Manual extraction loop | [~] | `put-record`, `put-note`, search, context, and extraction work are implemented; no real local PDF has been extracted yet. |
+| 5 | Gmail import | [~] | OAuth/client/sync code exists with mocked tests; real OAuth and real Locator backfill have not been run. |
+| 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
+| 7 | Hardening | [~] | Backup create/verify exists; `validate --strict` and backup-warning gates remain. |
+
+### Latest Completed Commits
+
+- `256a7a5` Add vault backup verification.
+- `61299ba` Add inbox report generation.
+- `ea8398e` Add vault context and extraction work listing.
+- `e253122` Add record and note indexing.
+- `a59724c` Add deterministic anomaly detection.
+- `ff61206` Add Gmail sync importer.
+- `384cf63` Switch project tooling to npm.
+
+### Remaining High-Value Work
+
+- Run real Gmail OAuth with `npm run gmail -- auth`.
+- Run a verified backup before first real Gmail backfill.
+- Import real Locator messages and attachments.
+- Register/render/extract the first real PDF once available.
+- Add fixture records for media settlements, interest notes, account statements,
+  and monthly charges.
+- Implement remaining financial anomaly rules.
+- Add `validate --strict`.
 
 ---
 
@@ -90,10 +135,10 @@ node_modules/
 
 ### Acceptance
 
-- `npm install` succeeds.
-- `npm run vault -- --help` prints available command groups.
-- `npm run setup` can be wired later but the script exists.
-- Private folders are ignored by Git.
+- [x] `npm install` succeeds.
+- [x] `npm run vault -- --help` prints available command groups.
+- [x] `npm run setup` can be wired later but the script exists.
+- [x] Private folders are ignored by Git.
 
 ---
 
@@ -185,10 +230,11 @@ npm run vault -- context
 
 ### Acceptance
 
-- `npm run vault -- setup` creates `vault/`, `index/`, and `reports/`.
-- `npm run vault -- register-document "zawiad po zebraniu.pdf"` stores one hashed PDF.
-- Re-running registration is a no-op except for safe source observation logic.
-- `npm run vault -- reindex` succeeds.
+- [x] `npm run vault -- setup` creates `vault/`, `index/`, and `reports/`.
+- [ ] `npm run vault -- register-document "zawiad po zebraniu.pdf"` stores one hashed PDF.
+  The file was not present when attempted.
+- [x] Re-running registration is a no-op except for safe source observation logic.
+- [x] `npm run vault -- reindex` succeeds.
 
 ---
 
@@ -248,9 +294,10 @@ npm run vault -- render-pdf <hash>
 
 ### Acceptance
 
-- The existing `zawiad po zebraniu.pdf` renders to page images under
+- [ ] The existing `zawiad po zebraniu.pdf` renders to page images under
   `index/renders/<hash>/`.
-- `npm run vault -- context` can report that the document needs extraction.
+  The file was not present when attempted.
+- [x] `npm run vault -- context` can report that a registered document needs extraction.
 
 ---
 
@@ -333,9 +380,11 @@ Create malformed variants that fail:
 
 ### Acceptance
 
-- `tools/schemas/record.v1.json` is generated from Zod.
-- `npm run vault -- validate-record <fixture>` succeeds for valid fixtures.
-- Invalid fixture tests fail predictably with useful Zod issues.
+- [x] `tools/schemas/record.v1.json` is generated from Zod.
+- [~] `npm run vault -- validate-record <fixture>` succeeds for valid fixtures.
+  A meeting notice fixture exists; broader fixture families remain.
+- [~] Invalid fixture tests fail predictably with useful Zod issues.
+  Basic invalid cases exist; total mismatch fixtures remain.
 
 ---
 
@@ -384,13 +433,14 @@ Sensitive data rule:
 
 ### Acceptance
 
-- At least one local PDF has:
+- [ ] At least one local PDF has:
   - stored document,
   - rendered pages,
   - valid record,
   - Markdown note,
   - searchable FTS entry,
   - local source citation.
+  The code path exists, but no real local PDF extraction has been completed.
 
 ---
 
@@ -451,11 +501,13 @@ npm run gmail -- list-locator --max 20
 
 ### Acceptance
 
-- OAuth completes.
-- Locator messages can be listed.
-- A real accounting PDF declared as `application/octet-stream` is saved as a
+- [ ] OAuth completes.
+  OAuth code exists, but the interactive flow has not been run.
+- [ ] Locator messages can be listed.
+  Listing code exists, but it depends on completing OAuth.
+- [ ] A real accounting PDF declared as `application/octet-stream` is saved as a
   local PDF after byte sniffing.
-- Re-running sync does not duplicate emails or documents.
+- [x] Re-running sync does not duplicate emails or documents in mocked sync tests.
 
 ---
 
@@ -533,9 +585,9 @@ npm run vault -- write-inbox
 
 ### Acceptance
 
-- `npm run vault -- detect-anomalies` creates idempotent anomalies.
-- `npm run vault -- write-inbox` creates `reports/inbox.md`.
-- Re-running both commands does not create duplicate anomalies.
+- [x] `npm run vault -- detect-anomalies` creates idempotent anomalies.
+- [x] `npm run vault -- write-inbox` creates `reports/inbox.md`.
+- [x] Re-running both commands does not create duplicate anomalies.
 
 ---
 
@@ -582,9 +634,9 @@ npm run vault -- validate --strict
 
 ### Acceptance
 
-- A verified backup can be created.
-- `npm run vault -- validate --strict` passes on a clean repo.
-- Full v1 checklist in `DESIGN.md` passes.
+- [x] A verified backup can be created.
+- [ ] `npm run vault -- validate --strict` passes on a clean repo.
+- [ ] Full v1 checklist in `DESIGN.md` passes.
 
 ---
 
@@ -626,27 +678,30 @@ New chat readiness:
 
 v1 is done when:
 
-- `npm install` works on the target machine.
-- `npm run vault -- setup` initializes the repo.
-- The local sample PDF can be registered by hash.
-- The sample scanned PDF renders to page images.
-- At least one valid record and note are stored.
-- Record fixtures exist for:
+- [x] `npm install` works on the target machine.
+- [x] `npm run vault -- setup` initializes the repo.
+- [ ] The local sample PDF can be registered by hash.
+- [ ] The sample scanned PDF renders to page images.
+- [~] At least one valid record and note are stored.
+  Implemented and tested with generated fixtures, not real local property PDFs.
+- [~] Record fixtures exist for:
   - `meeting_notice`
   - `media_settlement`
   - `interest_note`
   - `account_statement`
   - `monthly_charges`
-- `npm run gmail -- auth` works.
-- `npm run gmail -- sync --backfill-from <date>` imports Locator messages and raw
+  Meeting notice coverage exists; the other fixture families remain.
+- [ ] `npm run gmail -- auth` works.
+- [ ] `npm run gmail -- sync --backfill-from <date>` imports Locator messages and raw
   attachments.
-- `application/octet-stream` PDFs are saved correctly after byte sniffing.
-- `npm run vault -- reindex` rebuilds SQLite from canonical files.
-- `npm run vault -- search` returns cited results.
-- `npm run vault -- detect-anomalies` is idempotent.
-- `npm run vault -- write-inbox` creates a private report.
-- `npm run vault -- backup --verify <zip>` verifies a backup.
-- `npm test` passes.
+- [~] `application/octet-stream` PDFs are saved correctly after byte sniffing.
+  Implemented and tested with mocked Gmail attachment bytes; not yet tested with real Locator messages.
+- [x] `npm run vault -- reindex` rebuilds SQLite from canonical files.
+- [x] `npm run vault -- search` returns cited results.
+- [x] `npm run vault -- detect-anomalies` is idempotent.
+- [x] `npm run vault -- write-inbox` creates a private report.
+- [x] `npm run vault -- backup --verify <zip>` verifies a backup.
+- [x] `npm test` passes.
 
 ---
 
@@ -654,16 +709,17 @@ v1 is done when:
 
 Start here:
 
-1. Create `package.json`, `.gitignore`, and base docs.
-2. Implement `tools/paths.ts`, `tools/hash.ts`, and `tools/state.ts`.
-3. Implement `vault.init`.
-4. Implement SQLite schema creation.
-5. Implement `registerDocument`.
-6. Implement `reindex`.
-7. Implement `validate`.
-8. Add CLI wrappers for setup/register/reindex/validate.
-9. Register `zawiad po zebraniu.pdf`.
-10. Add tests for idempotent registration.
+1. [x] Create `package.json`, `.gitignore`, and base docs.
+2. [x] Implement `tools/paths.ts`, `tools/hash.ts`, and `tools/state.ts`.
+3. [x] Implement `vault.init`.
+4. [x] Implement SQLite schema creation.
+5. [x] Implement `registerDocument`.
+6. [x] Implement `reindex`.
+7. [x] Implement `validate`.
+8. [x] Add CLI wrappers for setup/register/reindex/validate.
+9. [ ] Register `zawiad po zebraniu.pdf`.
+   The file was not present when attempted.
+10. [x] Add tests for idempotent registration.
 
 Do not start Gmail OAuth until local file registration and reindex are stable.
 
