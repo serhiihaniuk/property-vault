@@ -26,6 +26,7 @@ import {
   reindex,
   search,
   sql,
+  tagDocument,
   validate,
   type ExtractionWorkItem,
   type PutNoteResult,
@@ -33,6 +34,7 @@ import {
   type RegisterDocumentResult,
   type ReindexResult,
   type SearchResult,
+  type TagDocumentResult,
   type VaultContext,
   type ValidationReport,
 } from './vault.ts';
@@ -71,6 +73,7 @@ Commands:
   inspect-pdf <hash-or-path>     Inspect PDF page count and text layer
   render-pdf <hash>              Render canonical PDF pages to index/renders
   export-schema [path]           Export record JSON Schema
+  tag-document <hash> <tag>      Set the asset_tag on a document (e.g. asset_logo)
   validate-record <path>         Validate a record JSON file
 
 Options:
@@ -104,6 +107,7 @@ const COMMANDS = new Set([
   'inspect-pdf',
   'render-pdf',
   'export-schema',
+  'tag-document',
   'validate-record',
 ]);
 
@@ -160,6 +164,8 @@ async function main(argv: string[]): Promise<number> {
       return runRenderPdf(context);
     case 'export-schema':
       return runExportSchema(context);
+    case 'tag-document':
+      return runTagDocument(context);
     case 'validate-record':
       return runValidateRecord(context);
     default:
@@ -370,6 +376,26 @@ async function runPutNote(context: CommandContext): Promise<number> {
     printJson(result);
   } else {
     printPutNoteResult(result);
+  }
+
+  return 0;
+}
+
+async function runTagDocument(context: CommandContext): Promise<number> {
+  const hash = context.args.positional[0];
+  const tag = context.args.positional[1];
+
+  if (!hash || !tag) {
+    console.error('tag-document requires a document hash and a tag (e.g. asset_logo)');
+    return 2;
+  }
+
+  const result: TagDocumentResult = await tagDocument(hash, tag);
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    console.log(`Tagged ${result.hash} as ${result.tag}`);
   }
 
   return 0;

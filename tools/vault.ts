@@ -920,6 +920,41 @@ export async function putNote(
   };
 }
 
+export type TagDocumentResult = {
+  hash: string;
+  tag: string;
+};
+
+export async function tagDocument(
+  hash: string,
+  tag: string,
+  root = resolveRepoRoot(),
+): Promise<TagDocumentResult> {
+  await init(root);
+
+  const normalizedHash = normalizeSha256(hash);
+
+  await assertDocumentExists(normalizedHash, root);
+
+  const db = await openVaultDatabase(root);
+
+  try {
+    const result = db
+      .prepare(
+        `UPDATE documents SET asset_tag = @tag, updated_at = datetime('now') WHERE hash = @hash`,
+      )
+      .run({ hash: normalizedHash, tag });
+
+    if (result.changes === 0) {
+      throw new Error(`Document not found in index: ${normalizedHash}`);
+    }
+  } finally {
+    db.close();
+  }
+
+  return { hash: normalizedHash, tag };
+}
+
 export const vault = {
   context,
   init,
@@ -931,6 +966,7 @@ export const vault = {
   registerDocument,
   putRecord,
   putNote,
+  tagDocument,
 };
 
 function directoriesForInit(paths: VaultPaths): string[] {
