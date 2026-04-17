@@ -7,6 +7,7 @@ import {
   type StoredAnomaly,
 } from './anomalies.ts';
 import { inspectPdf, renderPdfPages, resolvePdfPathOrHash } from './pdf.ts';
+import { writeInboxReport, type WriteInboxResult } from './reports.ts';
 import { exportRecordJsonSchema } from './schemas/export-json-schema.ts';
 import { parseVaultRecord } from './schemas/record.ts';
 import {
@@ -57,6 +58,7 @@ Commands:
   search <query>                Search indexed records and notes
   detect-anomalies [--json]     Detect deterministic anomalies
   list-work --kind extraction|anomaly
+  write-inbox [--json]          Write reports/inbox.md
   sql --select "<SQL>"           Run a read-only SELECT query
   inspect-pdf <hash-or-path>     Inspect PDF page count and text layer
   render-pdf <hash>              Render canonical PDF pages to index/renders
@@ -85,6 +87,7 @@ const COMMANDS = new Set([
   'search',
   'detect-anomalies',
   'list-work',
+  'write-inbox',
   'sql',
   'inspect-pdf',
   'render-pdf',
@@ -133,6 +136,8 @@ async function main(argv: string[]): Promise<number> {
       return runDetectAnomalies(context);
     case 'list-work':
       return runListWork(context);
+    case 'write-inbox':
+      return runWriteInbox(context);
     case 'sql':
       return runSql(context);
     case 'inspect-pdf':
@@ -199,6 +204,18 @@ async function runContext(contextArg: CommandContext): Promise<number> {
     printJson(result);
   } else {
     printContext(result);
+  }
+
+  return 0;
+}
+
+async function runWriteInbox(context: CommandContext): Promise<number> {
+  const result = await writeInboxReport();
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    printWriteInboxResult(result);
   }
 
   return 0;
@@ -590,6 +607,11 @@ function printContext(result: VaultContext): void {
     console.log('Extraction Work');
     printExtractionWork(result.extractionWork);
   }
+}
+
+function printWriteInboxResult(result: WriteInboxResult): void {
+  console.log(`Wrote inbox report to ${result.relativePath}`);
+  console.log(`Bytes: ${result.bytes}`);
 }
 
 function printExtractionWork(items: ExtractionWorkItem[]): void {
