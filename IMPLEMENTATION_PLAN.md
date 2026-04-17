@@ -1,0 +1,681 @@
+# Property Vault: Implementation Plan
+
+**Status:** Ready for v1 implementation
+**Based on:** `DESIGN.md` draft v3
+**Last updated:** 2026-04-17
+**Owner:** Serhii
+
+---
+
+## 1. Implementation Goal
+
+Build v1 of the Property Vault as a Codex-operated local knowledge base.
+
+The first implementation should make the repo usable for:
+
+- manually registering local PDFs,
+- rendering scanned PDFs into page images,
+- storing AI extraction records and notes,
+- rebuilding a SQLite index from canonical files,
+- searching and answering questions with citations,
+- syncing Locator Gmail messages through direct Gmail REST,
+- producing `reports/inbox.md` for the user and future Codex automations.
+
+The implementation must stay local-first and Node.js/TypeScript-only.
+
+---
+
+## 2. Phase Overview
+
+| Phase | Name | Result |
+| --- | --- | --- |
+| 0 | Project baseline | Repo has package/scripts, ignores, docs, and folder creation. |
+| 1 | Vault core | Documents, emails, records, notes, state, and SQLite index work. |
+| 2 | PDF rendering | Scanned PDFs render to page images for Codex/vision extraction. |
+| 3 | Record schema | Zod schema and JSON Schema are implemented and tested. |
+| 4 | Manual extraction loop | Local sample documents can be registered, extracted, and searched. |
+| 5 | Gmail import | Direct Gmail REST sync saves raw attachments despite MIME quirks. |
+| 6 | Reports and anomalies | Inbox report and deterministic anomaly detection work. |
+| 7 | Hardening | Tests, backup verification, validation, and runbooks are complete. |
+
+Phases should be implemented in order. Later phases may add code, but they
+should not rewrite earlier interfaces unless a test proves the interface is
+wrong.
+
+---
+
+## 3. Phase 0: Project Baseline
+
+### Files to create
+
+- `package.json`
+- `.gitignore`
+- `README.md`
+- `AGENT.md`
+- `.codex/sync-gmail.md`
+- `.codex/extract-document.md`
+- `.codex/answer-question.md`
+- `.codex/check-anomalies.md`
+- `.codex/write-inbox.md`
+- `tools/cli.ts`
+
+### Work
+
+- Create `package.json` from `DESIGN.md`.
+- Add scripts:
+  - `pnpm vault ...`
+  - `pnpm gmail ...`
+  - `pnpm run setup`
+  - `pnpm run validate`
+  - `pnpm run reindex`
+  - `pnpm test`
+- Add `.gitignore`:
+
+```gitignore
+vault/
+index/
+reports/
+node_modules/
+.lock
+.env
+```
+
+- Add `AGENT.md` with instructions for new Codex chats:
+  - read `DESIGN.md`,
+  - run `pnpm vault context`,
+  - never copy raw passwords,
+  - cite local sources,
+  - use CLI wrappers for mutations.
+- Add placeholder runbooks with the fixed sections from `DESIGN.md`.
+
+### Acceptance
+
+- `pnpm install` succeeds.
+- `pnpm vault --help` prints available command groups.
+- `pnpm run setup` can be wired later but the script exists.
+- Private folders are ignored by Git.
+
+---
+
+## 4. Phase 1: Vault Core
+
+### Files to create
+
+- `tools/vault.ts`
+- `tools/db.ts`
+- `tools/paths.ts`
+- `tools/hash.ts`
+- `tools/state.ts`
+- `tools/types.ts`
+- `tools/vault.test.ts`
+
+### Work
+
+Implement the canonical vault operations.
+
+Core APIs:
+
+```ts
+vault.init(): Promise<void>;
+vault.reindex(): Promise<void>;
+vault.validate(): Promise<ValidationReport>;
+vault.registerDocument(input: RegisterDocumentInput): Promise<RegisterDocumentResult>;
+vault.registerEmail(input: RegisterEmailInput): Promise<{ isNew: boolean; path: string }>;
+vault.putRecord(hash: string, record: VaultRecord): Promise<void>;
+vault.putNote(hash: string, markdown: string): Promise<void>;
+vault.putReport(name: string, markdown: string): Promise<void>;
+vault.search(opts: SearchOptions): Promise<SearchResult[]>;
+vault.sql<T>(query: string, params?: unknown[]): Promise<T[]>;
+```
+
+Canonical file writes:
+
+- Documents go to `vault/documents/<sha256>.<ext>`.
+- Email metadata goes to `vault/emails/<gmail-id>/`.
+- Records go to `vault/records/<hash>.json`.
+- Notes go to `vault/notes/<hash>.md`.
+- Source observations append to `vault/sources.jsonl`.
+- Mutable state writes atomically to `vault/state.json`.
+
+SQLite tables:
+
+- `documents`
+- `document_sources`
+- `emails`
+- `email_attachments`
+- `records`
+- `financial_rows`
+- `important_dates`
+- `resolutions`
+- `anomalies`
+- `sync_runs`
+- `fts_records`
+
+Important behavior:
+
+- `registerDocument` is idempotent by SHA-256.
+- MIME is sniffed from bytes with `file-type`.
+- `sources.jsonl` never receives duplicate source observations.
+- `vault.sql` rejects non-`SELECT` statements.
+- `reindex` drops and rebuilds `index/vault.db` from canonical files.
+
+### CLI commands
+
+Implement:
+
+```text
+pnpm vault setup
+pnpm vault validate
+pnpm vault reindex
+pnpm vault register-document <path>
+pnpm vault put-record <hash> <record-json-path>
+pnpm vault put-note <hash> <note-md-path>
+pnpm vault search <query>
+pnpm vault sql --select "<SQL>"
+pnpm vault context
+```
+
+### Tests
+
+- Same file registered twice creates one document.
+- Same bytes with different filenames create one document and two sources.
+- `reindex` rebuilds an equivalent DB.
+- `vault.sql` rejects writes.
+- `validate` detects missing canonical files.
+
+### Acceptance
+
+- `pnpm vault setup` creates `vault/`, `index/`, and `reports/`.
+- `pnpm vault register-document "zawiad po zebraniu.pdf"` stores one hashed PDF.
+- Re-running registration is a no-op except for safe source observation logic.
+- `pnpm vault reindex` succeeds.
+
+---
+
+## 5. Phase 2: PDF Rendering
+
+### Files to create
+
+- `tools/pdf.ts`
+- `tools/pdf.test.ts`
+
+### Work
+
+Implement scanned-first PDF handling.
+
+Core APIs:
+
+```ts
+inspectPdf(pathOrBytes): Promise<{
+  pageCount: number;
+  textPreview: string;
+  hasTextLayer: boolean;
+  needsVision: boolean;
+}>;
+
+renderPdfPages(hash: string): Promise<Array<{
+  page: number;
+  path: string;
+}>>;
+```
+
+Rules:
+
+- Try embedded text first.
+- If extracted text is blank or too short, mark `needsVision = true`.
+- Render pages to `index/renders/<hash>/page-001.png`.
+- Render output is derived and can be deleted/rebuilt.
+- Do not store rendered page images in Git.
+
+Implementation decision:
+
+- Use `pdf-parse` v2 APIs for text inspection and page rendering.
+- If `pdf-parse` rendering is insufficient on Windows, introduce a second Node
+  wrapper behind the same `tools/pdf.ts` API. Do not change caller behavior.
+
+### CLI commands
+
+```text
+pnpm vault inspect-pdf <hash-or-path>
+pnpm vault render-pdf <hash>
+```
+
+### Tests
+
+- Scanned `zawiad po zebraniu.pdf` reports `needsVision = true`.
+- Rendering creates one PNG per page.
+- Re-rendering is idempotent and overwrites only derived render files.
+
+### Acceptance
+
+- The existing `zawiad po zebraniu.pdf` renders to page images under
+  `index/renders/<hash>/`.
+- `pnpm vault context` can report that the document needs extraction.
+
+---
+
+## 6. Phase 3: Record Schema
+
+### Files to create
+
+- `tools/schemas/record.ts`
+- `tools/schemas/anomaly.ts`
+- `tools/schemas/export-json-schema.ts`
+- `tools/schemas/record.v1.json`
+- `tools/schemas/record.test.ts`
+
+### Work
+
+Implement the v1 schema from `DESIGN.md`.
+
+Document types:
+
+- `monthly_charges`
+- `media_settlement`
+- `shared_property_settlement`
+- `interest_note`
+- `account_statement`
+- `resolution`
+- `meeting_notice`
+- `service_notice`
+- `correspondence`
+- `other`
+
+Required substructures:
+
+- `Money`
+- `Period`
+- `ReferenceNumbers`
+- `FinancialRow`
+- `MeterReading`
+- `LedgerEntry`
+- `InterestEntry`
+- `ImportantDate`
+- `Resolution`
+- `SensitiveFinding`
+- `RecordSchema`
+
+Validation helpers:
+
+- Monthly charge sum equals stated total when stated total exists.
+- Media settlement final total matches row differences.
+- Interest note total matches interest rows.
+- Account statement final balance matches ledger summary.
+- Raw visible passwords are rejected outside `sensitive_findings` and must be
+  redacted.
+
+### CLI commands
+
+```text
+pnpm vault export-schema
+pnpm vault validate-record <record-json-path>
+```
+
+### Tests
+
+Create fixture records for:
+
+- `meeting_notice`
+- `media_settlement`
+- `interest_note`
+- `account_statement`
+- `monthly_charges`
+
+Each fixture must pass `RecordSchema.parse`.
+
+Create malformed variants that fail:
+
+- money as float,
+- bad date format,
+- raw password copied into summary,
+- missing document type,
+- mismatched total.
+
+### Acceptance
+
+- `tools/schemas/record.v1.json` is generated from Zod.
+- `pnpm vault validate-record <fixture>` succeeds for valid fixtures.
+- Invalid fixture tests fail predictably with useful Zod issues.
+
+---
+
+## 7. Phase 4: Manual Extraction Loop
+
+### Files to create
+
+- `.codex/extract-document.md`
+- `tests/fixtures/records/*.json`
+- `tests/fixtures/notes/*.md`
+
+### Work
+
+Implement the first complete Codex-operated extraction loop.
+
+Flow:
+
+1. Register a document.
+2. Render pages if needed.
+3. Codex reads page images.
+4. Codex writes extraction JSON to a temp file.
+5. Run `pnpm vault validate-record`.
+6. Run `pnpm vault put-record`.
+7. Run `pnpm vault put-note`.
+8. Reindex/search.
+
+First target:
+
+- `zawiad po zebraniu.pdf`
+- expected document type: `meeting_notice`
+- expected status: `needs_review` or `ok`, depending on extraction confidence.
+
+Next sample families from screenshots:
+
+- media settlement for I half of 2025,
+- media settlement for II half of 2025,
+- interest note,
+- account statement.
+
+Sensitive data rule:
+
+- If a document contains portal credentials, the note should say credentials are
+  present but must not repeat the raw password.
+- Record should include `sensitive_findings` with redacted value.
+- Anomaly detection should later emit `SECRET_VISIBLE`.
+
+### Acceptance
+
+- At least one local PDF has:
+  - stored document,
+  - rendered pages,
+  - valid record,
+  - Markdown note,
+  - searchable FTS entry,
+  - local source citation.
+
+---
+
+## 8. Phase 5: Gmail Import
+
+### Files to create
+
+- `tools/gmail-auth.ts`
+- `tools/gmail.ts`
+- `tools/gmail-cli.ts`
+- `tools/gmail.test.ts`
+
+### Work
+
+Implement direct Gmail REST import.
+
+OAuth:
+
+- Read credentials from `~/.config/property-vault/credentials.json`.
+- Cache token at `~/.config/property-vault/gmail-token.json`.
+- Use Gmail readonly scope only.
+- Do not store tokens in repo.
+
+Gmail APIs:
+
+```ts
+listMessages(opts): Promise<Array<{ id: string; threadId: string }>>;
+getMessage(gmailId): Promise<GmailMessageWithAttachments>;
+fetchAttachmentBytes(gmailId, attachmentId): Promise<Buffer>;
+```
+
+Sync logic:
+
+- Query known Locator senders.
+- Use `high_watermark_date - 14 days`.
+- Deduplicate by Gmail id.
+- Deduplicate documents by SHA-256.
+- Fetch raw attachment bytes regardless of declared MIME.
+- Sniff actual type locally.
+- Store email body and metadata.
+- Continue on per-attachment failure and emit anomaly later.
+
+### CLI commands
+
+```text
+pnpm gmail auth
+pnpm gmail sync
+pnpm gmail sync --backfill-from 2023-01-01
+pnpm gmail list-locator --max 20
+```
+
+### Tests
+
+- Unit-test MIME tree traversal with fixture Gmail payloads.
+- Test base64url decoding of attachment data.
+- Test sync idempotency with mocked Gmail responses.
+- Test lookback query generation.
+
+### Acceptance
+
+- OAuth completes.
+- Locator messages can be listed.
+- A real accounting PDF declared as `application/octet-stream` is saved as a
+  local PDF after byte sniffing.
+- Re-running sync does not duplicate emails or documents.
+
+---
+
+## 9. Phase 6: Reports and Anomalies
+
+### Files to create
+
+- `tools/anomalies.ts`
+- `tools/reports.ts`
+- `.codex/check-anomalies.md`
+- `.codex/write-inbox.md`
+- `tools/anomalies.test.ts`
+- `tools/reports.test.ts`
+
+### Work
+
+Implement deterministic anomaly rules:
+
+- `FEE_DELTA`
+- `FEE_DELTA_LARGE`
+- `MISSING_PERIOD`
+- `NEW_CATEGORY`
+- `REMOVED_CATEGORY`
+- `SETTLEMENT_NONZERO`
+- `MEDIA_SETTLEMENT_NONZERO`
+- `INTEREST_CHARGED`
+- `ACCOUNT_UNDERPAYMENT`
+- `TOTAL_MISMATCH`
+- `RESOLUTION_PENDING_VOTE`
+- `EXTRACTION_MISSING`
+- `EXTRACTION_FAILED`
+- `LOW_CONFIDENCE`
+- `OCR_PENDING`
+- `ORPHAN_RECORD`
+- `UNEXPECTED_SENDER`
+- `DEADLINE_APPROACHING`
+- `DEADLINE_MISSED`
+- `SCHEMA_OUTDATED`
+- `HASH_DRIFT`
+- `GMAIL_ATTACHMENT_FETCH_FAILED`
+- `SECRET_VISIBLE`
+
+Implement `reports/inbox.md` generation.
+
+Report contents:
+
+- new documents,
+- extraction work pending,
+- open anomalies,
+- pending votes,
+- upcoming deadlines,
+- questions for user,
+- latest financial changes,
+- safe citations to local hashes/paths.
+
+Privacy:
+
+- `reports/` is ignored by Git.
+- Reports must not contain raw passwords.
+
+### CLI commands
+
+```text
+pnpm vault detect-anomalies
+pnpm vault list-work --kind anomaly
+pnpm vault write-inbox
+```
+
+### Tests
+
+- Each anomaly rule has one positive and one negative fixture.
+- `SECRET_VISIBLE` triggers on sensitive findings.
+- Report generation redacts sensitive values.
+- Report generation is deterministic for the same DB state.
+
+### Acceptance
+
+- `pnpm vault detect-anomalies` creates idempotent anomalies.
+- `pnpm vault write-inbox` creates `reports/inbox.md`.
+- Re-running both commands does not create duplicate anomalies.
+
+---
+
+## 10. Phase 7: Hardening
+
+### Files to create
+
+- `tools/backup.ts`
+- `tools/backup.test.ts`
+- `tests/fixtures/`
+
+### Work
+
+Backup:
+
+- Create `vault-YYYY-MM-DD.zip`.
+- Include `manifest.json`.
+- Manifest contains path, size, SHA-256, and timestamp for each canonical file.
+- Verify archive by reading it back and checking hashes.
+- Add restore/reindex verification path.
+
+Validation:
+
+- Detect missing canonical files.
+- Detect orphan records.
+- Detect corrupt `sources.jsonl`.
+- Detect files whose content hash does not match path.
+- Warn if `reports/` or `vault/` are not ignored by Git.
+- Warn before Gmail backfill if no verified backup has been configured.
+
+### CLI commands
+
+```text
+pnpm vault backup --dest <path>
+pnpm vault backup --verify <zip>
+pnpm vault validate --strict
+```
+
+### Tests
+
+- Backup manifest hashes are correct.
+- Backup verification fails on tampered archive.
+- `validate --strict` catches Git ignore mistakes.
+
+### Acceptance
+
+- A verified backup can be created.
+- `pnpm vault validate --strict` passes on a clean repo.
+- Full v1 checklist in `DESIGN.md` passes.
+
+---
+
+## 11. Automation Readiness
+
+The implementation must support future Codex app automations.
+
+Automation command sequence:
+
+```text
+pnpm gmail sync
+pnpm vault list-work --kind extraction
+pnpm vault detect-anomalies
+pnpm vault write-inbox
+pnpm vault context
+```
+
+Automation rules:
+
+- Notify only when something changed or needs attention.
+- Do not send email.
+- Do not vote.
+- Do not acknowledge or resolve anomalies.
+- Do not access e-kartoteka.
+- Do not expose raw passwords.
+- End with `reports/inbox.md` updated and a short user-facing summary.
+
+New chat readiness:
+
+- `AGENT.md` tells Codex how to start.
+- `pnpm vault context` gives property identity, latest state, open anomalies,
+  and next useful files.
+- Search and SQL commands expose local context without requiring prior chat
+  history.
+
+---
+
+## 12. Definition of Done for v1
+
+v1 is done when:
+
+- `pnpm install` works on the target machine.
+- `pnpm vault setup` initializes the repo.
+- The local sample PDF can be registered by hash.
+- The sample scanned PDF renders to page images.
+- At least one valid record and note are stored.
+- Record fixtures exist for:
+  - `meeting_notice`
+  - `media_settlement`
+  - `interest_note`
+  - `account_statement`
+  - `monthly_charges`
+- `pnpm gmail auth` works.
+- `pnpm gmail sync --backfill-from <date>` imports Locator messages and raw
+  attachments.
+- `application/octet-stream` PDFs are saved correctly after byte sniffing.
+- `pnpm vault reindex` rebuilds SQLite from canonical files.
+- `pnpm vault search` returns cited results.
+- `pnpm vault detect-anomalies` is idempotent.
+- `pnpm vault write-inbox` creates a private report.
+- `pnpm vault backup --verify <zip>` verifies a backup.
+- `pnpm test` passes.
+
+---
+
+## 13. Implementation Order for the First Coding Session
+
+Start here:
+
+1. Create `package.json`, `.gitignore`, and base docs.
+2. Implement `tools/paths.ts`, `tools/hash.ts`, and `tools/state.ts`.
+3. Implement `vault.init`.
+4. Implement SQLite schema creation.
+5. Implement `registerDocument`.
+6. Implement `reindex`.
+7. Implement `validate`.
+8. Add CLI wrappers for setup/register/reindex/validate.
+9. Register `zawiad po zebraniu.pdf`.
+10. Add tests for idempotent registration.
+
+Do not start Gmail OAuth until local file registration and reindex are stable.
+
+---
+
+## 14. Notes for Codex Implementers
+
+- Prefer small modules with explicit APIs.
+- Do not let CLI commands duplicate library logic.
+- Keep all paths relative to discovered repo root.
+- Never write into `vault/` outside `tools/vault.ts`.
+- Never commit private generated data.
+- Do not copy raw passwords from source documents into notes, records, logs, or
+  final answers.
+- When a decision is not in this plan, check `DESIGN.md` first.
