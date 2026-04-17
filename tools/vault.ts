@@ -1,9 +1,9 @@
 import { constants } from 'node:fs';
-import { access, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileTypeFromBuffer } from 'file-type';
 import { initializeDatabase, openVaultDatabase } from './db.ts';
-import { sha256Buffer } from './hash.ts';
+import { isSha256Hex, normalizeSha256, sha256Buffer } from './hash.ts';
 import { getVaultPaths, resolveRepoRoot, type VaultPaths } from './paths.ts';
 import { createDefaultState, readState, writeState } from './state.ts';
 
@@ -36,6 +36,13 @@ export type RegisterDocumentResult = {
   isNewSource: boolean;
 };
 
+export type ReindexResult = {
+  root: string;
+  documentsIndexed: number;
+  sourcesIndexed: number;
+  sourcesSkipped: number;
+};
+
 type SourceObservation = {
   hash: string;
   seen_at: string;
@@ -47,6 +54,122 @@ type SourceObservation = {
 
 export async function init(root = resolveRepoRoot()): Promise<InitResult> {
   const paths = getVaultPaths(root);
+  const result = await ensureFileLayout(paths, root);
+
+  await initializeDatabase(root);
+
+  return {
+    root: paths.root,
+    createdDirectories: result.createdDirectories,
+    createdFiles: result.createdFiles,
+  };
+}
+
+export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> {
+  const paths = getVaultPaths(root);
+
+  await ensureFileLayout(paths, root);
+  await removeDatabaseFiles(paths);
+  await initializeDatabase(root);
+
+  const documentRows = await readCanonicalDocuments(paths);
+  const sourceObservations = await readSourceObservations(paths.sourcesJsonl);
+  const knownDocumentHashes = new Set(documentRows.map((row) => row.hash));
+  let sourcesIndexed = 0;
+  let sourcesSkipped = 0;
+
+  const db = await openVaultDatabase(root);
+
+  try {
+    const transaction = db.transaction(() => {
+      const insertDocument = db.prepare(`
+        INSERT INTO documents (
+          hash,
+          mime,
+          size_bytes,
+          ingested_at,
+          page_count,
+          has_text_layer,
+          needs_ocr,
+          ocr_status,
+          document_date,
+          asset_tag,
+          local_path,
+          updated_at
+        )
+        VALUES (
+          @hash,
+          @mime,
+          @sizeBytes,
+          @ingestedAt,
+          NULL,
+          0,
+          0,
+          'pending',
+          NULL,
+          NULL,
+          @relativePath,
+          datetime('now')
+        )
+      `);
+      const insertSource = db.prepare(`
+        INSERT OR IGNORE INTO document_sources (
+          hash,
+          source_kind,
+          source_ref,
+          seen_at,
+          original_filename
+        )
+        VALUES (
+          @hash,
+          @sourceKind,
+          @sourceRef,
+          @seenAt,
+          @originalFilename
+        )
+      `);
+
+      for (const document of documentRows) {
+        insertDocument.run(document);
+      }
+
+      for (const observation of sourceObservations) {
+        if (!knownDocumentHashes.has(observation.hash)) {
+          sourcesSkipped += 1;
+          continue;
+        }
+
+        const result = insertSource.run({
+          hash: observation.hash,
+          sourceKind: observation.source.kind,
+          sourceRef: stableStringify(sourceReferenceForIdentity(observation.source)),
+          seenAt: observation.seen_at,
+          originalFilename: originalFilenameFromObservation(observation),
+        });
+
+        if (result.changes > 0) {
+          sourcesIndexed += 1;
+        }
+      }
+    });
+
+    transaction();
+  } finally {
+    db.close();
+  }
+
+  return {
+    root: paths.root,
+    documentsIndexed: documentRows.length,
+    sourcesIndexed,
+    sourcesSkipped,
+  };
+}
+
+async function ensureFileLayout(
+  paths: VaultPaths,
+  root: string,
+): Promise<Pick<InitResult, 'createdDirectories' | 'createdFiles'>> {
   const createdDirectories: string[] = [];
   const createdFiles: string[] = [];
 
@@ -71,10 +194,7 @@ export async function init(root = resolveRepoRoot()): Promise<InitResult> {
     await readState(root);
   }
 
-  await initializeDatabase(root);
-
   return {
-    root: paths.root,
     createdDirectories,
     createdFiles,
   };
@@ -211,6 +331,7 @@ export async function registerDocument(
 
 export const vault = {
   init,
+  reindex,
   registerDocument,
 };
 
@@ -245,6 +366,98 @@ async function pathExists(filePath: string): Promise<boolean> {
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && 'code' in error;
+}
+
+type DocumentIndexRow = {
+  hash: string;
+  mime: string;
+  sizeBytes: number;
+  ingestedAt: string;
+  relativePath: string;
+};
+
+async function removeDatabaseFiles(paths: VaultPaths): Promise<void> {
+  for (const filePath of [
+    paths.databasePath,
+    `${paths.databasePath}-wal`,
+    `${paths.databasePath}-shm`,
+  ]) {
+    assertInsideDirectory(filePath, paths.indexDir);
+    await rm(filePath, { force: true });
+  }
+}
+
+async function readCanonicalDocuments(paths: VaultPaths): Promise<DocumentIndexRow[]> {
+  const entries = await readdir(paths.documentsDir, { withFileTypes: true });
+  const documents: DocumentIndexRow[] = [];
+  const seenHashes = new Set<string>();
+
+  for (const entry of entries) {
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    const parsed = parseCanonicalDocumentFilename(entry.name);
+    const filePath = path.join(paths.documentsDir, entry.name);
+    const bytes = await readFile(filePath);
+    const actualHash = sha256Buffer(bytes);
+
+    if (actualHash !== parsed.hash) {
+      throw new Error(`HASH_DRIFT: ${filePath} has SHA-256 ${actualHash}`);
+    }
+
+    if (seenHashes.has(parsed.hash)) {
+      throw new Error(`Duplicate canonical document hash: ${parsed.hash}`);
+    }
+
+    seenHashes.add(parsed.hash);
+
+    const stats = await stat(filePath);
+    const detected = await fileTypeFromBuffer(bytes);
+    const mime = detected?.mime ?? mimeFromExtension(parsed.extension);
+
+    documents.push({
+      hash: parsed.hash,
+      mime,
+      sizeBytes: stats.size,
+      ingestedAt: stableFileDate(stats.birthtime, stats.mtime),
+      relativePath: toRepoRelativePath(paths.root, filePath),
+    });
+  }
+
+  return documents.sort((left, right) => left.hash.localeCompare(right.hash));
+}
+
+function parseCanonicalDocumentFilename(filename: string): {
+  hash: string;
+  extension: string;
+} {
+  const extension = normalizeExtension(path.extname(filename).replace(/^\./, ''));
+  const hash = path.basename(filename, path.extname(filename)).toLowerCase();
+
+  if (!isSha256Hex(hash)) {
+    throw new Error(`Invalid canonical document filename: ${filename}`);
+  }
+
+  return {
+    hash: normalizeSha256(hash),
+    extension,
+  };
+}
+
+function stableFileDate(birthtime: Date, mtime: Date): string {
+  const chosen = Number.isNaN(birthtime.getTime()) ? mtime : birthtime;
+  return chosen.toISOString();
+}
+
+function assertInsideDirectory(filePath: string, directory: string): void {
+  const resolvedFile = path.resolve(filePath);
+  const resolvedDirectory = path.resolve(directory);
+  const relative = path.relative(resolvedDirectory, resolvedFile);
+
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(`Refusing to operate outside ${resolvedDirectory}: ${resolvedFile}`);
+  }
 }
 
 function normalizeExtension(extension: string): string {
