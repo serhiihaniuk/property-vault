@@ -11,12 +11,18 @@ import { exportRecordJsonSchema } from './schemas/export-json-schema.ts';
 import { parseVaultRecord } from './schemas/record.ts';
 import {
   init,
+  putNote,
+  putRecord,
   registerDocument,
   reindex,
+  search,
   sql,
   validate,
+  type PutNoteResult,
+  type PutRecordResult,
   type RegisterDocumentResult,
   type ReindexResult,
+  type SearchResult,
   type ValidationReport,
 } from './vault.ts';
 
@@ -41,6 +47,9 @@ Commands:
   validate [--json]             Validate vault structure and derived index
   reindex [--json]              Rebuild SQLite index from canonical vault files
   register-document <path>      Register a local file by content hash
+  put-record <hash> <json>      Store and index a validated extraction record
+  put-note <hash> <md>          Store a Markdown note for a document
+  search <query>                Search indexed records and notes
   detect-anomalies [--json]     Detect deterministic anomalies
   list-work --kind anomaly      List open anomaly work
   sql --select "<SQL>"           Run a read-only SELECT query
@@ -53,6 +62,7 @@ Options:
   --source <kind>               Source kind for register-document (default: manual_drop)
   --kind <kind>                 Work kind for list-work
   --select <SQL>                SQL SELECT statement for the sql command
+  --limit <number>              Maximum search results (default: 20)
   --scale <number>              Render scale for render-pdf (default: 1.5)
   --desired-width <px>          Target render width for render-pdf
   --json                        Print machine-readable JSON
@@ -64,6 +74,9 @@ const COMMANDS = new Set([
   'validate',
   'reindex',
   'register-document',
+  'put-record',
+  'put-note',
+  'search',
   'detect-anomalies',
   'list-work',
   'sql',
@@ -102,6 +115,12 @@ async function main(argv: string[]): Promise<number> {
       return runReindex(context);
     case 'register-document':
       return runRegisterDocument(context);
+    case 'put-record':
+      return runPutRecord(context);
+    case 'put-note':
+      return runPutNote(context);
+    case 'search':
+      return runSearch(context);
     case 'detect-anomalies':
       return runDetectAnomalies(context);
     case 'list-work':
@@ -211,6 +230,71 @@ async function runRegisterDocument(context: CommandContext): Promise<number> {
     printJson(result);
   } else {
     printRegisterDocumentResult(result);
+  }
+
+  return 0;
+}
+
+async function runPutRecord(context: CommandContext): Promise<number> {
+  const hash = context.args.positional[0];
+  const recordPath = context.args.positional[1];
+
+  if (!hash || !recordPath) {
+    console.error('put-record requires a document hash and record JSON path');
+    return 2;
+  }
+
+  const raw = await readFile(path.resolve(recordPath), 'utf8');
+  const result = await putRecord(hash, JSON.parse(raw) as unknown);
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    printPutRecordResult(result);
+  }
+
+  return 0;
+}
+
+async function runPutNote(context: CommandContext): Promise<number> {
+  const hash = context.args.positional[0];
+  const notePath = context.args.positional[1];
+
+  if (!hash || !notePath) {
+    console.error('put-note requires a document hash and Markdown note path');
+    return 2;
+  }
+
+  const markdown = await readFile(path.resolve(notePath), 'utf8');
+  const result = await putNote(hash, markdown);
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    printPutNoteResult(result);
+  }
+
+  return 0;
+}
+
+async function runSearch(context: CommandContext): Promise<number> {
+  const query = context.args.positional.join(' ');
+
+  if (!query.trim()) {
+    console.error('search requires a query');
+    return 2;
+  }
+
+  const limitFlag = stringFlag(context.args, 'limit');
+  const results = await search({
+    query,
+    limit: limitFlag ? Number(limitFlag) : undefined,
+  });
+
+  if (context.json) {
+    printJson(results);
+  } else {
+    printSearchResults(results);
   }
 
   return 0;
@@ -387,6 +471,7 @@ function flagExpectsValue(name: string): boolean {
     name === 'source' ||
     name === 'kind' ||
     name === 'select' ||
+    name === 'limit' ||
     name === 'scale' ||
     name === 'desired-width'
   );
@@ -411,11 +496,44 @@ function printRegisterDocumentResult(result: RegisterDocumentResult): void {
   console.log(`New source: ${yesNo(result.isNewSource)}`);
 }
 
+function printPutRecordResult(result: PutRecordResult): void {
+  console.log(`Stored record for ${result.hash}`);
+  console.log(`Path: ${result.relativePath}`);
+  console.log(`Type: ${result.documentType}`);
+  console.log(`Title: ${result.title}`);
+}
+
+function printPutNoteResult(result: PutNoteResult): void {
+  console.log(`Stored note for ${result.hash}`);
+  console.log(`Path: ${result.relativePath}`);
+}
+
+function printSearchResults(results: SearchResult[]): void {
+  if (results.length === 0) {
+    console.log('No search results.');
+    return;
+  }
+
+  for (const result of results) {
+    console.log(`${result.hash} ${result.documentType} ${result.title}`);
+    console.log(`Record: ${result.recordPath}`);
+    if (result.notePath) {
+      console.log(`Note: ${result.notePath}`);
+    }
+    if (result.snippet) {
+      console.log(result.snippet);
+    }
+    console.log('');
+  }
+}
+
 function printReindexResult(result: ReindexResult): void {
   console.log(`Reindexed vault at ${result.root}`);
   console.log(`Documents indexed: ${result.documentsIndexed}`);
   console.log(`Sources indexed: ${result.sourcesIndexed}`);
   console.log(`Sources skipped: ${result.sourcesSkipped}`);
+  console.log(`Records indexed: ${result.recordsIndexed}`);
+  console.log(`Notes indexed: ${result.notesIndexed}`);
 }
 
 function printDetectAnomaliesResult(result: DetectAnomaliesResult): void {

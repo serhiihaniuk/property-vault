@@ -4,7 +4,16 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { openVaultDatabase } from './db.ts';
-import { registerDocument, reindex, sql, validate } from './vault.ts';
+import {
+  putNote,
+  putRecord,
+  registerDocument,
+  reindex,
+  search,
+  sql,
+  validate,
+} from './vault.ts';
+import type { VaultRecord } from './schemas/record.ts';
 
 test('registerDocument is idempotent for the same file path', async () => {
   const fixture = await createFixture();
@@ -196,6 +205,94 @@ test('reindex rebuilds PDF inspection metadata', async () => {
   }
 });
 
+test('putRecord and putNote store canonical files and index searchable content', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const sourcePath = path.join(fixture.root, 'meeting.txt');
+    await writeFile(sourcePath, 'meeting source document', 'utf8');
+    const registered = await registerDocument({ path: sourcePath }, fixture.root);
+    const record = validMeetingNoticeRecord({
+      title: 'Annual repair vote',
+      summary: 'Owners will vote about roof repair.',
+    });
+
+    const recordResult = await putRecord(registered.hash, record, fixture.root);
+    const noteResult = await putNote(
+      registered.hash,
+      'Note: roof repair requires owner attention.',
+      fixture.root,
+    );
+    const rows = await sql<{
+      document_type: string;
+      title: string;
+      note_path: string | null;
+      financial_rows: number;
+      important_dates: number;
+      resolutions: number;
+    }>(`
+      SELECT
+        records.document_type,
+        records.title,
+        records.note_path,
+        (SELECT count(*) FROM financial_rows WHERE hash = records.hash) AS financial_rows,
+        (SELECT count(*) FROM important_dates WHERE hash = records.hash) AS important_dates,
+        (SELECT count(*) FROM resolutions WHERE hash = records.hash) AS resolutions
+      FROM records
+      WHERE hash = ?
+    `, [registered.hash], fixture.root);
+    const results = await search({ query: 'roof repair' }, fixture.root);
+
+    assert.equal(recordResult.relativePath, `vault/records/${registered.hash}.json`);
+    assert.equal(noteResult.relativePath, `vault/notes/${registered.hash}.md`);
+    assert.equal(rows[0]?.document_type, 'meeting_notice');
+    assert.equal(rows[0]?.title, 'Annual repair vote');
+    assert.equal(rows[0]?.note_path, `vault/notes/${registered.hash}.md`);
+    assert.equal(rows[0]?.financial_rows, 1);
+    assert.equal(rows[0]?.important_dates, 1);
+    assert.equal(rows[0]?.resolutions, 1);
+    assert.equal(results[0]?.hash, registered.hash);
+  } finally {
+    await fixture.remove();
+  }
+});
+
+test('reindex rebuilds records, notes, and search index from canonical files', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const sourcePath = path.join(fixture.root, 'meeting.txt');
+    await writeFile(sourcePath, 'meeting source document', 'utf8');
+    const registered = await registerDocument({ path: sourcePath }, fixture.root);
+
+    await putRecord(
+      registered.hash,
+      validMeetingNoticeRecord({
+        title: 'Balcony renovation vote',
+        summary: 'Owners discuss balcony renovation costs.',
+      }),
+      fixture.root,
+    );
+    await putNote(registered.hash, 'Balcony renovation note.', fixture.root);
+
+    const result = await reindex(fixture.root);
+    const rows = await sql<{ count: number }>(
+      'SELECT count(*) AS count FROM records',
+      [],
+      fixture.root,
+    );
+    const results = await search({ query: 'balcony renovation' }, fixture.root);
+
+    assert.equal(result.recordsIndexed, 1);
+    assert.equal(result.notesIndexed, 1);
+    assert.equal(rows[0]?.count, 1);
+    assert.equal(results[0]?.hash, registered.hash);
+    assert.equal(results[0]?.notePath, `vault/notes/${registered.hash}.md`);
+  } finally {
+    await fixture.remove();
+  }
+});
+
 function makePdf(text: string): Buffer {
   const objects: string[] = [];
   const content = text ? `BT /F1 24 Tf 72 720 Td (${escapePdfText(text)}) Tj ET` : '';
@@ -228,6 +325,76 @@ function makePdf(text: string): Buffer {
   body += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
 
   return Buffer.from(body, 'utf8');
+}
+
+function validMeetingNoticeRecord(input: {
+  title: string;
+  summary: string;
+}): VaultRecord {
+  return {
+    schema_version: 1,
+    extractor_version: '2026.04-a',
+    extracted_at: '2026-04-17T11:00:00.000Z',
+    extracted_by: 'codex-test',
+    confidence: 0.92,
+    status: 'needs_review',
+    language: 'pl',
+    document_type: 'meeting_notice',
+    document_date: '2026-03-19',
+    period: { kind: 'none' },
+    title: input.title,
+    summary_plain: input.summary,
+    key_facts: [
+      { label: 'Topic', value: 'roof repair vote' },
+      { label: 'Reference', value: 'L. dz. 381/2026' },
+    ],
+    financial_rows: [{
+      row_type: 'charge',
+      category: 'repair_fund',
+      category_original: 'Fundusz remontowy',
+      category_group: 'repairs',
+      period: { kind: 'month', value: '2026-04' },
+      money: { amount_minor: 12500, currency: 'PLN' },
+      quantity: null,
+      unit_price_minor: null,
+      confidence: 0.9,
+      source_page: 1,
+      note: null,
+    }],
+    meter_readings: [],
+    ledger_entries: [],
+    interest_entries: [],
+    important_dates: [{
+      date: '2026-04-30',
+      label: 'Vote deadline',
+      kind: 'deadline',
+    }],
+    resolutions: [{
+      number: '1/2026',
+      subject: 'Approve roof repair',
+      outcome: 'pending_vote',
+      voting_method: 'individual vote collection',
+      money_limit: null,
+      note: null,
+    }],
+    reference_numbers: {
+      document_ref: 'L. dz. 381/2026',
+      property_code: null,
+      unit_code: null,
+      bank_account: null,
+      source_document_numbers: [],
+    },
+    sensitive_findings: [],
+    mentions: {
+      people: [],
+      addresses: [],
+      emails: [],
+      phones: [],
+      reference_numbers: ['L. dz. 381/2026'],
+    },
+    questions_for_user: [],
+    warnings: [],
+  };
 }
 
 function escapePdfText(text: string): string {

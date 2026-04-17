@@ -11,6 +11,7 @@ import {
 import { isSha256Hex, normalizeSha256, sha256Buffer } from './hash.ts';
 import { inspectPdf } from './pdf.ts';
 import { getVaultPaths, resolveRepoRoot, type VaultPaths } from './paths.ts';
+import { parseVaultRecord, type VaultRecord } from './schemas/record.ts';
 import { createDefaultState, readState, writeState } from './state.ts';
 
 export type InitResult = {
@@ -42,11 +43,43 @@ export type RegisterDocumentResult = {
   isNewSource: boolean;
 };
 
+export type PutRecordResult = {
+  hash: string;
+  path: string;
+  relativePath: string;
+  documentType: VaultRecord['document_type'];
+  title: string;
+};
+
+export type PutNoteResult = {
+  hash: string;
+  path: string;
+  relativePath: string;
+};
+
 export type ReindexResult = {
   root: string;
   documentsIndexed: number;
   sourcesIndexed: number;
   sourcesSkipped: number;
+  recordsIndexed: number;
+  notesIndexed: number;
+};
+
+export type SearchOptions = {
+  query: string;
+  limit?: number;
+};
+
+export type SearchResult = {
+  hash: string;
+  title: string;
+  documentType: string;
+  status: string;
+  confidence: number;
+  snippet: string;
+  recordPath: string;
+  notePath: string | null;
 };
 
 export type ValidationIssue = {
@@ -77,6 +110,16 @@ type SourceObservation = {
     kind: string;
     [key: string]: unknown;
   };
+};
+
+type CanonicalRecord = {
+  hash: string;
+  record: VaultRecord;
+};
+
+type CanonicalNote = {
+  relativePath: string;
+  markdown: string;
 };
 
 export async function init(root = resolveRepoRoot()): Promise<InitResult> {
@@ -275,6 +318,43 @@ export async function sql<T = unknown>(
   }
 }
 
+export async function search(
+  options: SearchOptions,
+  root = resolveRepoRoot(),
+): Promise<SearchResult[]> {
+  const query = options.query.trim();
+
+  if (query === '') {
+    return [];
+  }
+
+  const db = await openVaultDatabase(root);
+
+  try {
+    return db.prepare(`
+      SELECT
+        records.hash,
+        records.title,
+        records.document_type AS documentType,
+        records.status,
+        records.confidence,
+        snippet(fts_records, 2, '[', ']', ' ... ', 12) AS snippet,
+        records.record_path AS recordPath,
+        records.note_path AS notePath
+      FROM fts_records
+      JOIN records ON records.hash = fts_records.hash
+      WHERE fts_records MATCH @query
+      ORDER BY bm25(fts_records), records.document_date DESC, records.hash
+      LIMIT @limit
+    `).all({
+      query: ftsQuery(query),
+      limit: Math.max(1, Math.min(options.limit ?? 20, 100)),
+    }) as SearchResult[];
+  } finally {
+    db.close();
+  }
+}
+
 export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> {
   const paths = getVaultPaths(root);
 
@@ -284,9 +364,12 @@ export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> 
 
   const documentRows = await readCanonicalDocuments(paths);
   const sourceObservations = await readSourceObservations(paths.sourcesJsonl);
+  const canonicalRecords = await readCanonicalRecords(paths);
+  const canonicalNotes = await readCanonicalNotes(paths);
   const knownDocumentHashes = new Set(documentRows.map((row) => row.hash));
   let sourcesIndexed = 0;
   let sourcesSkipped = 0;
+  let recordsIndexed = 0;
 
   const db = await openVaultDatabase(root);
 
@@ -361,6 +444,15 @@ export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> 
           sourcesIndexed += 1;
         }
       }
+
+      for (const record of canonicalRecords) {
+        if (!knownDocumentHashes.has(record.hash)) {
+          continue;
+        }
+
+        indexRecord(db, paths, record.hash, record.record, canonicalNotes.get(record.hash) ?? null);
+        recordsIndexed += 1;
+      }
     });
 
     transaction();
@@ -373,6 +465,8 @@ export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> 
     documentsIndexed: documentRows.length,
     sourcesIndexed,
     sourcesSkipped,
+    recordsIndexed,
+    notesIndexed: canonicalNotes.size,
   };
 }
 
@@ -548,12 +642,99 @@ export async function registerDocument(
   };
 }
 
+export async function putRecord(
+  hash: string,
+  input: unknown,
+  root = resolveRepoRoot(),
+): Promise<PutRecordResult> {
+  await init(root);
+
+  const normalizedHash = normalizeSha256(hash);
+  const paths = getVaultPaths(root);
+  const record = parseVaultRecord(input);
+  const recordPath = path.join(paths.recordsDir, `${normalizedHash}.json`);
+  const relativePath = toRepoRelativePath(paths.root, recordPath);
+
+  await assertDocumentExists(normalizedHash, root);
+  await writeFile(recordPath, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
+
+  const note = await readCanonicalNote(paths, normalizedHash);
+  const db = await openVaultDatabase(root);
+
+  try {
+    const transaction = db.transaction(() => {
+      indexRecord(db, paths, normalizedHash, record, note);
+    });
+
+    transaction();
+  } finally {
+    db.close();
+  }
+
+  return {
+    hash: normalizedHash,
+    path: recordPath,
+    relativePath,
+    documentType: record.document_type,
+    title: record.title,
+  };
+}
+
+export async function putNote(
+  hash: string,
+  markdown: string,
+  root = resolveRepoRoot(),
+): Promise<PutNoteResult> {
+  await init(root);
+
+  const normalizedHash = normalizeSha256(hash);
+  const paths = getVaultPaths(root);
+  const notePath = path.join(paths.notesDir, `${normalizedHash}.md`);
+  const relativePath = toRepoRelativePath(paths.root, notePath);
+
+  await assertDocumentExists(normalizedHash, root);
+  await writeFile(notePath, ensureTrailingNewline(markdown), 'utf8');
+
+  const db = await openVaultDatabase(root);
+
+  try {
+    db.prepare(`
+      UPDATE records
+      SET note_path = @notePath,
+          updated_at = datetime('now')
+      WHERE hash = @hash
+    `).run({
+      hash: normalizedHash,
+      notePath: relativePath,
+    });
+    db.prepare(`
+      UPDATE fts_records
+      SET note = @note
+      WHERE hash = @hash
+    `).run({
+      hash: normalizedHash,
+      note: markdown,
+    });
+  } finally {
+    db.close();
+  }
+
+  return {
+    hash: normalizedHash,
+    path: notePath,
+    relativePath,
+  };
+}
+
 export const vault = {
   init,
   reindex,
+  search,
   sql,
   validate,
   registerDocument,
+  putRecord,
+  putNote,
 };
 
 function directoriesForInit(paths: VaultPaths): string[] {
@@ -615,6 +796,291 @@ type DbSourceRow = {
 
 type IssueSink = (issue: ValidationIssue) => void;
 
+function indexRecord(
+  db: Awaited<ReturnType<typeof openVaultDatabase>>,
+  paths: VaultPaths,
+  hash: string,
+  record: VaultRecord,
+  note: CanonicalNote | null,
+): void {
+  const recordPath = toRepoRelativePath(paths.root, path.join(paths.recordsDir, `${hash}.json`));
+
+  db.prepare(`
+    INSERT INTO records (
+      hash,
+      schema_version,
+      extractor_version,
+      extracted_at,
+      extracted_by,
+      status,
+      confidence,
+      document_type,
+      document_date,
+      period_kind,
+      period_value,
+      period_start,
+      period_end,
+      title,
+      summary_plain,
+      record_path,
+      note_path,
+      record_json,
+      updated_at
+    )
+    VALUES (
+      @hash,
+      @schemaVersion,
+      @extractorVersion,
+      @extractedAt,
+      @extractedBy,
+      @status,
+      @confidence,
+      @documentType,
+      @documentDate,
+      @periodKind,
+      @periodValue,
+      @periodStart,
+      @periodEnd,
+      @title,
+      @summaryPlain,
+      @recordPath,
+      @notePath,
+      @recordJson,
+      datetime('now')
+    )
+    ON CONFLICT(hash) DO UPDATE SET
+      schema_version = excluded.schema_version,
+      extractor_version = excluded.extractor_version,
+      extracted_at = excluded.extracted_at,
+      extracted_by = excluded.extracted_by,
+      status = excluded.status,
+      confidence = excluded.confidence,
+      document_type = excluded.document_type,
+      document_date = excluded.document_date,
+      period_kind = excluded.period_kind,
+      period_value = excluded.period_value,
+      period_start = excluded.period_start,
+      period_end = excluded.period_end,
+      title = excluded.title,
+      summary_plain = excluded.summary_plain,
+      record_path = excluded.record_path,
+      note_path = excluded.note_path,
+      record_json = excluded.record_json,
+      updated_at = datetime('now')
+  `).run({
+    hash,
+    schemaVersion: record.schema_version,
+    extractorVersion: record.extractor_version,
+    extractedAt: record.extracted_at,
+    extractedBy: record.extracted_by,
+    status: record.status,
+    confidence: record.confidence,
+    documentType: record.document_type,
+    documentDate: record.document_date,
+    ...periodColumns(record.period),
+    title: record.title,
+    summaryPlain: record.summary_plain,
+    recordPath,
+    notePath: note?.relativePath ?? null,
+    recordJson: JSON.stringify(record),
+  });
+
+  db.prepare('UPDATE documents SET document_date = @documentDate, updated_at = datetime(\'now\') WHERE hash = @hash')
+    .run({ hash, documentDate: record.document_date });
+
+  db.prepare('DELETE FROM financial_rows WHERE hash = ?').run(hash);
+  db.prepare('DELETE FROM important_dates WHERE hash = ?').run(hash);
+  db.prepare('DELETE FROM resolutions WHERE hash = ?').run(hash);
+  db.prepare('DELETE FROM fts_records WHERE hash = ?').run(hash);
+
+  insertFinancialRows(db, hash, record);
+  insertImportantDates(db, hash, record);
+  insertResolutions(db, hash, record);
+  insertFtsRecord(db, hash, record, note?.markdown ?? '');
+}
+
+function insertFinancialRows(
+  db: Awaited<ReturnType<typeof openVaultDatabase>>,
+  hash: string,
+  record: VaultRecord,
+): void {
+  const insert = db.prepare(`
+    INSERT INTO financial_rows (
+      hash,
+      row_type,
+      category,
+      category_original,
+      category_group,
+      period_kind,
+      period_value,
+      period_start,
+      period_end,
+      amount_minor,
+      currency,
+      quantity_value,
+      quantity_unit,
+      unit_price_minor,
+      confidence,
+      source_page,
+      note
+    )
+    VALUES (
+      @hash,
+      @rowType,
+      @category,
+      @categoryOriginal,
+      @categoryGroup,
+      @periodKind,
+      @periodValue,
+      @periodStart,
+      @periodEnd,
+      @amountMinor,
+      @currency,
+      @quantityValue,
+      @quantityUnit,
+      @unitPriceMinor,
+      @confidence,
+      @sourcePage,
+      @note
+    )
+  `);
+
+  for (const row of record.financial_rows) {
+    insert.run({
+      hash,
+      rowType: row.row_type,
+      category: row.category,
+      categoryOriginal: row.category_original,
+      categoryGroup: row.category_group,
+      ...periodColumns(row.period),
+      amountMinor: row.money.amount_minor,
+      currency: row.money.currency,
+      quantityValue: row.quantity?.value ?? null,
+      quantityUnit: row.quantity?.unit ?? null,
+      unitPriceMinor: row.unit_price_minor,
+      confidence: row.confidence,
+      sourcePage: row.source_page,
+      note: row.note,
+    });
+  }
+}
+
+function insertImportantDates(
+  db: Awaited<ReturnType<typeof openVaultDatabase>>,
+  hash: string,
+  record: VaultRecord,
+): void {
+  const insert = db.prepare(`
+    INSERT INTO important_dates (hash, date, label, kind)
+    VALUES (@hash, @date, @label, @kind)
+  `);
+
+  for (const item of record.important_dates) {
+    insert.run({
+      hash,
+      date: item.date,
+      label: item.label,
+      kind: item.kind,
+    });
+  }
+}
+
+function insertResolutions(
+  db: Awaited<ReturnType<typeof openVaultDatabase>>,
+  hash: string,
+  record: VaultRecord,
+): void {
+  const insert = db.prepare(`
+    INSERT INTO resolutions (
+      hash,
+      number,
+      subject,
+      outcome,
+      voting_method,
+      money_limit_amount_minor,
+      money_limit_currency,
+      note
+    )
+    VALUES (
+      @hash,
+      @number,
+      @subject,
+      @outcome,
+      @votingMethod,
+      @moneyLimitAmountMinor,
+      @moneyLimitCurrency,
+      @note
+    )
+  `);
+
+  for (const item of record.resolutions) {
+    insert.run({
+      hash,
+      number: item.number,
+      subject: item.subject,
+      outcome: item.outcome,
+      votingMethod: item.voting_method,
+      moneyLimitAmountMinor: item.money_limit?.amount_minor ?? null,
+      moneyLimitCurrency: item.money_limit?.currency ?? null,
+      note: item.note,
+    });
+  }
+}
+
+function insertFtsRecord(
+  db: Awaited<ReturnType<typeof openVaultDatabase>>,
+  hash: string,
+  record: VaultRecord,
+  note: string,
+): void {
+  db.prepare(`
+    INSERT INTO fts_records (hash, title, summary_plain, key_facts, note)
+    VALUES (@hash, @title, @summaryPlain, @keyFacts, @note)
+  `).run({
+    hash,
+    title: record.title,
+    summaryPlain: record.summary_plain,
+    keyFacts: [
+      ...record.key_facts.map((fact) => `${fact.label}: ${fact.value}`),
+      ...record.questions_for_user,
+      ...record.warnings,
+    ].join('\n'),
+    note,
+  });
+}
+
+function periodColumns(period: VaultRecord['period']): {
+  periodKind: string;
+  periodValue: string | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+} {
+  if (period.kind === 'month' || period.kind === 'year') {
+    return {
+      periodKind: period.kind,
+      periodValue: period.value,
+      periodStart: null,
+      periodEnd: null,
+    };
+  }
+
+  if (period.kind === 'range') {
+    return {
+      periodKind: period.kind,
+      periodValue: null,
+      periodStart: period.start,
+      periodEnd: period.end,
+    };
+  }
+
+  return {
+    periodKind: period.kind,
+    periodValue: null,
+    periodStart: null,
+    periodEnd: null,
+  };
+}
+
 async function removeDatabaseFiles(paths: VaultPaths): Promise<void> {
   for (const filePath of [
     paths.databasePath,
@@ -672,6 +1138,63 @@ async function readCanonicalDocuments(paths: VaultPaths): Promise<DocumentIndexR
   return documents.sort((left, right) => left.hash.localeCompare(right.hash));
 }
 
+async function readCanonicalRecords(paths: VaultPaths): Promise<CanonicalRecord[]> {
+  const entries = await readdir(paths.recordsDir, { withFileTypes: true });
+  const records: CanonicalRecord[] = [];
+
+  for (const entry of entries) {
+    if (!entry.isFile() || path.extname(entry.name).toLowerCase() !== '.json') {
+      continue;
+    }
+
+    const hash = normalizeSha256(path.basename(entry.name, '.json'));
+    const filePath = path.join(paths.recordsDir, entry.name);
+    const raw = await readFile(filePath, 'utf8');
+    const record = parseVaultRecord(JSON.parse(raw) as unknown);
+
+    records.push({ hash, record });
+  }
+
+  return records.sort((left, right) => left.hash.localeCompare(right.hash));
+}
+
+async function readCanonicalNotes(paths: VaultPaths): Promise<Map<string, CanonicalNote>> {
+  const entries = await readdir(paths.notesDir, { withFileTypes: true });
+  const notes = new Map<string, CanonicalNote>();
+
+  for (const entry of entries) {
+    if (!entry.isFile() || path.extname(entry.name).toLowerCase() !== '.md') {
+      continue;
+    }
+
+    const hash = normalizeSha256(path.basename(entry.name, '.md'));
+    const filePath = path.join(paths.notesDir, entry.name);
+
+    notes.set(hash, {
+      relativePath: toRepoRelativePath(paths.root, filePath),
+      markdown: await readFile(filePath, 'utf8'),
+    });
+  }
+
+  return notes;
+}
+
+async function readCanonicalNote(
+  paths: VaultPaths,
+  hash: string,
+): Promise<CanonicalNote | null> {
+  const notePath = path.join(paths.notesDir, `${hash}.md`);
+
+  if (!(await pathExists(notePath))) {
+    return null;
+  }
+
+  return {
+    relativePath: toRepoRelativePath(paths.root, notePath),
+    markdown: await readFile(notePath, 'utf8'),
+  };
+}
+
 function parseCanonicalDocumentFilename(filename: string): {
   hash: string;
   extension: string;
@@ -687,6 +1210,26 @@ function parseCanonicalDocumentFilename(filename: string): {
     hash: normalizeSha256(hash),
     extension,
   };
+}
+
+async function assertDocumentExists(hash: string, root: string): Promise<void> {
+  const paths = getVaultPaths(root);
+  const entries = await readdir(paths.documentsDir, { withFileTypes: true });
+  const exists = entries.some((entry) => {
+    if (!entry.isFile()) {
+      return false;
+    }
+
+    try {
+      return parseCanonicalDocumentFilename(entry.name).hash === hash;
+    } catch {
+      return false;
+    }
+  });
+
+  if (!exists) {
+    throw new Error(`Cannot write record or note for missing document hash: ${hash}`);
+  }
 }
 
 function stableFileDate(birthtime: Date, mtime: Date): string {
@@ -763,6 +1306,23 @@ async function inspectDocumentMetadata(
 
 function toRepoRelativePath(root: string, filePath: string): string {
   return path.relative(root, filePath).split(path.sep).join('/');
+}
+
+function ensureTrailingNewline(value: string): string {
+  return value.endsWith('\n') ? value : `${value}\n`;
+}
+
+function ftsQuery(query: string): string {
+  const terms = query
+    .match(/[\p{L}\p{N}_-]+/gu)
+    ?.map((term) => term.trim())
+    .filter((term) => term !== '') ?? [];
+
+  if (terms.length === 0) {
+    return `"${query.replace(/"/g, '""')}"`;
+  }
+
+  return terms.map((term) => `"${term.replace(/"/g, '""')}"`).join(' AND ');
 }
 
 function buildSourceObservation(input: {
