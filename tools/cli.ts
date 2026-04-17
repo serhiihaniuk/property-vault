@@ -1,5 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import {
+  detectAnomalies,
+  listOpenAnomalies,
+  type DetectAnomaliesResult,
+  type StoredAnomaly,
+} from './anomalies.ts';
 import { inspectPdf, renderPdfPages, resolvePdfPathOrHash } from './pdf.ts';
 import { exportRecordJsonSchema } from './schemas/export-json-schema.ts';
 import { parseVaultRecord } from './schemas/record.ts';
@@ -35,6 +41,8 @@ Commands:
   validate [--json]             Validate vault structure and derived index
   reindex [--json]              Rebuild SQLite index from canonical vault files
   register-document <path>      Register a local file by content hash
+  detect-anomalies [--json]     Detect deterministic anomalies
+  list-work --kind anomaly      List open anomaly work
   sql --select "<SQL>"           Run a read-only SELECT query
   inspect-pdf <hash-or-path>     Inspect PDF page count and text layer
   render-pdf <hash>              Render canonical PDF pages to index/renders
@@ -43,6 +51,7 @@ Commands:
 
 Options:
   --source <kind>               Source kind for register-document (default: manual_drop)
+  --kind <kind>                 Work kind for list-work
   --select <SQL>                SQL SELECT statement for the sql command
   --scale <number>              Render scale for render-pdf (default: 1.5)
   --desired-width <px>          Target render width for render-pdf
@@ -55,6 +64,8 @@ const COMMANDS = new Set([
   'validate',
   'reindex',
   'register-document',
+  'detect-anomalies',
+  'list-work',
   'sql',
   'inspect-pdf',
   'render-pdf',
@@ -91,6 +102,10 @@ async function main(argv: string[]): Promise<number> {
       return runReindex(context);
     case 'register-document':
       return runRegisterDocument(context);
+    case 'detect-anomalies':
+      return runDetectAnomalies(context);
+    case 'list-work':
+      return runListWork(context);
     case 'sql':
       return runSql(context);
     case 'inspect-pdf':
@@ -104,6 +119,37 @@ async function main(argv: string[]): Promise<number> {
     default:
       unreachable(args.command);
   }
+}
+
+async function runDetectAnomalies(context: CommandContext): Promise<number> {
+  const result = await detectAnomalies();
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    printDetectAnomaliesResult(result);
+  }
+
+  return 0;
+}
+
+async function runListWork(context: CommandContext): Promise<number> {
+  const kind = stringFlag(context.args, 'kind');
+
+  if (kind !== 'anomaly') {
+    console.error('list-work currently requires --kind anomaly');
+    return 2;
+  }
+
+  const anomalies = await listOpenAnomalies();
+
+  if (context.json) {
+    printJson(anomalies);
+  } else {
+    printOpenAnomalies(anomalies);
+  }
+
+  return 0;
 }
 
 async function runSetup(context: CommandContext): Promise<number> {
@@ -337,7 +383,13 @@ function parseArgs(argv: string[]): ParsedArgs {
 }
 
 function flagExpectsValue(name: string): boolean {
-  return name === 'source' || name === 'select' || name === 'scale' || name === 'desired-width';
+  return (
+    name === 'source' ||
+    name === 'kind' ||
+    name === 'select' ||
+    name === 'scale' ||
+    name === 'desired-width'
+  );
 }
 
 function stringFlag(args: ParsedArgs, name: string): string | null {
@@ -364,6 +416,25 @@ function printReindexResult(result: ReindexResult): void {
   console.log(`Documents indexed: ${result.documentsIndexed}`);
   console.log(`Sources indexed: ${result.sourcesIndexed}`);
   console.log(`Sources skipped: ${result.sourcesSkipped}`);
+}
+
+function printDetectAnomaliesResult(result: DetectAnomaliesResult): void {
+  console.log(`Anomalies detected: ${result.detected}`);
+  console.log(`Open anomalies: ${result.open}`);
+  console.log(`Resolved anomalies: ${result.resolved}`);
+}
+
+function printOpenAnomalies(anomalies: StoredAnomaly[]): void {
+  if (anomalies.length === 0) {
+    console.log('No open anomaly work.');
+    return;
+  }
+
+  for (const anomaly of anomalies) {
+    const subject = anomaly.subjectHash ? ` ${anomaly.subjectHash}` : '';
+    console.log(`#${anomaly.id} ${anomaly.severity.toUpperCase()} ${anomaly.ruleId}${subject}`);
+    console.log(JSON.stringify(anomaly.payload));
+  }
 }
 
 function printValidationReport(report: ValidationReport): void {
