@@ -16,7 +16,7 @@
     "test": "node --test --experimental-strip-types tools/**/*.test.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^11",
+    "better-sqlite3": "^12.9.0",
     "consola": "^3",
     "date-fns": "^4",
     "file-type": "^19",
@@ -36,5 +36,10 @@
     "@types/node": "^22",
     "@types/proper-lockfile": "^4",
     "@types/write-file-atomic": "^4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   }
 }

@@ -1,5 +1,6 @@
 import { constants } from 'node:fs';
 import { access, mkdir, writeFile } from 'node:fs/promises';
+import { initializeDatabase } from './db.ts';
 import { getVaultPaths, resolveRepoRoot, type VaultPaths } from './paths.ts';
 import { createDefaultState, readState, writeState } from './state.ts';
 
@@ -34,6 +35,8 @@ export async function init(root = resolveRepoRoot()): Promise<InitResult> {
   } else {
     await readState(root);
   }
+
+  await initializeDatabase(root);
 
   return {
     root: paths.root,
