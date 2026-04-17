@@ -365,6 +365,21 @@ function detectDeadlines(
 
   return rows.flatMap((row) => {
     if (row.date < today) {
+      if (isPaymentDeadline(row)) {
+        return [{
+          ruleId: 'PAYMENT_DEADLINE_UNCONFIRMED',
+          severity: 'warning' as const,
+          subjectHash: row.hash,
+          payload: {
+            hash: row.hash,
+            date: row.date,
+            label: row.label,
+            kind: row.kind,
+            needs_confirmation: true,
+          },
+        }];
+      }
+
       return [{
         ruleId: 'DEADLINE_MISSED',
         severity: 'critical' as const,
@@ -395,6 +410,16 @@ function detectDeadlines(
 
     return [];
   });
+}
+
+function isPaymentDeadline(row: { label: string; kind: string }): boolean {
+  const kind = row.kind.toLowerCase();
+  const label = row.label.toLowerCase();
+
+  return (
+    kind === 'payment_due' ||
+    /(payment|paid|payable|p[łl]atno[śs][ćc]|zap[łl]at|wp[łl]at|nale[żz]no[śs][ćc])/u.test(label)
+  );
 }
 
 async function detectVisibleSecrets(

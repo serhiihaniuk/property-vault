@@ -68,7 +68,7 @@ test('detectAnomalies flags OCR, Gmail, confidence, vote, and deadline work', as
       db.prepare(`
         INSERT INTO important_dates (hash, date, label, kind)
         VALUES
-          (@hash, '2026-04-10', 'Overdue payment', 'deadline'),
+          (@hash, '2026-04-10', 'Overdue filing', 'deadline'),
           (@hash, '2026-04-20', 'Upcoming vote', 'deadline')
       `).run({ hash: registered.hash });
       db.prepare(`
@@ -105,6 +105,40 @@ test('detectAnomalies flags OCR, Gmail, confidence, vote, and deadline work', as
       'OCR_PENDING',
       'RESOLUTION_PENDING_VOTE',
     ]);
+  } finally {
+    await fixture.remove();
+  }
+});
+
+test('detectAnomalies treats past payment deadlines as unconfirmed, not missed', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const sourcePath = path.join(fixture.root, 'settlement.txt');
+    await writeFile(sourcePath, 'settlement source', 'utf8');
+    const registered = await registerDocument({ path: sourcePath }, fixture.root);
+    await insertRecord(fixture.root, registered.hash, { confidence: 0.9 });
+
+    const db = await openVaultDatabase(fixture.root);
+    try {
+      db.prepare(`
+        INSERT INTO important_dates (hash, date, label, kind)
+        VALUES (@hash, '2026-03-31', 'Payment deadline for settlement result', 'deadline')
+      `).run({ hash: registered.hash });
+    } finally {
+      db.close();
+    }
+
+    const result = await detectAnomalies({
+      root: fixture.root,
+      now: new Date('2026-04-17T12:00:00.000Z'),
+    });
+    const open = await listOpenAnomalies(fixture.root);
+
+    assert.equal(result.open, 1);
+    assert.equal(open[0]?.ruleId, 'PAYMENT_DEADLINE_UNCONFIRMED');
+    assert.equal(open[0]?.severity, 'warning');
+    assert.equal(open[0]?.payload.needs_confirmation, true);
   } finally {
     await fixture.remove();
   }

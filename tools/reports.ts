@@ -291,8 +291,16 @@ function appendAnomalies(
   lines.push('- Open anomalies:');
   for (const anomaly of anomalies.slice(0, 20)) {
     const subject = anomaly.subjectHash ? ` [${shortHash(anomaly.subjectHash)}]` : '';
-    lines.push(`  - ${anomaly.severity.toUpperCase()} ${anomaly.ruleId}${subject}`);
+    lines.push(`  - ${anomaly.severity.toUpperCase()} ${formatAnomalyRule(anomaly.ruleId)}${subject}`);
   }
+}
+
+function formatAnomalyRule(ruleId: string): string {
+  if (ruleId === 'PAYMENT_DEADLINE_UNCONFIRMED') {
+    return 'PAYMENT_DEADLINE_UNCONFIRMED - confirm paid/booked';
+  }
+
+  return ruleId;
 }
 
 function appendPendingVotes(lines: string[], votes: PendingVote[]): void {
