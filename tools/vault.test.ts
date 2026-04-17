@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { openVaultDatabase } from './db.ts';
-import { registerDocument, reindex, validate } from './vault.ts';
+import { registerDocument, reindex, sql, validate } from './vault.ts';
 
 test('registerDocument is idempotent for the same file path', async () => {
   const fixture = await createFixture();
@@ -90,6 +90,30 @@ test('reindex rebuilds document and source rows from canonical files', async () 
     } finally {
       db.close();
     }
+  } finally {
+    await fixture.remove();
+  }
+});
+
+test('sql allows SELECT statements and rejects writes', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const sourcePath = path.join(fixture.root, 'notice.txt');
+    await writeFile(sourcePath, 'query document bytes', 'utf8');
+    await registerDocument({ path: sourcePath }, fixture.root);
+
+    const rows = await sql<{ count: number }>(
+      'SELECT count(*) AS count FROM documents',
+      [],
+      fixture.root,
+    );
+
+    assert.equal(rows[0]?.count, 1);
+    await assert.rejects(
+      () => sql('DELETE FROM documents', [], fixture.root),
+      /only accepts SELECT/,
+    );
   } finally {
     await fixture.remove();
   }

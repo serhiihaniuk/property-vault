@@ -258,6 +258,22 @@ export async function validate(root = resolveRepoRoot()): Promise<ValidationRepo
   };
 }
 
+export async function sql<T = unknown>(
+  query: string,
+  params: unknown[] = [],
+  root = resolveRepoRoot(),
+): Promise<T[]> {
+  assertReadOnlySelectQuery(query);
+
+  const db = await openVaultDatabase(root);
+
+  try {
+    return db.prepare(query).all(...params) as T[];
+  } finally {
+    db.close();
+  }
+}
+
 export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> {
   const paths = getVaultPaths(root);
 
@@ -525,6 +541,7 @@ export async function registerDocument(
 export const vault = {
   init,
   reindex,
+  sql,
   validate,
   registerDocument,
 };
@@ -948,4 +965,18 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function assertReadOnlySelectQuery(query: string): void {
+  const normalized = query.trim().replace(/^\uFEFF/, '');
+
+  if (!/^select\b/i.test(normalized)) {
+    throw new Error('vault.sql only accepts SELECT statements');
+  }
+
+  const withoutTrailingSemicolon = normalized.replace(/;\s*$/, '');
+
+  if (withoutTrailingSemicolon.includes(';')) {
+    throw new Error('vault.sql accepts one SELECT statement at a time');
+  }
 }

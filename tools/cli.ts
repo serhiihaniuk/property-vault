@@ -3,6 +3,7 @@ import {
   init,
   registerDocument,
   reindex,
+  sql,
   validate,
   type RegisterDocumentResult,
   type ReindexResult,
@@ -30,14 +31,16 @@ Commands:
   validate [--json]             Validate vault structure and derived index
   reindex [--json]              Rebuild SQLite index from canonical vault files
   register-document <path>      Register a local file by content hash
+  sql --select "<SQL>"           Run a read-only SELECT query
 
 Options:
   --source <kind>               Source kind for register-document (default: manual_drop)
+  --select <SQL>                SQL SELECT statement for the sql command
   --json                        Print machine-readable JSON
   -h, --help                    Show help
 `;
 
-const COMMANDS = new Set(['setup', 'validate', 'reindex', 'register-document']);
+const COMMANDS = new Set(['setup', 'validate', 'reindex', 'register-document', 'sql']);
 
 async function main(argv: string[]): Promise<number> {
   const args = parseArgs(argv);
@@ -68,6 +71,8 @@ async function main(argv: string[]): Promise<number> {
       return runReindex(context);
     case 'register-document':
       return runRegisterDocument(context);
+    case 'sql':
+      return runSql(context);
     default:
       unreachable(args.command);
   }
@@ -137,6 +142,20 @@ async function runRegisterDocument(context: CommandContext): Promise<number> {
   return 0;
 }
 
+async function runSql(context: CommandContext): Promise<number> {
+  const query = stringFlag(context.args, 'select') ?? context.args.positional.join(' ');
+
+  if (!query.trim()) {
+    console.error('sql requires --select "<SQL>" or a positional SELECT statement');
+    return 2;
+  }
+
+  const rows = await sql(query);
+  printJson(rows);
+
+  return 0;
+}
+
 function parseArgs(argv: string[]): ParsedArgs {
   const flags = new Map<string, string | boolean>();
   const positional: string[] = [];
@@ -193,7 +212,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 }
 
 function flagExpectsValue(name: string): boolean {
-  return name === 'source';
+  return name === 'source' || name === 'select';
 }
 
 function stringFlag(args: ParsedArgs, name: string): string | null {
