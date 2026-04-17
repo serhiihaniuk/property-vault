@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileTypeFromBuffer } from 'file-type';
 import { openVaultDatabase } from './db.ts';
@@ -155,10 +155,10 @@ async function processAttachments(
 
     try {
       const bytes = await client.fetchAttachmentBytes(message.id, part.attachmentId);
-      const attachmentPath = await writeEmailAttachment(message.id, index, part.filename, bytes, root);
+      const tmpPath = await writeTempBytes(message.id, index, bytes, root);
       const detected = await fileTypeFromBuffer(bytes);
       const registered = await registerDocument({
-        path: attachmentPath,
+        path: tmpPath,
         source: {
           kind: 'gmail_attachment',
           ref: {
@@ -168,10 +168,12 @@ async function processAttachments(
             attachment_id: part.attachmentId,
             filename: part.filename,
           },
-          originalFilename: part.filename || path.basename(attachmentPath),
+          originalFilename: part.filename || `attachment-${index}.bin`,
           seenAt: messageDateForWatermark(message) ?? new Date().toISOString(),
         },
       }, root);
+
+      await unlink(tmpPath).catch(() => {});
 
       rows.push({
         attachmentIndex: index,
@@ -207,9 +209,22 @@ async function storeEmail(
   const metadataPath = path.join(emailDir, 'metadata.json');
   const relativeBodyPath = toRepoRelativePath(paths.root, bodyPath);
 
+  const attachmentsJsonPath = path.join(emailDir, 'attachments.json');
+  const attachmentsMeta = attachments.map((a) => ({
+    index: a.attachmentIndex,
+    attachmentId: a.part.attachmentId,
+    originalFilename: a.part.filename || null,
+    declaredMime: a.part.mimeType || null,
+    sniffedMime: a.sniffedMime,
+    sizeBytes: a.sizeBytes,
+    hash: a.hash,
+    failed: a.failed,
+  }));
+
   await mkdir(emailDir, { recursive: true });
   await writeFile(bodyPath, `${message.bodyText}\n`, 'utf8');
   await writeFile(metadataPath, `${JSON.stringify(message, null, 2)}\n`, 'utf8');
+  await writeFile(attachmentsJsonPath, `${JSON.stringify(attachmentsMeta, null, 2)}\n`, 'utf8');
 
   const db = await openVaultDatabase(root);
 
@@ -322,19 +337,17 @@ async function storeEmail(
   }
 }
 
-async function writeEmailAttachment(
+async function writeTempBytes(
   gmailId: string,
   index: number,
-  filename: string,
   bytes: Buffer,
   root: string,
 ): Promise<string> {
   const paths = getVaultPaths(root);
-  const attachmentsDir = path.join(paths.emailsDir, safePathSegment(gmailId), 'attachments');
-  const safeName = safePathSegment(filename || `attachment-${index}.bin`);
-  const filePath = path.join(attachmentsDir, `${String(index).padStart(3, '0')}-${safeName}`);
+  const tmpDir = path.join(paths.indexDir, 'tmp');
+  const filePath = path.join(tmpDir, `${safePathSegment(gmailId)}-${index}.bin`);
 
-  await mkdir(attachmentsDir, { recursive: true });
+  await mkdir(tmpDir, { recursive: true });
   await writeFile(filePath, bytes);
   return filePath;
 }
