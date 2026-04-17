@@ -25,7 +25,7 @@ Legend:
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
 | 4 | Manual extraction loop | [~] | All 5 imported documents triaged/extracted; extraction queue is 0. Fixture families for media_settlement, interest_note, account_statement still missing. |
-| 5 | Gmail import | [~] | OAuth, Locator listing, and a first real capped Locator sync have run; full historical backfill remains. |
+| 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
@@ -46,8 +46,6 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Run a broader verified Locator Gmail backfill (only 5 messages from capped sync;
-  29 total messages known to exist).
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
@@ -95,7 +93,6 @@ Updated 2026-04-17 after extraction and bug-fix session.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
   2026-03-21. Outcomes unknown; confirm with Serhii and update records.
-- Full Locator Gmail backfill pending (29 messages known; only 5 synced).
 - Fixture records for `media_settlement`, `interest_note`, `account_statement`
   still missing.
 - Remaining financial anomaly rules (`FEE_DELTA`, `MISSING_PERIOD`, etc.)
@@ -106,7 +103,6 @@ Updated 2026-04-17 after extraction and bug-fix session.
 ```powershell
 npm run vault -- context --json
 npm run vault -- list-work --kind anomaly --json
-npm run gmail -- sync --backfill-from 2023-01-01
 ```
 
 Important: do not commit `vault/`, `index/`, or `reports/` contents.
@@ -758,8 +754,8 @@ v1 is done when:
 - [x] `npm run gmail -- auth` works.
 - [x] `npm run gmail -- sync --backfill-from <date>` imports Locator messages and raw
   attachments.
-- [~] `application/octet-stream` PDFs are saved correctly after byte sniffing.
-  Implemented and tested with mocked Gmail attachment bytes; not yet tested with real Locator messages.
+- [x] `application/octet-stream` PDFs are saved correctly after byte sniffing.
+  Implemented and tested with real Locator messages.
 - [x] `npm run vault -- reindex` rebuilds SQLite from canonical files.
 - [x] `npm run vault -- search` returns cited results.
 - [x] `npm run vault -- detect-anomalies` is idempotent.
