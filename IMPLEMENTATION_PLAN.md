@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:37 Europe/Warsaw
+**Last updated:** 2026-04-17 18:39 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -24,13 +24,14 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | 22 real records are stored; broader backfill leaves 8 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
+| 4 | Manual extraction loop | [~] | 23 real records are stored; broader backfill leaves 7 documents in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
+- `a632712` Record September 2025 monthly charge extraction.
 - `ec20a72` Record July 2025 media settlement extraction.
 - `a4151a3` Record July 2025 monthly charge extraction.
 - `8d8166e` Record March 2025 meeting notice extraction.
@@ -65,8 +66,8 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Continue broader-backfill extraction queue; 8 documents remain after
-  extracting `41cd380...`.
+- Continue broader-backfill extraction queue; 7 documents remain after
+  extracting `23b8299...`.
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
@@ -75,7 +76,7 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the September 2025 monthly charge notice.
+Updated 2026-04-17 after extracting the September 2025 adopted-resolutions notice.
 
 #### Vault state
 
@@ -87,13 +88,12 @@ Updated 2026-04-17 after extracting the September 2025 monthly charge notice.
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
 - `reports/inbox.md` up to date; 36 open anomalies.
-- Current records: 22.
-- Current extraction queue: 8 documents.
+- Current records: 23.
+- Current extraction queue: 7 documents.
 - New broader-backfill extraction completed this step:
-  `41cd380...` September 2025 monthly charge notice (`monthly_charges`, `ok`):
-  charge schedule effective 2025-09-01, total monthly charge 401.13 PLN, rows
-  sum exactly to the stated total and the notice shows zero balances on issue
-  date.
+  `23b8299...` September 2025 adopted-resolutions notice (`meeting_notice`,
+  `ok`): four 2025 resolutions are adopted by majority vote, resolving the
+  earlier blank ballot card and post-meeting notice for the same items.
 
 #### Documents (6 total)
 
@@ -123,7 +123,7 @@ Updated 2026-04-17 after extracting the September 2025 monthly charge notice.
 
 - `PAYMENT_DEADLINE_UNCONFIRMED` - 2025 shared-property settlement result has
   a past payment date, but payment/booked status is unknown.
-- `EXTRACTION_MISSING` - 8 documents from the broader Gmail backfill still
+- `EXTRACTION_MISSING` - 7 documents from the broader Gmail backfill still
   need extraction or asset classification.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
