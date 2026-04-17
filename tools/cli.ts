@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { inspectPdf, renderPdfPages, resolvePdfPathOrHash } from './pdf.ts';
 import {
   init,
   registerDocument,
@@ -32,15 +33,27 @@ Commands:
   reindex [--json]              Rebuild SQLite index from canonical vault files
   register-document <path>      Register a local file by content hash
   sql --select "<SQL>"           Run a read-only SELECT query
+  inspect-pdf <hash-or-path>     Inspect PDF page count and text layer
+  render-pdf <hash>              Render canonical PDF pages to index/renders
 
 Options:
   --source <kind>               Source kind for register-document (default: manual_drop)
   --select <SQL>                SQL SELECT statement for the sql command
+  --scale <number>              Render scale for render-pdf (default: 1.5)
+  --desired-width <px>          Target render width for render-pdf
   --json                        Print machine-readable JSON
   -h, --help                    Show help
 `;
 
-const COMMANDS = new Set(['setup', 'validate', 'reindex', 'register-document', 'sql']);
+const COMMANDS = new Set([
+  'setup',
+  'validate',
+  'reindex',
+  'register-document',
+  'sql',
+  'inspect-pdf',
+  'render-pdf',
+]);
 
 async function main(argv: string[]): Promise<number> {
   const args = parseArgs(argv);
@@ -73,6 +86,10 @@ async function main(argv: string[]): Promise<number> {
       return runRegisterDocument(context);
     case 'sql':
       return runSql(context);
+    case 'inspect-pdf':
+      return runInspectPdf(context);
+    case 'render-pdf':
+      return runRenderPdf(context);
     default:
       unreachable(args.command);
   }
@@ -156,6 +173,60 @@ async function runSql(context: CommandContext): Promise<number> {
   return 0;
 }
 
+async function runInspectPdf(context: CommandContext): Promise<number> {
+  const target = context.args.positional[0];
+
+  if (!target) {
+    console.error('inspect-pdf requires a hash or file path');
+    return 2;
+  }
+
+  const pdfPath = await resolvePdfPathOrHash(target);
+  const result = await inspectPdf(pdfPath);
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    console.log(`Pages: ${result.pageCount}`);
+    console.log(`Text length: ${result.textLength}`);
+    console.log(`Has text layer: ${yesNo(result.hasTextLayer)}`);
+    console.log(`Needs vision: ${yesNo(result.needsVision)}`);
+    if (result.textPreview) {
+      console.log('');
+      console.log(result.textPreview);
+    }
+  }
+
+  return 0;
+}
+
+async function runRenderPdf(context: CommandContext): Promise<number> {
+  const hash = context.args.positional[0];
+
+  if (!hash) {
+    console.error('render-pdf requires a canonical document hash');
+    return 2;
+  }
+
+  const scaleFlag = stringFlag(context.args, 'scale');
+  const desiredWidthFlag = stringFlag(context.args, 'desired-width');
+  const pages = await renderPdfPages(hash, {
+    scale: scaleFlag ? Number(scaleFlag) : undefined,
+    desiredWidth: desiredWidthFlag ? Number(desiredWidthFlag) : undefined,
+  });
+
+  if (context.json) {
+    printJson(pages);
+  } else {
+    console.log(`Rendered pages: ${pages.length}`);
+    for (const page of pages) {
+      console.log(`Page ${page.page}: ${page.path}`);
+    }
+  }
+
+  return 0;
+}
+
 function parseArgs(argv: string[]): ParsedArgs {
   const flags = new Map<string, string | boolean>();
   const positional: string[] = [];
@@ -212,7 +283,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 }
 
 function flagExpectsValue(name: string): boolean {
-  return name === 'source' || name === 'select';
+  return name === 'source' || name === 'select' || name === 'scale' || name === 'desired-width';
 }
 
 function stringFlag(args: ParsedArgs, name: string): string | null {
