@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:48 Europe/Warsaw
+**Last updated:** 2026-04-17 18:50 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -24,13 +24,14 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | 29 real records are stored; broader backfill leaves 1 document in the extraction queue. Fixture families for media_settlement, interest_note, account_statement still missing. |
+| 4 | Manual extraction loop | [~] | 30 real records are stored; broader backfill queue is now empty. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
+- `b35587a` Record second-half 2025 media settlement extraction.
 - `b4a6071` Record February 2026 annual meeting notice extraction.
 - `dd0b8d6` Note December 2025 LAF commit hash.
 - `9eff85c` Record December 2025 LAF refinancing resolution extraction.
@@ -73,8 +74,7 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Continue broader-backfill extraction queue; 1 document remains after
-  extracting `77e2baf...`.
+- Broader-backfill extraction queue is complete after extracting `b35587a...`.
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
@@ -83,7 +83,7 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the February 2026 annual-meeting notice.
+Updated 2026-04-17 after extracting the second-half 2025 media settlement.
 
 #### Vault state
 
@@ -95,14 +95,13 @@ Updated 2026-04-17 after extracting the February 2026 annual-meeting notice.
   and 32 canonical documents.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
 - `reports/inbox.md` up to date; 30 open anomalies.
-- Current records: 29.
-- Current extraction queue: 1 document.
+- Current records: 30.
+- Current extraction queue: 0 documents.
 - New broader-backfill extraction completed this step:
-  `77e2baf...` February 2026 annual-meeting notice (`meeting_notice`,
-  `needs_review`): the notice announces the 2026-02-24 meeting, lists three
-  agenda resolutions, and includes historical background text; final vote
-  outcomes are not shown.
-- Commit for this step: `b4a6071`, `dd0b8d6`, and `9eff85c`.
+  `b35587a...` second-half 2025 media settlement (`media_settlement`, `ok`):
+  the settlement shows a 754.66 PLN underpayment with a 2026-03-31 payment
+  deadline and the usual redacted personal and bank details.
+- Commit for this step: `b35587a`, `b4a6071`, `dd0b8d6`, and `9eff85c`.
 
 #### Documents (6 total)
 
@@ -132,8 +131,7 @@ Updated 2026-04-17 after extracting the February 2026 annual-meeting notice.
 
 - `PAYMENT_DEADLINE_UNCONFIRMED` - 2025 shared-property settlement result has
   a past payment date, but payment/booked status is unknown.
-- `EXTRACTION_MISSING` - 1 document from the broader Gmail backfill still
-  need extraction or asset classification.
+- `EXTRACTION_MISSING` - broader Gmail backfill queue is exhausted.
 
 - `RESOLUTION_PENDING_VOTE` – 6 uchwały from 2026-03 meeting, voting started
   2026-03-21, plus Resolution 6/2022 DACH BUD ballot from 2024-10-17.
