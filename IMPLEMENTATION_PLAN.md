@@ -24,7 +24,7 @@ Legend:
 | 1 | Vault core | [x] | Init, register, validate, reindex, SQL, records, notes, search, context, and extraction work listing exist. |
 | 2 | PDF rendering | [~] | PDF inspection/rendering exist, generated tests pass, and a real Gmail-imported PDF rendered; the named sample PDF was not present. |
 | 3 | Record schema | [~] | Schema, JSON Schema export, and basic tests exist; broader fixture families and total validations remain. |
-| 4 | Manual extraction loop | [~] | One real Gmail-imported PDF has a rendered page, valid record, note, and searchable FTS entry; 5 imported documents still need triage/extraction. |
+| 4 | Manual extraction loop | [~] | All 5 imported documents triaged/extracted; extraction queue is 0. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [~] | OAuth, Locator listing, and a first real capped Locator sync have run; full historical backfill remains. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
 | 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
@@ -42,19 +42,16 @@ Legend:
 
 ### Remaining High-Value Work
 
-- Triage the remaining imported Gmail attachments; classify inline/logo PNGs as
-  assets if they are not real documents.
-- Continue real extraction with `732269777adf41e87681ab52b3ec3b053b687144bc7749030106039bc28ba7f4`
-  or another remaining real document.
-- Run a broader verified Locator backfill after the first capped sync.
-- Add fixture records for media settlements, interest notes, account statements,
-  and monthly charges.
-- Implement remaining financial anomaly rules.
+- Run a broader verified Locator Gmail backfill (only 5 messages from capped sync;
+  29 total messages known to exist).
+- Add fixture records for media settlements, interest notes, and account
+  statements (monthly charges now covered by `732269...`).
+- Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
+- Confirm voting outcomes for 6 pending uchwały from the March 2026 meeting notice.
 
 ### Current Handoff Checkpoint
 
-This checkpoint was written before switching to another AI because model limits
-were close.
+Updated 2026-04-17 after extraction session.
 
 Done against real user data:
 
@@ -63,39 +60,37 @@ Done against real user data:
   `C:\Users\Serge\Desktop\dabrowskiego-backups\vault-2026-04-17.zip`.
 - A capped real Locator sync imported 5 messages and 9 attachments with 0
   attachment failures.
-- First real extracted document:
-  `6e9efc283330689c599876f81ffeb1b561943d861a426bb1794808bc905ce22c`
-  - MIME: `application/pdf`
-  - pages: 1
-  - type: `shared_property_settlement`
-  - status: `needs_review`
-  - rendered page exists under `index/renders/.../page-001.png`
-  - record and note were stored in ignored `vault/` data
-  - `npm run vault -- search settlement --json` returns the record
-- `npm run vault -- validate --strict --json` passed after the extraction.
-- `npm run vault -- write-inbox --json` refreshed the ignored private report.
-- `git status --short` was clean after the private-data-only extraction because
-  `vault/`, `index/`, and `reports/` are ignored.
+- Added `tag-document` CLI command to vault.ts/cli.ts.
+- Both Locator logo PNGs tagged as `asset_logo` and removed from extraction queue.
+- Extraction queue is now **0** (all 5 documents triaged or extracted).
+- 4 documents fully extracted (records + notes stored, FTS indexed):
+  - `6e9efc28...` – `shared_property_settlement` (rozliczenie kosztów 2025)
+  - `732269777...` – `monthly_charges` (opłaty kwiecień 2026, 537,75 zł, sum ✓)
+  - `dce27d56...` – `service_notice` (mycie garażu podziemnego kwiecień 2026)
+  - `0a50303e...` – `meeting_notice` (zawiadomienie po zebraniu, 6 uchwał pending)
+- `npm run vault -- validate --strict --json` passes.
+- `reports/inbox.md` refreshed (7 open anomalies).
 
 Pick up with:
 
 ```powershell
 npm run vault -- context --json
-npm run vault -- list-work --kind extraction --json
+npm run gmail -- sync --backfill-from 2023-01-01
 ```
 
-Remaining extraction queue at handoff:
+Open anomalies to review:
 
-- `f2dd30eb7893164284d2adbafad1ce7044625a0c0271cc9f51471ad95aa19bfe`
-  (`image/png`) - inspect whether it is a real document or an inline/logo asset.
-- `732269777adf41e87681ab52b3ec3b053b687144bc7749030106039bc28ba7f4`
-  (`application/pdf`, 1 page) - likely a good next real extraction candidate.
-- `0a50303e7a2ef8a69e915e3f501bbb202bafac68ad2f7c1b1adfbceae0971e6d`
-  (`application/pdf`, 12 pages) - larger extraction target.
-- `80a272dc69e5cf1e6f447c1843581f5c5301bb68e58ba3c348cfb9bf0f0c1e59`
-  (`image/png`) - inspect whether it is a real document or an inline/logo asset.
-- `dce27d56aa14ee2a75e45abc6532845d2c13b0544e93c796d4fac8b98ad1277c`
-  (`application/pdf`, 2 pages).
+- `RESOLUTION_PENDING_VOTE` – 6 uchwały z marca 2026 bez wyniku głosowania.
+  Confirm outcomes with Serhii.
+- `EXTRACTION_MISSING` / `LOW_CONFIDENCE` – check `list-work --kind anomaly`.
+
+Completed extraction queue (no remaining items):
+
+- `f2dd30eb...` (`image/png`) – Locator logo, tagged `asset_logo`.
+- `80a272dc...` (`image/png`) – Locator logo (duplicate), tagged `asset_logo`.
+- `732269777...` – extracted as `monthly_charges`.
+- `0a50303e...` – extracted as `meeting_notice`.
+- `dce27d56...` (`application/pdf`, 2 pages) – extracted as `service_notice`.
 
 Important: do not commit private `vault/`, `index/`, or `reports/` contents.
 Only commit tracked code/docs/plan updates.
