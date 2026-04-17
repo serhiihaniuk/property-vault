@@ -31,6 +31,7 @@ Legend:
 
 ### Latest Completed Commits
 
+- `bd63aac` Record September 2025 adopted resolutions extraction.
 - `aa811e2` Record September 2025 resolutions extraction.
 - `a632712` Record September 2025 monthly charge extraction.
 - `ec20a72` Record July 2025 media settlement extraction.
