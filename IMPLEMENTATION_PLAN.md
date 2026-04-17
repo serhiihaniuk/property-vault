@@ -31,6 +31,7 @@ Legend:
 
 ### Latest Completed Commits
 
+- `b4a6071` Record February 2026 annual meeting notice extraction.
 - `dd0b8d6` Note December 2025 LAF commit hash.
 - `9eff85c` Record December 2025 LAF refinancing resolution extraction.
 - `46e3260` Record October 2025 monthly charge extraction.
@@ -101,7 +102,7 @@ Updated 2026-04-17 after extracting the February 2026 annual-meeting notice.
   `needs_review`): the notice announces the 2026-02-24 meeting, lists three
   agenda resolutions, and includes historical background text; final vote
   outcomes are not shown.
-- Commit for this step: `dd0b8d6` and `9eff85c`.
+- Commit for this step: `b4a6071`, `dd0b8d6`, and `9eff85c`.
 
 #### Documents (6 total)
 
