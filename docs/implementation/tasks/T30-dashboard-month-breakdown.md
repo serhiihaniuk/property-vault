@@ -65,6 +65,14 @@
   - The dashboard comparison now unions selected-month rows with previous-only categories before summary derivation, which keeps month-over-month deltas visible without inflating the selected-month category count.
 - Coordinator notes review:
   - Previous reviewer finding was addressed on this branch with focused application-layer logic and regression coverage. No additional coordinator follow-up is needed.
-- Next handoff note: start a reviewer chat and say `reviewer T30`. Review should use branch `codex/T30-dashboard`; branch setup is agent-managed.
+- Coordinator final review:
+  - merged the reviewer-approved T30 dashboard slice into `master`
+  - accepted the runtime-safe `@dabrowskiego/db/runtime` and `@dabrowskiego/db/migrations` export split as the correct boundary for Next route/runtime consumers
+  - accepted the dashboard comparison behavior that preserves previous-only categories for month-over-month visibility without inflating current-month category counts
+- Actions taken:
+  - merged `codex/T30-dashboard` into `master`
+  - recorded T30 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored: none.
+- Next handoff note: nothing right now.
 
 
