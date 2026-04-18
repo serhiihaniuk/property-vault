@@ -1,17 +1,48 @@
 # T12 — Create `packages/auth` with Better Auth
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `Codex on codex/T12-package-auth`
 - Goal: Add the auth package and isolate Better Auth setup.
 - Dependencies: `T11`
 - Write scope: `packages/auth/**`, shared auth config only
+- Worker branch: `codex/T12-package-auth`
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Wave group: `core-b`
 - Required verification: `strong`
 - Completion signal: Better Auth setup exists behind package helpers and integrates with Postgres.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: do not leak Better Auth internals outside the package
+- Files changed:
+  - `docs/implementation/tasks/T12-package-auth-better-auth.md`
+  - `package.json`
+  - `package-lock.json`
+  - `packages/auth/package.json`
+  - `packages/auth/tsconfig.json`
+  - `packages/auth/src/auth.test.ts`
+  - `packages/auth/src/auth.ts`
+  - `packages/auth/src/config.ts`
+  - `packages/auth/src/index.ts`
+  - `packages/auth/src/roles.ts`
+  - `packages/auth/src/session.ts`
+- Contracts changed: none
+- Tests run:
+  - `npm run --workspace @dabrowskiego/auth typecheck`
+  - `npm run --workspace @dabrowskiego/auth test`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `npm test`
+- Coordinator notes:
+  - Observation: `pg-mem` does not support the `pg` driver `getTypeParser` path Better Auth hits for deeper credential queries such as `signInEmail`.
+  - Why it matters: current package tests can verify auth construction, session helpers, and disabled sign-up, but later credential and invite flows will need a real Postgres-backed integration path for honest coverage.
+  - Suggested follow-up: add real Postgres integration coverage before or during `T33` access/invite flows.
+  - Urgency: `soon`
+- Review result: pending review
+- Reviewer: unassigned
+- Review tests run: none yet
+- Merge status: pending review
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: open a reviewer chat on branch `codex/T12-package-auth` and say `reviewer T12`
 
 

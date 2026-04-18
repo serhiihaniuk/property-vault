@@ -23,7 +23,8 @@
     "gmail": "node --experimental-strip-types tools/gmail-cli.ts",
     "reindex": "node --experimental-strip-types tools/cli.ts reindex",
     "validate": "node --experimental-strip-types tools/cli.ts validate",
-    "typecheck": "npm run typecheck:vault && npm run typecheck:db && turbo typecheck --filter=@dabrowskiego/web",
+    "typecheck": "npm run typecheck:vault && npm run typecheck:db && npm run typecheck:auth && turbo typecheck --filter=@dabrowskiego/web",
+    "typecheck:auth": "npm run --workspace @dabrowskiego/auth typecheck",
     "typecheck:db": "npm run --workspace @dabrowskiego/db typecheck",
     "typecheck:vault": "tsc --noEmit",
     "test": "node --test --experimental-strip-types tools/**/*.test.ts"

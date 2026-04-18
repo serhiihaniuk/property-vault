@@ -1,0 +1,22 @@
+{
+  "name": "@dabrowskiego/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@dabrowskiego/db": "0.1.0",
+    "better-auth": "^1.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "pg-mem": "^3.0.14",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --experimental-strip-types src/**/*.test.ts"
+  }
+}
