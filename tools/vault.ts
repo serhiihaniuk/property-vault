@@ -8,6 +8,7 @@ import {
   initializeDatabase,
   openVaultDatabase,
 } from './db.ts';
+import { normalizeVaultRecordFinancialCategories } from './financial-categories.ts';
 import { isSha256Hex, normalizeSha256, sha256Buffer } from './hash.ts';
 import { inspectPdf } from './pdf.ts';
 import { getVaultPaths, resolveRepoRoot, type VaultPaths } from './paths.ts';
@@ -966,7 +967,7 @@ export async function putRecord(
 
   const normalizedHash = normalizeSha256(hash);
   const paths = getVaultPaths(root);
-  const record = parseVaultRecord(input);
+  const record = normalizeVaultRecordFinancialCategories(parseVaultRecord(input));
   const recordPath = path.join(paths.recordsDir, `${normalizedHash}.json`);
   const relativePath = toRepoRelativePath(paths.root, recordPath);
 
@@ -1550,7 +1551,7 @@ async function readCanonicalRecords(paths: VaultPaths): Promise<CanonicalRecord[
     const hash = normalizeSha256(path.basename(entry.name, '.json'));
     const filePath = path.join(paths.recordsDir, entry.name);
     const raw = await readFile(filePath, 'utf8');
-    const record = parseVaultRecord(JSON.parse(raw) as unknown);
+    const record = normalizeVaultRecordFinancialCategories(parseVaultRecord(JSON.parse(raw) as unknown));
 
     records.push({ hash, record });
   }

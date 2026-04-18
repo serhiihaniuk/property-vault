@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -255,6 +255,140 @@ test('putRecord and putNote store canonical files and index searchable content',
     assert.equal(rows[0]?.important_dates, 1);
     assert.equal(rows[0]?.resolutions, 1);
     assert.equal(results[0]?.hash, registered.hash);
+  } finally {
+    await fixture.remove();
+  }
+});
+
+test('putRecord normalizes financial categories for dashboard queries', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const sourcePath = path.join(fixture.root, 'monthly-charges.txt');
+    await writeFile(sourcePath, 'monthly charge source document', 'utf8');
+    const registered = await registerDocument({ path: sourcePath }, fixture.root);
+    const record = validMeetingNoticeRecord({
+      title: 'Monthly category normalization',
+      summary: 'Monthly charges use dashboard category aliases.',
+    });
+    record.document_type = 'monthly_charges';
+    record.financial_rows = [{
+      row_type: 'charge',
+      category: 'zaliczka_czesc_wspolna',
+      category_original: 'Zaliczka na część wspólną',
+      category_group: 'utrzymanie_nieruchomosci_wspolnej',
+      period: { kind: 'month', value: '2026-04' },
+      money: { amount_minor: 14427, currency: 'PLN' },
+      quantity: { value: 49.07, unit: 'm2' },
+      unit_price_minor: 294,
+      confidence: 0.98,
+      source_page: 1,
+      note: null,
+    }, {
+      row_type: 'settlement',
+      category: 'heat_energy_cost',
+      category_original: 'Energia cieplna CO - koszt',
+      category_group: 'media_settlement',
+      period: {
+        kind: 'range',
+        start: '2025-01-01',
+        end: '2025-12-31',
+      },
+      money: { amount_minor: 95531, currency: 'PLN' },
+      quantity: null,
+      unit_price_minor: null,
+      confidence: 0.96,
+      source_page: 1,
+      note: null,
+    }, {
+      row_type: 'charge',
+      category: 'ai_label_woda_ciepla',
+      category_original: 'Woda ciepla',
+      category_group: 'media',
+      period: { kind: 'month', value: '2026-04' },
+      money: { amount_minor: 8528, currency: 'PLN' },
+      quantity: { value: 2.19, unit: 'm3' },
+      unit_price_minor: 3894,
+      confidence: 0.91,
+      source_page: 1,
+      note: null,
+    }];
+
+    await putRecord(registered.hash, record, fixture.root);
+
+    const storedRecord = JSON.parse(
+      await readFile(path.join(fixture.root, 'vault', 'records', `${registered.hash}.json`), 'utf8'),
+    ) as VaultRecord;
+    const rows = await sql<{
+      category: string;
+      category_group: string | null;
+      amount_minor: number;
+    }>(`
+      SELECT category, category_group, amount_minor
+      FROM financial_rows
+      WHERE hash = ?
+      ORDER BY amount_minor
+    `, [registered.hash], fixture.root);
+
+    assert.deepEqual(rows, [{
+      category: 'hot_water_heating',
+      category_group: 'media',
+      amount_minor: 8528,
+    }, {
+      category: 'shared_property_advance',
+      category_group: 'shared_property',
+      amount_minor: 14427,
+    }, {
+      category: 'central_heating_cost',
+      category_group: 'media_settlement',
+      amount_minor: 95531,
+    }]);
+    assert.equal(storedRecord.financial_rows[0]?.category, 'shared_property_advance');
+    assert.equal(storedRecord.financial_rows[0]?.category_original, 'Zaliczka na część wspólną');
+    assert.equal(storedRecord.financial_rows[1]?.category, 'central_heating_cost');
+    assert.equal(storedRecord.financial_rows[2]?.category, 'hot_water_heating');
+
+    const mediaPath = path.join(fixture.root, 'media-settlement.txt');
+    await writeFile(mediaPath, 'media settlement source document', 'utf8');
+    const mediaDocument = await registerDocument({ path: mediaPath }, fixture.root);
+    const mediaRecord = validMeetingNoticeRecord({
+      title: 'Media category normalization',
+      summary: 'Media settlement uses source-label guardrails.',
+    });
+    mediaRecord.document_type = 'media_settlement';
+    mediaRecord.financial_rows = [{
+      row_type: 'settlement',
+      category: 'strange_ai_label',
+      category_original: 'Ciepla woda - koszt',
+      category_group: 'media_settlement',
+      period: {
+        kind: 'range',
+        start: '2025-01-01',
+        end: '2025-12-31',
+      },
+      money: { amount_minor: 89381, currency: 'PLN' },
+      quantity: null,
+      unit_price_minor: null,
+      confidence: 0.91,
+      source_page: 1,
+      note: null,
+    }];
+
+    await putRecord(mediaDocument.hash, mediaRecord, fixture.root);
+
+    const mediaRows = await sql<{
+      category: string;
+      category_group: string | null;
+    }>(`
+      SELECT category, category_group
+      FROM financial_rows
+      WHERE hash = ?
+    `, [mediaDocument.hash], fixture.root);
+
+    assert.deepEqual(mediaRows, [{
+      category: 'hot_water_cost',
+      category_group: 'media_settlement',
+    }]);
   } finally {
     await fixture.remove();
   }
