@@ -40,13 +40,36 @@ The repo currently has:
 
 1. Read `ARCHITECTURE.md`.
 2. Read `docs/implementation/AGENT_PROTOCOL.md`.
-3. Read `docs/implementation/WORKTREE_GUIDE.md` when using parallel agents.
-4. Read `APP_IMPLEMENTATION_PLAN.md`.
-5. Read the assigned task file under `docs/implementation/tasks/` if doing app
+3. If the first user message is a role shortcut, read the matching role file:
+   - `coordinator` -> `docs/implementation/roles/COORDINATOR.md`
+   - `implementer` or `implementator` -> `docs/implementation/roles/IMPLEMENTER.md`
+   - `reviewer` -> `docs/implementation/roles/REVIEWER.md`
+4. Read `docs/implementation/WORKTREE_GUIDE.md` when using parallel agents.
+5. Read `APP_IMPLEMENTATION_PLAN.md`.
+6. Read the assigned task file under `docs/implementation/tasks/` if doing app
    implementation.
-6. Run `npm run vault -- context` when local vault/runtime context matters.
-7. Use local records, notes, SQLite, or cited source files before answering
+7. Run `npm run vault -- context` when local vault/runtime context matters.
+8. Use local records, notes, SQLite, or cited source files before answering
    factual questions.
+
+## Role Shortcuts
+
+If a new chat starts with one of these messages:
+
+- `coordinator`
+- `implementer`
+- `implementator`
+- `reviewer`
+
+then immediately switch into that role by reading the matching role file and
+reply briefly with:
+
+- what this role does,
+- what you expect from Serhii next,
+- the next valid command or prompt shape.
+
+Keep that reply short and operational. Do not require Serhii to restate the
+whole workflow.
 
 ## Operating Rules
 

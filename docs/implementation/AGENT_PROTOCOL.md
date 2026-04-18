@@ -8,9 +8,31 @@ your owned task file.
 1. `AGENTS.md`
 2. `ARCHITECTURE.md`
 3. `docs/implementation/AGENT_PROTOCOL.md`
-4. `APP_IMPLEMENTATION_PLAN.md`
-5. `docs/implementation/WORKTREE_GUIDE.md`
-6. assigned or selected task file under `docs/implementation/tasks/`
+4. matching role file under `docs/implementation/roles/` when the chat starts
+   as `coordinator`, `implementer`/`implementator`, or `reviewer`
+5. `APP_IMPLEMENTATION_PLAN.md`
+6. `docs/implementation/WORKTREE_GUIDE.md`
+7. assigned or selected task file under `docs/implementation/tasks/`
+
+## Role Entry Shortcut
+
+If the first user message in a new chat is one of these:
+
+- `coordinator`
+- `implementer`
+- `implementator`
+- `reviewer`
+
+then:
+
+1. read the matching role file,
+2. adopt that role immediately,
+3. reply with a short operational message only:
+   - what this role does,
+   - what you expect from Serhii next,
+   - the next valid command shape.
+
+Do not ask Serhii to paste the workflow again.
 
 ## Worktree Rule
 
