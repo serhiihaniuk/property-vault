@@ -5,9 +5,12 @@ Read this file first in every new Codex session for this repo.
 ## Startup
 
 1. Read `DESIGN.md`.
-2. Read `IMPLEMENTATION_PLAN.md` if the task involves implementation.
-3. Run `npm run vault -- context` once that command exists.
-4. Use local records, notes, SQLite, or cited source files before answering
+2. For app architecture or UI work, read `ARCHITECTURE.md`.
+3. For app implementation work, read `docs/implementation/AGENT_PROTOCOL.md`
+   and `APP_IMPLEMENTATION_PLAN.md`.
+4. Read `IMPLEMENTATION_PLAN.md` only when current vault/runtime state matters.
+5. Run `npm run vault -- context` once that command exists.
+6. Use local records, notes, SQLite, or cited source files before answering
    factual questions.
 
 ## Operating Rules
@@ -40,6 +43,20 @@ npm run vault -- write-inbox
 
 These commands are implemented progressively according to
 `IMPLEMENTATION_PLAN.md`.
+
+## App Work
+
+For app work, use this read order:
+
+1. `DESIGN.md`
+2. `ARCHITECTURE.md`
+3. `docs/implementation/AGENT_PROTOCOL.md`
+4. `APP_IMPLEMENTATION_PLAN.md`
+5. assigned task file under `docs/implementation/tasks/`
+6. `IMPLEMENTATION_PLAN.md` only if current vault/runtime context matters
+
+Treat `ARCHITECTURE.md` as the durable target architecture and
+`APP_IMPLEMENTATION_PLAN.md` as the app build backlog.
 
 ## Private Data
 

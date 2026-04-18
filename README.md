@@ -46,5 +46,7 @@ answers.
 ## Key Documents
 
 - `DESIGN.md` contains the system design and data model.
+- `ARCHITECTURE.md` contains the approved app/system architecture.
+- `APP_IMPLEMENTATION_PLAN.md` contains the detailed app build backlog.
 - `IMPLEMENTATION_PLAN.md` contains the phased build plan.
 - `AGENTS.md` is the startup guide for future Codex sessions.
