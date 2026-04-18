@@ -31,7 +31,7 @@ Legend:
 
 ### Latest Completed Commits
 
-- `pending` Harden reindex to rebuild canonical email, tag, and anomaly state.
+- `0db190f` Harden reindex to rebuild canonical email, tag, and anomaly state.
 - `33646e0` Mark broader backfill queue complete.
 - `e08561c` Note February 2026 meeting commit hash.
 - `b4a6071` Record February 2026 annual meeting notice extraction.
