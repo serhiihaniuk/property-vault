@@ -51,6 +51,20 @@
 - Coordinator notes:
   - Resolved the carry-forward from `T22` inside this task by adding runtime-safe `@dabrowskiego/db/runtime` and `@dabrowskiego/db/migrations` exports, so Next route code no longer pulls filesystem-only migrations through the root package barrel.
   - No additional backlog-shaping follow-up was needed during implementation.
+- Review result: `merge ready`
+- Reviewer: `Codex`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/application test`
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/system-handlers.test.ts apps/web/app/api/_lib/dashboard-handlers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+- Merge status: `ready`
+- Architecture note:
+  - The dashboard comparison now unions selected-month rows with previous-only categories before summary derivation, which keeps month-over-month deltas visible without inflating the selected-month category count.
+- Coordinator notes review:
+  - Previous reviewer finding was addressed on this branch with focused application-layer logic and regression coverage. No additional coordinator follow-up is needed.
 - Next handoff note: start a reviewer chat and say `reviewer T30`. Review should use branch `codex/T30-dashboard`; branch setup is agent-managed.
 
 
