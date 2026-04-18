@@ -27,7 +27,7 @@ export type VaultPaths = {
   reportArchiveDir: string;
 };
 
-const REPO_MARKERS = ['DESIGN.md', 'IMPLEMENTATION_PLAN.md', 'package.json'];
+const REPO_MARKERS = ['AGENTS.md', 'turbo.json', 'package.json'];
 
 export class PathError extends Error {
   constructor(message: string) {

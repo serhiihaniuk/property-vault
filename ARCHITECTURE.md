@@ -6,8 +6,7 @@
 
 This document describes the approved target architecture for the deployable app
 and the supporting repo structure. It is intentionally forward-looking: current
-implementation details may lag behind it. For current vault/runtime status, use
-`IMPLEMENTATION_PLAN.md`.
+implementation details may lag behind it.
 
 ## 1. Purpose
 

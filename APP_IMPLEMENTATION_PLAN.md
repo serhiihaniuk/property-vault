@@ -6,8 +6,7 @@
 slices, and supporting test/reporting workflow
 
 This file is the detailed execution backlog for the app. It is not the place
-for current vault runtime counts or extraction history. Use
-`IMPLEMENTATION_PLAN.md` for that.
+for extraction history or ad hoc notes.
 
 ## 1. Rules of Use
 

@@ -10,6 +10,8 @@ not be committed.
 
 ## Current Status
 
+- local vault tooling already exists for context, search, validation, reindex,
+  Gmail sync, anomaly detection, and inbox writing,
 - the approved app/system architecture is in `ARCHITECTURE.md`,
 - the detailed app backlog is in `APP_IMPLEMENTATION_PLAN.md`,
 - the agent execution protocol is in `docs/implementation/AGENT_PROTOCOL.md`,
@@ -21,7 +23,7 @@ not be committed.
 - npm
 - Windows PowerShell for the initial local workflow
 
-## Planned Commands
+## Useful Commands
 
 ```text
 npm install
@@ -33,9 +35,6 @@ npm run vault -- search <query>
 npm run gmail -- auth
 npm run gmail -- sync
 ```
-
-Some commands are placeholders until the implementation phases add the matching
-TypeScript files.
 
 ## Privacy
 

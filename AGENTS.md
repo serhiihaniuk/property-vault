@@ -28,6 +28,8 @@ The repo currently has:
 
 - local property evidence under `vault/`,
 - local supporting derived data under `index/` and `reports/`,
+- working vault tooling for context, search, validation, reindex, Gmail sync,
+  anomaly detection, and inbox writing,
 - an approved target architecture in `ARCHITECTURE.md`,
 - a detailed app backlog in `APP_IMPLEMENTATION_PLAN.md`,
 - an agent workflow in `docs/implementation/AGENT_PROTOCOL.md`,
