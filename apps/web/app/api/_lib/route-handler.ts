@@ -12,6 +12,8 @@ export interface RouteHandlerResult<TBody> {
   status?: number;
 }
 
+const ROUTE_HANDLER_RESULT_KEYS = new Set(['body', 'headers', 'status']);
+
 export interface CreateRouteHandlerOptions<TBody, TContext extends PropertyVaultRouteContext> {
   contract: RouteContract;
   execute: (
@@ -73,5 +75,8 @@ function isRouteHandlerResult<TBody>(
     return false;
   }
 
-  return 'body' in value && ('status' in value || 'headers' in value);
+  return (
+    'body' in value &&
+    Object.keys(value).every((key) => ROUTE_HANDLER_RESULT_KEYS.has(key))
+  );
 }

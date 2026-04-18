@@ -6,6 +6,9 @@ import { apiIndexRoute, healthCheckRoute } from '@dabrowskiego/contracts';
 import { createJsonResponse } from './response.ts';
 
 type RuntimeResolver = () => PropertyVaultApiRuntime;
+type SystemHealthChecks = Awaited<
+  ReturnType<PropertyVaultApiRuntime['application']['system']['getHealthStatus']>
+>['checks'];
 
 export function createApiIndexGetHandler(resolveRuntime: RuntimeResolver = getPropertyVaultApiRuntime) {
   return createRouteHandler({
@@ -27,7 +30,7 @@ export function createHealthCheckGetHandler(
       const runtime = resolveRuntime();
       const health = await runtime.application.system.getHealthStatus();
 
-      if (health.status !== 'ok') {
+      if (hasUnavailableHealthCheck(health.checks)) {
         throw new ApiProblemError(
           createApiProblem({
             code: 'health_check_failed',
@@ -55,11 +58,13 @@ export function createOpenApiDocumentGetHandler(
   };
 }
 
-function summarizeHealthFailure(
-  checks: Awaited<ReturnType<PropertyVaultApiRuntime['application']['system']['getHealthStatus']>>['checks'],
-): string {
+function hasUnavailableHealthCheck(checks: SystemHealthChecks): boolean {
+  return checks.some((check) => check.status === 'down');
+}
+
+function summarizeHealthFailure(checks: SystemHealthChecks): string {
   return checks
-    .filter((check) => check.status !== 'ok')
+    .filter((check) => check.status === 'down')
     .map((check) => (check.detail ? `${check.name}: ${check.detail}` : `${check.name}: ${check.status}`))
     .join('; ');
 }

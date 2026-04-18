@@ -45,7 +45,32 @@ test('system route handlers return application-backed API metadata and health da
   );
 });
 
-test('health route maps degraded application health into the declared problem response', async () => {
+test('health route returns degraded health using the declared 200 response contract', async () => {
+  const runtime = createTestRuntime({
+    healthDependencies: [
+      {
+        async check() {
+          return {
+            detail: 'Background sync is lagging behind the latest inbox changes.',
+            status: 'degraded',
+          };
+        },
+        name: 'background-sync',
+      },
+    ],
+  });
+  const response = await createHealthCheckGetHandler(() => runtime)(
+    new Request('http://example.test/api/health'),
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(
+    healthCheckResponseSchema.parse(await response.json()),
+    await runtime.application.system.getHealthStatus(),
+  );
+});
+
+test('health route maps unavailable application health into the declared problem response', async () => {
   const runtime = createTestRuntime({
     healthDependencies: [
       {

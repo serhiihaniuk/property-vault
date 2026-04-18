@@ -32,6 +32,37 @@ test('createRouteHandler validates query input and returns the contract response
   assert.deepEqual(await response.json(), { page: '1' });
 });
 
+test('createRouteHandler accepts explicit response wrappers without transport overrides', async () => {
+  const handler = createRouteHandler({
+    contract: {
+      method: 'get',
+      operationId: 'getRouteHandlerWrappedResponseTest',
+      path: '/api/test',
+      query: createRequiredPageQuerySchema(),
+      responses: {
+        200: {
+          description: 'Echo response.',
+          schema: createPageResponseSchema(),
+        },
+      },
+      summary: 'Test route handler wrapped response normalization.',
+      tags: ['test'],
+    } satisfies RouteContract,
+    async execute(request) {
+      return {
+        body: {
+          page: request.query.page,
+        },
+      };
+    },
+  });
+
+  const response = await handler(new Request('http://example.test/api/test?page=2'));
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { page: '2' });
+});
+
 test('createRouteHandler returns an RFC 7807 problem for invalid input', async () => {
   const handler = createRouteHandler({
     contract: {
