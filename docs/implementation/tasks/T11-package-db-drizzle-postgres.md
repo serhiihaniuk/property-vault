@@ -45,11 +45,12 @@
 - Coordinator final review:
   - merged the reviewer-approved T11 result into `main`
   - accepted the reviewer hardening for migration loading in `packages/db/src/migrations.test.ts`
-  - kept the schema-bootstrap observation as future guidance for upcoming schema tasks
+  - promoted the schema-bootstrap guardrail into the implementation plan and future DB/bootstrap tasks
 - Actions taken:
   - merged `codex/review-t11` into `main`
   - kept reviewer improvements to `packages/db/src/migrations.test.ts`
-  - preserved the migration bootstrap guardrail for future tasks
+  - updated `APP_IMPLEMENTATION_PLAN.md` with the explicit multi-schema migration bootstrap rule
+  - updated `T15` and `T16` with carry-forward notes for blank-database schema bootstrap verification
 - Actions ignored: none
 - Merge status: `merged codex/review-t11 into main`
 - Next handoff note: nothing right now

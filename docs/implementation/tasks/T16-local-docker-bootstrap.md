@@ -12,6 +12,12 @@
 - Files changed: none yet
 - Contracts changed: none yet
 - Tests run: none yet
+- Coordinator notes:
+  - Carry-forward from `T11`: local bootstrap should exercise migrations
+    against a blank Postgres database and catch missing explicit schema
+    bootstrap statements.
+  - Expected outcome: documented startup from empty local Postgres proves the
+    multi-schema migration path really works.
 - Next handoff note: keep setup boring and explicit; no hidden magic
 
 

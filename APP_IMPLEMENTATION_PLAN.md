@@ -32,6 +32,9 @@ for extraction history or ad hoc notes.
 - Foundational package tasks may also touch minimal root metadata when needed
   to make the new package trackable and installable, such as `.gitignore`,
   `package-lock.json`, and workspace-level package-manager metadata.
+- For future multi-schema database work, keep explicit `CREATE SCHEMA IF NOT
+  EXISTS` bootstrap statements in migrations instead of assuming the generator
+  will emit them for blank databases.
 - Private-data ignore rules must stay root-anchored such as `/vault/`,
   `/index/`, and `/reports/` so nested workspace paths are not ignored.
 
