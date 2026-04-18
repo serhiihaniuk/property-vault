@@ -311,7 +311,7 @@ This workflow is intentionally one task at a time.
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T20` | Refactor `apps/web` into minimal FSD | `done` | `T11`-`T16` | `apps/web/app/**`, `apps/web/src/**` | `gpt-5.4-mini / medium` | `web-shell` | `strong` | web app has stable minimal FSD layout and compiles |
-| `T21` | Add app providers and API client | `todo` | `T12`, `T13`, `T20` | `apps/web/src/shared/**`, provider wiring | `gpt-5.4-mini / medium` | `web-shell` | `standard` | auth/query/theme/API client providers are wired |
+| `T21` | Add app providers and API client | `claimed` | `T12`, `T13`, `T20` | `apps/web/src/shared/**`, provider wiring | `gpt-5.4-mini / medium` | `web-shell` | `standard` | auth/query/theme/API client providers are wired |
 | `T22` | Add thin REST route handler structure | `todo` | `T13`, `T14`, `T20` | `apps/web/app/api/**` and transport adapters | `gpt-5.4 / medium` | `web-shell` | `strong` | route handlers validate, delegate, and return contract DTOs |
 | `T23` | Add contract/client generation flow | `todo` | `T13`, `T22` | contracts generation config and web client wiring | `gpt-5.4-mini / medium` | `web-shell` | `standard` | OpenAPI generation and typed client flow are working |
 
