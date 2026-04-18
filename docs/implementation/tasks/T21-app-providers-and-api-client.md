@@ -1,7 +1,7 @@
 # T21 — Add app providers and API client
 
 - Status: `done`
-- Owner: `Codex implementer`
+- Owner: `coordinator`
 - Goal: Wire auth, theme, query, and API-client providers into the web app.
 - Dependencies: `T12`, `T13`, `T20`
 - Write scope: `apps/web/src/shared/**`, provider setup only
@@ -43,6 +43,14 @@
 - Merge status: `ready for coordinator merge`
 - Architecture note: acceptable and aligned. `app/providers.tsx` stays thin while shared auth/query/theme/API client infrastructure lives under `apps/web/src/shared/**`, which matches the approved web-shell boundary for later T22/T23 work.
 - Coordinator notes review: no follow-up needed for the runtime implementation. Reverted the worker edit to `APP_IMPLEMENTATION_PLAN.md` because that file is coordinator-owned and should only be updated during final coordination on `master`.
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - merged the reviewer-approved T21 result into `master`
+  - accepted the thin provider composition and shared auth/query/theme/API client ownership as the correct shared-infrastructure base for later web-shell tasks
+  - no extra carry-forward task changes were needed beyond the merged shared provider/client layer
+- Actions taken:
+  - merged `codex/T21-app-providers-and-api-client` into `master`
+  - recorded T21 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored: none
+- Next handoff note: nothing right now.
 
 
