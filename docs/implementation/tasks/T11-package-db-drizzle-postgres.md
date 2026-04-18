@@ -43,14 +43,14 @@
   - Refined: the committed migration already includes explicit `CREATE SCHEMA IF NOT EXISTS` bootstrap statements, so the current branch is safe for blank databases.
   - Confirmed: keeping schema-bootstrap statements explicit in future multi-schema migrations is still a valid guardrail.
 - Coordinator final review:
-  - merged the reviewer-approved T11 result into `main`
+  - merged the reviewer-approved T11 result into `master`
   - accepted the reviewer hardening for migration loading in `packages/db/src/migrations.test.ts`
   - promoted the schema-bootstrap guardrail into the implementation plan and future DB/bootstrap tasks
 - Actions taken:
-  - merged `codex/review-t11` into `main`
+  - merged `codex/review-t11` into `master`
   - kept reviewer improvements to `packages/db/src/migrations.test.ts`
   - updated `APP_IMPLEMENTATION_PLAN.md` with the explicit multi-schema migration bootstrap rule
   - updated `T15` and `T16` with carry-forward notes for blank-database schema bootstrap verification
 - Actions ignored: none
-- Merge status: `merged codex/review-t11 into main`
+- Merge status: `merged codex/review-t11 into master`
 - Next handoff note: nothing right now

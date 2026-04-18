@@ -23,7 +23,7 @@ instead of improvising a worktree setup mid-task.
 
 Think in three phases, not three checkouts:
 
-1. `main` for coordination and merge
+1. `master` for coordination and merge
 2. one task branch for implementation
 3. that same task branch for review
 
@@ -31,9 +31,9 @@ Only one task branch should be active at a time.
 
 ## Recommended flow
 
-### 1. Keep `main` for coordination
+### 1. Keep `master` for coordination
 
-Use `main` for:
+Use `master` for:
 
 - reading plans,
 - picking tasks,
@@ -41,7 +41,7 @@ Use `main` for:
 - merging reviewed work.
 
 Before coordinator actions such as `pick task` or `merge latest reviewed task`,
-the coordinator should switch the checkout back to `main`.
+the coordinator should switch the checkout back to `master`.
 
 ### 2. Let the active role create or switch to one task branch
 
@@ -69,7 +69,7 @@ The implementer should:
 - work only on the task branch,
 - update only the owned task file,
 - commit on that same task branch,
-- never merge directly into `main`.
+- never merge directly into `master`.
 
 Because this is the same checkout, branch switches usually reuse the existing
 `node_modules`.
@@ -83,14 +83,14 @@ If this checkout is fresh or missing dependencies:
 
 Recommended flow:
 
-1. coordinator picks the task on `main`
+1. coordinator picks the task on `master`
 2. implementer creates or switches to `codex/Txx-...`
 3. implementer finishes and commits on `codex/Txx-...`
 4. reviewer opens for that task and switches to the same branch if needed
 5. reviewer makes bounded fixes if needed
 6. reviewer reruns verification
 7. reviewer returns `merge ready` or `blocked`
-8. coordinator switches back to `main` and merges the reviewed task branch
+8. coordinator switches back to `master` and merges the reviewed task branch
 
 No dedicated review worktree is required in the default flow.
 
@@ -99,29 +99,29 @@ No dedicated review worktree is required in the default flow.
 After review succeeds:
 
 ```powershell
-git switch main
+git switch master
 git merge --ff-only codex/T10-package-vault
 git branch -d codex/T10-package-vault
 ```
 
 If reviewer made fixes on the task branch, merge that same branch.
 
-## Branch visibility from `main`
+## Branch visibility from `master`
 
-Task-file edits made on a task branch do not automatically appear on `main`
+Task-file edits made on a task branch do not automatically appear on `master`
 until merge.
 
-So when coordinating from `main`:
+So when coordinating from `master`:
 
 - the task branch copy is the live source of truth,
-- `main` may still show stale task status,
+- `master` may still show stale task status,
 - branch switching is handled by the active role, not by Serhii,
 - do not pick another task while one task branch is still active and unmerged.
 
 ## Rules
 
 - one active task branch at a time
-- no direct worker commits to `main`
+- no direct worker commits to `master`
 - reviewer verifies the same task branch
 - coordinator merges after final review
 - if review reveals architecture drift, stop and report instead of patching

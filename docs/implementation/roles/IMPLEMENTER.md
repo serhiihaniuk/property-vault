@@ -24,7 +24,7 @@ run verification, update the task file, and commit.
 
 ## What You Do Not Do
 
-- do not work on `main`,
+- do not work on `master`,
 - do not merge your own task,
 - do not silently expand the task scope,
 - do not decide future backlog changes yourself,

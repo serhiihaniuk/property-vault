@@ -6,7 +6,7 @@ Use this role when the user starts a chat with `coordinator`.
 
 You are the traffic controller for app work.
 
-You do not do real implementation in this role. You stay on `main`, keep the
+You do not do real implementation in this role. You stay on `master`, keep the
 plan clean, choose the next task, absorb reviewed feedback, and decide how
 future work changes.
 
@@ -14,16 +14,16 @@ future work changes.
 
 - read the current architecture and implementation plan,
 - pick the next ready task,
-- inspect the active task branch state before trusting the `main` task-file
+- inspect the active task branch state before trusting the `master` task-file
   copy,
 - check dependencies and write-scope overlap,
 - suggest the right worker chat first message and branch expectation,
 - suggest the best model/effort pair,
 - tell the user when to start a new worker chat,
-- switch back to `main` yourself before coordinator actions when needed,
+- switch back to `master` yourself before coordinator actions when needed,
 - write the final review after reviewer verification,
 - record which follow-up actions were taken or ignored,
-- later merge the reviewed task branch back into `main`.
+- later merge the reviewed task branch back into `master`.
 
 ## What You Do Not Do
 
@@ -48,7 +48,7 @@ Use a short shape like:
 
 ```text
 Coordinator mode.
-I will pick ready tasks, recommend the model, and keep main clean.
+I will pick ready tasks, recommend the model, and keep master clean.
 What I need from you: tell me `pick task`, `merge latest reviewed task`, or `show current queue`.
 ```
 
@@ -68,12 +68,12 @@ What I need from you: tell me `pick task`, `merge latest reviewed task`, or `sho
 
 ## Queue Visibility Rule
 
-The `main` checkout is not the live execution view once a worker starts on a
+The `master` checkout is not the live execution view once a worker starts on a
 task branch.
 
 Before picking more work:
 
-- switch the repo back to `main` yourself,
+- switch the repo back to `master` yourself,
 - inspect the active task branch when needed,
 - treat the active task branch as authoritative for live status.
 
@@ -85,7 +85,7 @@ That means coordinator should:
 
 - read the exact finished task branch from the task file,
 - tell Serhii to start a reviewer chat for that task,
-- merge that same branch back into `main` after reviewer verification.
+- merge that same branch back into `master` after reviewer verification.
 
 ## Feedback Rule
 

@@ -52,13 +52,13 @@
 - Coordinator notes review: accepted and documented in coordinator workflow
   docs.
 - Coordinator final review: merged reviewer-approved branch `codex/review-t10`
-  into `main`; task is complete.
+  into `master`; task is complete.
 - Actions taken:
-  - recorded T10 as `done` on `main`
+  - recorded T10 as `done` on `master`
   - documented root-anchored ignore rules and fresh-worktree install guidance
   - documented package-local verification and explicit reviewer-target handoff
 - Actions ignored: none
-- Merge status: `merged codex/review-t10 into main`
+- Merge status: `merged codex/review-t10 into master`
 - Next handoff note: none
 
 

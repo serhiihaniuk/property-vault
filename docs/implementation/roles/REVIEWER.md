@@ -75,12 +75,12 @@ Use one short line that tells Serhii the exact next action, for example:
 
 ## Review Target Rule
 
-The local task file on `main` is not authoritative for a finished worker task.
+The local task file on `master` is not authoritative for a finished worker task.
 
 When review starts:
 
 - require the exact finished task branch,
-- if this chat is on `main`, switch to that exact task branch yourself,
+- if this chat is on `master`, switch to that exact task branch yourself,
 - only trust the local task file when the reviewer chat is already attached to
   the correct task branch.
 - check whether the task introduced meaningful architectural choices and

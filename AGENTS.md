@@ -120,7 +120,7 @@ If nothing is needed, say that clearly:
 - Agents manage branch creation and checkout themselves; Serhii should not need
   to manually switch branches during normal task flow.
 - When a task is active on its task branch, the task-file copy on that branch
-  is authoritative until it is merged back into `main`.
+  is authoritative until it is merged back into `master`.
 - Finish or merge the current task branch before starting another
   implementation task.
 - Non-blocking design observations from workers should be recorded for the

@@ -12,7 +12,7 @@ for extraction history or ad hoc notes.
 
 - `ARCHITECTURE.md` is the durable architecture reference.
 - This file is the execution backlog and coordination reference.
-- `main` is the integration branch.
+- `master` is the integration branch.
 - Each worker agent should work on one task branch at a time.
 - Agents manage branch creation and checkout themselves; Serhii should not need
   to do manual branch management during normal flow.
@@ -28,9 +28,9 @@ for extraction history or ad hoc notes.
   - owned code files
   - their own task file under `docs/implementation/tasks/`
 - Coordinator may update the table statuses in this file for at-a-glance queue
-  visibility on `main`.
+  visibility on `master`.
 - Coordinator also records final review decisions and merges reviewed work back
-  into `main`.
+  into `master`.
 - Foundational package tasks may also touch minimal root metadata when needed
   to make the new package trackable and installable, such as `.gitignore`,
   `package-lock.json`, and workspace-level package-manager metadata.
@@ -91,7 +91,7 @@ Expected workflow:
 5. coordinator final pass
    - read reviewer output and coordinator notes
    - decide which follow-up actions are taken or ignored
-   - merge the reviewed task branch back to `main` when ready
+   - merge the reviewed task branch back to `master` when ready
    - update backlog/docs if future work changes
 
 `start` and `do` are intentionally separate so Serhii can choose model/cost
@@ -101,14 +101,14 @@ before the task actually runs.
 
 Use this workflow for sequential branch execution:
 
-1. `main` is the integration branch and should stay mergeable.
+1. `master` is the integration branch and should stay mergeable.
 2. The active role creates or switches to one task branch, usually named with
    the task ID.
 3. The worker agent edits and commits only on that task branch.
 4. The reviewer agent checks that same task branch, fixes small issues if
    needed, and hands a `merge ready` or `blocked` result to coordinator.
 5. The coordinator records final decisions and merges that reviewed task branch
-   back into `main`.
+   back into `master`.
 
 Recommended branch shape:
 
@@ -124,7 +124,7 @@ Example local commands:
 
 ```powershell
 git switch -c codex/T10-package-vault
-git switch main
+git switch master
 git merge --ff-only codex/T10-package-vault
 ```
 
@@ -137,8 +137,8 @@ git branch -d codex/T10-package-vault
 Important rules:
 
 - never let two unfinished task branches run at once,
-- never let workers commit directly on `main`,
-- coordinator stays mostly in the main checkout,
+- never let workers commit directly on `master`,
+- coordinator stays mostly in the `master` checkout,
 - reviewer verifies the same task branch and hands off,
 - coordinator merges after reviewer verification and final decision logging.
 
@@ -152,20 +152,20 @@ Coordinator should:
 
 - read the worker branch from the task file,
 - hand reviewer that exact task branch,
-- merge that reviewed task branch back into `main`.
+- merge that reviewed task branch back into `master`.
 
-### Queue visibility from `main`
+### Queue visibility from `master`
 
 Worker task-file edits are branch-local while the task is in progress.
 
 That means:
 
-- the copy of `docs/implementation/tasks/Txx-*.md` visible on `main` may lag,
+- the copy of `docs/implementation/tasks/Txx-*.md` visible on `master` may lag,
 - the task branch copy is the live execution view,
-- coordinator should switch back to `main` before picking more work,
+- coordinator should switch back to `master` before picking more work,
 - branch checkout is handled by the active role, not by Serhii,
 - this backlog table may be updated by coordinator so the queue stays readable
-  from `main`,
+  from `master`,
 - do not start another task while one task branch is still awaiting review or
   merge.
 
@@ -370,7 +370,7 @@ Coordinator responsibilities:
 - record `Coordinator final review`,
 - record `Actions taken`,
 - record `Actions ignored`,
-- merge reviewed work back into `main` when ready.
+- merge reviewed work back into `master` when ready.
 
 ### Meaning of `Actions taken`
 

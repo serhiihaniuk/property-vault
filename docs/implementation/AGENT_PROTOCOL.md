@@ -97,11 +97,11 @@ actually required.
 
 ## Branch Rule
 
-- `main` is the integration branch.
+- `master` is the integration branch.
 - Use one active task branch at a time.
 - Workers and reviewers use the same task branch sequentially.
 - Agents manage branch creation and checkout themselves.
-- Workers do not commit directly to `main`.
+- Workers do not commit directly to `master`.
 - Do not start a new task until the current task branch is merged or
   intentionally abandoned.
 
@@ -111,10 +111,10 @@ Task-file edits happen on the active task branch first.
 
 That means:
 
-- `main` may still show `todo` or `claimed` while the live task branch already
+- `master` may still show `todo` or `claimed` while the live task branch already
   says `in_progress` or `done`,
 - the active task branch is authoritative for that task until merge,
-- before picking more work, the coordinator should switch back to `main` and
+- before picking more work, the coordinator should switch back to `master` and
   make sure no other task branch is still mid-flight.
 
 ## Reviewer Target Rule
@@ -125,9 +125,9 @@ That means:
 
 - `reviewer T10` is only sufficient when the reviewer chat is already attached
   to the finished task branch,
-- if the reviewer chat opens on `main`, the reviewer should switch to the exact
+- if the reviewer chat opens on `master`, the reviewer should switch to the exact
   task branch first,
-- reviewer should not treat the `main` copy of the task file as authoritative
+- reviewer should not treat the `master` copy of the task file as authoritative
   for a finished task result.
 
 ## Command Workflow
@@ -137,7 +137,7 @@ That means:
 Do this when asked to pick work.
 
 1. Read the files above.
-2. Confirm you are on `main` and no older task branch is still awaiting review
+2. Confirm you are on `master` and no older task branch is still awaiting review
    or merge.
 3. Scan task files.
 4. Select the first task that is:
