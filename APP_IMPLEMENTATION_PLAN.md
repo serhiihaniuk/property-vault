@@ -13,10 +13,16 @@ for current vault runtime counts or extraction history. Use
 
 - `ARCHITECTURE.md` is the durable architecture reference.
 - This file is the execution backlog and coordination reference.
+- `main` is the integration branch.
+- Each worker agent should work in its own git worktree on its own branch.
 - Only the coordinator edits:
   - `ARCHITECTURE.md`
   - this file
   - shared architectural decisions
+- The reviewer agent may:
+  - review worker results,
+  - make bounded fixes in the worker worktree or a dedicated reviewer worktree,
+  - merge approved task branches back into `main`.
 - Worker agents edit:
   - owned code files
   - their own task file under `docs/implementation/tasks/`
@@ -55,15 +61,66 @@ Expected workflow:
    - wait for `start`
 
 3. `start`
+   - work in the assigned worktree/branch only
    - implement only inside the declared write scope
    - run the required verification
    - update the task file
    - commit with task ID in the subject
 
+4. reviewer pass
+   - review the worker branch in isolation
+   - make bounded fixes if needed
+   - run the required review verification
+   - merge back to `main` only after the task is `done`
+
 `start` and `do` are intentionally separate so Serhii can choose model/cost
 before the task actually runs.
 
-## 4. Model Selection
+## 4. Worktree and Branch Workflow
+
+Use this workflow for parallel agent execution:
+
+1. `main` is the integration branch and should stay mergeable.
+2. Create one worktree per worker agent.
+3. Give each worktree its own branch, usually named with the task ID.
+4. The worker agent edits and commits only inside its own worktree.
+5. The reviewer agent checks the worker result, fixes small issues if needed,
+   and merges the task branch back into `main`.
+
+Recommended branch shape:
+
+- `codex/T10-package-vault`
+- `codex/T11-package-db`
+- `codex/T30-dashboard`
+
+Recommended worktree shape:
+
+- main checkout: coordination only
+- sibling worktrees per active task/agent
+
+Example local commands:
+
+```powershell
+git worktree add ..\dabrowskiego-T10 -b codex/T10-package-vault
+git worktree add ..\dabrowskiego-T11 -b codex/T11-package-db
+git worktree list
+```
+
+After the task is reviewed and merged:
+
+```powershell
+git worktree remove ..\dabrowskiego-T10
+git branch -d codex/T10-package-vault
+```
+
+Important rules:
+
+- never let two worker agents share one worktree,
+- never let workers commit directly on `main`,
+- coordinator stays mostly in the main checkout,
+- reviewer merges only after verification and task-file update.
+
+## 5. Model Selection
 
 Use only these recommendations in task files:
 
@@ -90,7 +147,7 @@ Use only these recommendations in task files:
 - cross-package refactors,
 - difficult integration failures.
 
-## 5. Verification Gates
+## 6. Verification Gates
 
 - `light`
   - `npm run typecheck`
@@ -114,7 +171,7 @@ Use only these recommendations in task files:
   - Playwright smoke
   - browser verification
 
-## 6. Standard Scripts
+## 7. Standard Scripts
 
 The app implementation should add and maintain these scripts:
 
@@ -127,7 +184,7 @@ The app implementation should add and maintain these scripts:
 - `npm run test:e2e`
 - `npm run test:contracts`
 
-## 7. Parallelization Rules
+## 8. Parallelization Rules
 
 Parallel work is allowed only when:
 
@@ -191,7 +248,39 @@ contracts, it must stop and report `blocked`.
 | `T43` | Dev/bootstrap scripts | `todo` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / medium` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
 | `T44` | Final documentation cleanup | `todo` | `T40`-`T43` | root/package docs only | `gpt-5.4-mini / medium` | `hardening-e` | `light` | architecture, package docs, and task docs reflect reality |
 
-## 9. Worker Reporting Requirements
+## 9. Reviewer Workflow
+
+The reviewer agent is optional but recommended.
+
+### Reviewer responsibilities
+
+- verify the worker stayed inside the write scope,
+- check contract and boundary discipline,
+- run the required verification gate,
+- make small bounded fixes if needed,
+- update the task file with review notes,
+- merge the task branch back into `main`.
+
+### Reviewer limits
+
+The reviewer should not silently redesign shared architecture during review.
+If review exposes a bigger architectural problem, the reviewer marks the task
+`blocked` and reports it to the coordinator instead of freelancing a redesign.
+
+### Recommended reviewer model
+
+Use a stronger model for the reviewer when the task is:
+
+- schema-heavy,
+- auth-heavy,
+- cross-package,
+- UI plus API plus contract at once.
+
+Typical reviewer default:
+
+- `gpt-5.4 / xhigh`
+
+## 10. Worker Reporting Requirements
 
 Each worker task file must include:
 
@@ -210,7 +299,14 @@ Every task commit must include the task ID, for example:
 - `T30 Add dashboard summary routes and application service`
 - `T31 Add document detail contracts and provenance widget`
 
-## 10. Test Strategy
+The reviewer should also append a short review note before merge:
+
+- `Review result`
+- `Reviewer`
+- `Review tests run`
+- `Merge status`
+
+## 11. Test Strategy
 
 ### Unit/package tests
 
@@ -264,7 +360,7 @@ For major UI tasks:
 - check runtime/console errors,
 - verify the changed flow visually.
 
-## 11. Autonomous Stop Rules
+## 12. Autonomous Stop Rules
 
 An agent may continue without Serhii only if:
 

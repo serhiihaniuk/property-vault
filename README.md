@@ -48,4 +48,6 @@ answers.
 
 - `ARCHITECTURE.md` contains the approved app/system architecture.
 - `APP_IMPLEMENTATION_PLAN.md` contains the detailed app build backlog.
+- `docs/implementation/AGENT_PROTOCOL.md` contains the spawned-agent workflow.
+- `docs/implementation/WORKTREE_GUIDE.md` explains the worktree + reviewer flow.
 - `AGENTS.md` is the startup guide for future Codex sessions.

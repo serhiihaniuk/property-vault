@@ -9,7 +9,15 @@ your owned task file.
 2. `ARCHITECTURE.md`
 3. `docs/implementation/AGENT_PROTOCOL.md`
 4. `APP_IMPLEMENTATION_PLAN.md`
-5. assigned or selected task file under `docs/implementation/tasks/`
+5. `docs/implementation/WORKTREE_GUIDE.md`
+6. assigned or selected task file under `docs/implementation/tasks/`
+
+## Worktree Rule
+
+- `main` is the integration branch.
+- Each worker agent should work in its own worktree and its own task branch.
+- Workers do not commit directly to `main`.
+- Reviewer checks and merges worker branches back into `main`.
 
 ## Command Workflow
 
@@ -27,6 +35,7 @@ Do this when asked to pick work.
 5. Reply with:
    - chosen task ID/title,
    - why it is ready,
+   - branch/worktree expectation,
    - write scope,
    - required verification,
    - next command: `do`
@@ -41,6 +50,7 @@ Do this when asked to prepare execution.
 2. Change status to `in_progress`.
 3. Reply with:
    - status set to `in_progress`,
+   - worktree/branch reminder,
    - recommended model:
      - `gpt-5.4-mini / medium`, or
      - `gpt-5.4 / xhigh`
@@ -55,15 +65,17 @@ Do not implement yet.
 Do this when asked to execute.
 
 1. Re-read the task file.
-2. Implement only inside the declared write scope.
-3. Run the required verification gate.
-4. Update the task file with:
+2. Work only inside the assigned worktree and branch.
+3. Implement only inside the declared write scope.
+4. Run the required verification gate.
+5. Update the task file with:
    - files changed,
    - contracts changed,
    - tests run,
    - status,
    - next handoff note
-5. Commit with the task ID in the subject.
+6. Commit with the task ID in the subject.
+7. Hand off to the reviewer instead of merging yourself.
 
 ## Status Rules
 
@@ -86,6 +98,12 @@ Workers edit:
 - owned code files
 - their own task file
 
+Reviewer may edit:
+
+- the worker branch being reviewed,
+- the worker task file,
+- merge-related metadata after verification
+
 ## Parallel Work
 
 Parallel work is allowed only when:
@@ -96,6 +114,22 @@ Parallel work is allowed only when:
 
 If a task must change shared boundaries or shared contracts, stop and mark it
 `blocked`.
+
+## Reviewer Flow
+
+1. Read the worker task file and branch/worktree context.
+2. Review the worker result in isolation.
+3. Make small bounded fixes if needed.
+4. Run the required review verification.
+5. Update the task file with:
+   - `Review result`
+   - `Reviewer`
+   - `Review tests run`
+   - `Merge status`
+6. Merge back into `main` only if the task is truly ready.
+
+If review exposes an architectural conflict, mark the task `blocked` and report
+it to the coordinator instead of redesigning it during review.
 
 ## Required Task File Fields
 

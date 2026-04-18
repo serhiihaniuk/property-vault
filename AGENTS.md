@@ -38,11 +38,12 @@ The repo currently has:
 
 1. Read `ARCHITECTURE.md`.
 2. Read `docs/implementation/AGENT_PROTOCOL.md`.
-3. Read `APP_IMPLEMENTATION_PLAN.md`.
-4. Read the assigned task file under `docs/implementation/tasks/` if doing app
+3. Read `docs/implementation/WORKTREE_GUIDE.md` when using parallel agents.
+4. Read `APP_IMPLEMENTATION_PLAN.md`.
+5. Read the assigned task file under `docs/implementation/tasks/` if doing app
    implementation.
-5. Run `npm run vault -- context` when local vault/runtime context matters.
-6. Use local records, notes, SQLite, or cited source files before answering
+6. Run `npm run vault -- context` when local vault/runtime context matters.
+7. Use local records, notes, SQLite, or cited source files before answering
    factual questions.
 
 ## Operating Rules
