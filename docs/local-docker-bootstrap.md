@@ -33,6 +33,9 @@ Important values in `.env`:
 npm run docker:db:up
 ```
 
+The command waits for the Postgres healthcheck to report ready before it
+returns, so the next migration step can run immediately after startup.
+
 Useful companion commands:
 
 ```powershell

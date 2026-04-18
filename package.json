@@ -17,7 +17,7 @@
     "lint": "turbo lint --filter=@dabrowskiego/web",
     "db:generate": "npm run --workspace @dabrowskiego/db db:generate",
     "db:migrate": "npm run --workspace @dabrowskiego/db db:migrate",
-    "docker:db:up": "docker compose up -d postgres",
+    "docker:db:up": "docker compose up -d --wait postgres",
     "docker:db:down": "docker compose down",
     "docker:db:reset": "docker compose down -v",
     "docker:db:logs": "docker compose logs -f postgres",

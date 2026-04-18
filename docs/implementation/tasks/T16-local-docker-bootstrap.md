@@ -35,5 +35,24 @@
   - Expected outcome: documented startup from empty local Postgres proves the
     multi-schema migration path really works.
 - Next handoff note: start a reviewer chat on `codex/T16-local-docker-bootstrap` and say `reviewer T16 branch codex/T16-local-docker-bootstrap`
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run docker:db:reset`
+  - `npm run docker:db:up`
+  - `npm run db:migrate`
+  - `docker compose exec -T postgres psql -U postgres -d dabrowskiego -c "select schema_name from information_schema.schemata where schema_name in ('app', 'auth', 'vault') order by schema_name;"`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run docker:db:down`
+- Merge status: `ready`
+- Architecture note:
+  - Waiting for the Postgres healthcheck in the root Docker bootstrap script is
+    aligned with the approved local-first/bootstrap direction and keeps later
+    app tasks from inheriting a race between container startup and migrations.
+- Coordinator notes review:
+  - Confirmed. The reviewed flow now proves the blank-database migration path
+    against local Docker and verifies the expected `app`, `auth`, and `vault`
+    schemas exist after migration.
 
 
