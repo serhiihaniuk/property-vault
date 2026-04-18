@@ -130,6 +130,9 @@ export function createDashboardApplicationService(
           dependencies.loadDocumentRows(db, selectedPeriodValue),
         ]);
 
+      const selectedBreakdownByCategory = new Map(
+        selectedBreakdownRows.map((row) => [row.category, row]),
+      );
       const previousBreakdownByCategory = new Map(
         previousBreakdownRows.map((row) => [row.category, row]),
       );
@@ -142,7 +145,10 @@ export function createDashboardApplicationService(
       const previousTotalAmountMinor = previousPeriodValue
         ? previousBreakdownRows.reduce((sum, row) => sum + row.totalAmountMinor, 0)
         : null;
-      const breakdown = selectedBreakdownRows
+      const breakdown = mergeComparedBreakdownRows(
+        selectedBreakdownByCategory,
+        previousBreakdownRows,
+      )
         .map((row) =>
           createBreakdownItem({
             documents: documentsByCategory.get(row.category) ?? [],
@@ -155,6 +161,7 @@ export function createDashboardApplicationService(
         .sort((left, right) => right.amount.amountMinor - left.amount.amountMinor);
       const summary = createSummary({
         breakdown,
+        selectedCategoryCount: selectedBreakdownRows.length,
         previousTotalAmountMinor,
         totalAmountMinor,
       });
@@ -304,6 +311,7 @@ function createBreakdownItem(input: {
 
 function createSummary(input: {
   breakdown: DashboardMonthBreakdownResponse['breakdown'];
+  selectedCategoryCount: number;
   previousTotalAmountMinor: number | null;
   totalAmountMinor: number;
 }): DashboardMonthBreakdownResponse['summary'] {
@@ -323,7 +331,7 @@ function createSummary(input: {
     )[0] ?? null;
 
   return {
-    categoryCount: input.breakdown.length,
+    categoryCount: input.selectedCategoryCount,
     changedCategoryCount:
       input.previousTotalAmountMinor === null
         ? 0
@@ -356,6 +364,27 @@ function createSummary(input: {
             amountMinor: input.totalAmountMinor - input.previousTotalAmountMinor,
           }),
   };
+}
+
+function mergeComparedBreakdownRows(
+  selectedBreakdownByCategory: Map<string, DashboardBreakdownRow>,
+  previousBreakdownRows: DashboardBreakdownRow[],
+): DashboardBreakdownRow[] {
+  const mergedRows = Array.from(selectedBreakdownByCategory.values());
+
+  for (const previousRow of previousBreakdownRows) {
+    if (selectedBreakdownByCategory.has(previousRow.category)) {
+      continue;
+    }
+
+    mergedRows.push({
+      category: previousRow.category,
+      categoryGroup: previousRow.categoryGroup,
+      totalAmountMinor: 0,
+    });
+  }
+
+  return mergedRows;
 }
 
 function groupDocumentsByCategory(

@@ -120,7 +120,7 @@ export function DashboardOverviewWidget({
             }
           />
           <MetricCard
-            description={`${data.summary.categoryCount} normalized categories`}
+            description={`${data.summary.categoryCount} active in the selected month`}
             title="Changed categories"
             value={String(data.summary.changedCategoryCount)}
           />

@@ -117,6 +117,58 @@ test('dashboard service rejects an unavailable requested month', async () => {
   );
 });
 
+test('dashboard service keeps previous-only categories in the month comparison', async () => {
+  const dashboard = createDashboardApplicationService(createDashboardContext(), {
+    async loadBreakdownRows(_db, periodValue) {
+      return REMOVED_CATEGORY_BREAKDOWN_ROWS[periodValue] ?? [];
+    },
+    async loadDocumentRows(_db, periodValue) {
+      return REMOVED_CATEGORY_DOCUMENT_ROWS[periodValue] ?? [];
+    },
+    async loadMonthHistory() {
+      return [...REMOVED_CATEGORY_MONTH_HISTORY_ROWS];
+    },
+  });
+
+  const breakdown = await dashboard.getMonthBreakdown();
+  const removedCategory = breakdown.breakdown.find(
+    (item) => item.category === 'e_kartoteka_access',
+  );
+
+  assert.equal(breakdown.summary?.categoryCount, 1);
+  assert.equal(breakdown.summary?.changedCategoryCount, 1);
+  assert.deepEqual(breakdown.summary?.topChange, {
+    category: 'e_kartoteka_access',
+    categoryLabel: 'e-Kartoteka access',
+    changeStatus: 'down',
+    delta: {
+      amountMinor: -6000,
+      currency: 'PLN',
+    },
+  });
+  assert.deepEqual(removedCategory, {
+    amount: {
+      amountMinor: 0,
+      currency: 'PLN',
+    },
+    category: 'e_kartoteka_access',
+    categoryGroup: 'individual',
+    categoryGroupLabel: 'Individual',
+    categoryLabel: 'e-Kartoteka access',
+    changeStatus: 'down',
+    delta: {
+      amountMinor: -6000,
+      currency: 'PLN',
+    },
+    previousAmount: {
+      amountMinor: 6000,
+      currency: 'PLN',
+    },
+    sharePercent: 0,
+    sourceDocuments: [],
+  });
+});
+
 function createDashboardContext() {
   return createPropertyVaultApplicationContext({
     db: {} as PropertyVaultDatabase,
@@ -237,6 +289,76 @@ const DOCUMENT_ROWS: Record<
       documentType: 'monthly_charges',
       hash: 'b'.repeat(64),
       title: 'October 2025 monthly charges',
+    },
+  ],
+};
+
+const REMOVED_CATEGORY_MONTH_HISTORY_ROWS = [
+  {
+    periodValue: '2026-04',
+    totalAmountMinor: 12000,
+  },
+  {
+    periodValue: '2026-03',
+    totalAmountMinor: 18000,
+  },
+] as const;
+
+const REMOVED_CATEGORY_BREAKDOWN_ROWS: Record<
+  string,
+  Array<{
+    category: string;
+    categoryGroup: string | null;
+    totalAmountMinor: number;
+  }>
+> = {
+  '2026-04': [
+    {
+      category: 'shared_property_advance',
+      categoryGroup: 'shared_property',
+      totalAmountMinor: 12000,
+    },
+  ],
+  '2026-03': [
+    {
+      category: 'shared_property_advance',
+      categoryGroup: 'shared_property',
+      totalAmountMinor: 12000,
+    },
+    {
+      category: 'e_kartoteka_access',
+      categoryGroup: 'individual',
+      totalAmountMinor: 6000,
+    },
+  ],
+};
+
+const REMOVED_CATEGORY_DOCUMENT_ROWS: Record<
+  string,
+  Array<{
+    category: string;
+    documentDate: string | null;
+    documentType: string;
+    hash: string;
+    title: string;
+  }>
+> = {
+  '2026-04': [
+    {
+      category: 'shared_property_advance',
+      documentDate: '2026-04-01',
+      documentType: 'monthly_charges',
+      hash: 'c'.repeat(64),
+      title: 'April 2026 monthly charges',
+    },
+  ],
+  '2026-03': [
+    {
+      category: 'e_kartoteka_access',
+      documentDate: '2026-03-01',
+      documentType: 'monthly_charges',
+      hash: 'd'.repeat(64),
+      title: 'March 2026 monthly charges',
     },
   ],
 };
