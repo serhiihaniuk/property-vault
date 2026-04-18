@@ -53,21 +53,21 @@
   - Why it matters: the architecture sample's literal `src/pages/**` layer is incompatible with the current root-level App Router setup.
   - Suggested follow-up: coordinator should decide whether to standardize the web page layer on `src/views/**` or move the router shell to `src/app/**` in the docs and future tasks.
   - Urgency: `soon`
-- Review result: `re-review required`
+- Review result: `merge ready`
 - Reviewer: `Codex reviewer`
 - Review tests run:
   - `npm run typecheck`
   - `npm run lint`
   - `npm run build`
-  - `Invoke-WebRequest http://127.0.0.1:3000` against the already-running `apps/web` dev server to confirm the rendered shell contains `Property Vault` and `Dashboard shell`
-- Merge status: `re-review required`
+  - `Invoke-WebRequest http://127.0.0.1:3000` against the already-running `apps/web` dev server to confirm the rendered shell contains `Property Vault` and `Core questions`
+- Merge status: `ready`
 - Architecture note:
-  - The blocked shared-ownership issue was addressed in follow-up implementation: `app/(app)/layout.tsx` is a thin route-group frame again, `src/shared/ui/app-shell.tsx` was removed, and dashboard-specific chrome now lives in `widgets/dashboard-overview` and `widgets/dashboard-foundation`.
-  - Import directions remain aligned after the follow-up: `views/dashboard` composes widgets, those widgets depend on `shared`, and the current tree still avoids upward imports and same-level cross-slice imports.
-  - The `src/views/**` page layer remains an acceptable local substitute for `src/pages/**` while the App Router stays rooted in `app/`, but that naming choice should still be propagated deliberately in the docs and future tasks instead of leaving `src/pages/**` as the nominal target shape.
-  - The styling follow-up now relies on shared `Card`, `Badge`, and `Separator` primitives plus scale utilities instead of the earlier scattered arbitrary shell values; reviewer should confirm this is now within the intended low-ceremony Tailwind/shadcn approach.
+  - The chosen FSD ownership and import directions are aligned. `app/` is thin again, `views/dashboard` composes route-level screen sections from widgets, the widgets depend downward on `shared`, and the current tree still avoids upward imports and same-level cross-slice imports.
+  - The `src/views/**` page layer is acceptable but worth propagating later as the documented local substitute for `src/pages/**` while the App Router stays rooted in `app/`, so later tasks do not reintroduce the legacy Next.js `src/pages` conflict.
+  - The UI refactor is now aligned with the intended low-ceremony Tailwind/shadcn approach. The earlier page-local shell styling was replaced by shared `Card`, `Badge`, and `Separator` primitives plus mostly scale-based utilities, which is acceptable to propagate as the baseline for later web tasks.
+  - Remaining custom layout choices are limited and localized rather than scattered. If similar non-scale layout patterns start repeating later, they should be centralized in shared primitives instead of copied sideways across pages or widgets.
 - Coordinator notes review:
-  - Confirmed. The import graph is directionally clean, and `src/views/**` is a reasonable Next.js-specific stand-in for the page layer, but the shared-layer ownership and design-system drift both need fixes before this branch should merge.
-- Next handoff note: start a reviewer chat and say `reviewer T20 branch codex/T20-web-minimal-fsd`. Branch setup is agent-managed.
+  - Confirmed. The ownership fix and styling cleanup addressed the prior block, and the only carry-forward item left is to align future docs/tasks with the `src/views/**` page-layer interpretation while the App Router remains in root `app/`.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
 
 
