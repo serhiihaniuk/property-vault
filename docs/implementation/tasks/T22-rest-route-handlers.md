@@ -1,17 +1,49 @@
 # T22 — Add thin REST route handler structure
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `implementer`
 - Goal: Implement REST endpoints with thin Next.js route handlers.
 - Dependencies: `T13`, `T14`, `T20`
 - Write scope: `apps/web/app/api/**`, transport adapters only
+- Worker branch: `codex/T22-rest-route-handlers`
 - Recommended execution model: `gpt-5.4 / medium`
 - Wave group: `web-shell`
 - Required verification: `strong`
 - Completion signal: route handlers validate, delegate, and return contract DTOs without owning business logic.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: no DB access in handlers; call application services only
+- Files changed:
+  - `apps/web/app/api/route.ts`
+  - `apps/web/app/api/health/route.ts`
+  - `apps/web/app/api/openapi.json/route.ts`
+  - `apps/web/app/api/_lib/problem.ts`
+  - `apps/web/app/api/_lib/request.ts`
+  - `apps/web/app/api/_lib/response.ts`
+  - `apps/web/app/api/_lib/route-handler.ts`
+  - `apps/web/app/api/_lib/route-handler.test.ts`
+  - `apps/web/app/api/_lib/runtime.ts`
+  - `apps/web/app/api/_lib/system-handlers.ts`
+  - `apps/web/app/api/_lib/system-handlers.test.ts`
+  - `docs/implementation/tasks/T22-rest-route-handlers.md`
+- Contracts changed: none in `packages/contracts`
+- Tests run:
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/route-handler.test.ts apps/web/app/api/_lib/system-handlers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run test:contracts`
+  - `npm run build`
+- Coordinator notes:
+  - Observation: importing the root `@dabrowskiego/db` package into Next route runtime pulls `packages/db/src/migrations.ts`, and Turbopack then fails on the filesystem-only migrations path.
+  - Why it matters: later DB-backed web routes need a server-safe package entrypoint or subpath export instead of relying on the current root package barrel.
+  - Suggested follow-up: coordinator should schedule a small follow-up before the first DB-backed route slice so web runtime can consume DB client/config exports without pulling migrations into the app bundle.
+  - Urgency: `soon`
+- Review result: pending review
+- Reviewer: `unassigned`
+- Review tests run: none yet
+- Merge status: `pending review`
+- Architecture note: pending review
+- Coordinator notes review: pending review
+- Coordinator final review: pending review
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: start a reviewer chat on `codex/T22-rest-route-handlers` and say `reviewer T22`.
 
 
