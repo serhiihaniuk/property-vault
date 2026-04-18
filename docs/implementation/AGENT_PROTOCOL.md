@@ -280,13 +280,30 @@ it to the coordinator instead of redesigning it during review.
 1. Read the reviewed task result and any coordinator notes.
 2. Decide whether each observation changes future tasks, ordering, docs, or
    architecture decisions.
-3. Merge only when the reviewer result is truly `merge ready`.
-4. Update the task file with:
+3. If an accepted observation matters for future work, promote it into the
+   relevant future task file or `APP_IMPLEMENTATION_PLAN.md` instead of relying
+   on memory or the old completed task file alone.
+4. Merge only when the reviewer result is truly `merge ready`.
+5. Update the task file with:
    - `Coordinator final review`
    - `Actions taken`
    - `Actions ignored`
-5. Update `APP_IMPLEMENTATION_PLAN.md` or related docs when the coordinator
+6. Update `APP_IMPLEMENTATION_PLAN.md` or related docs when the coordinator
    decision changes future work.
+
+## Actions Disposition Rule
+
+- `Actions taken` means concrete changes actually made now, such as:
+  - merging the reviewed branch,
+  - updating a dependent future task file,
+  - changing backlog status, ordering, or dependencies,
+  - updating shared docs or architecture guidance,
+  - creating a new follow-up task.
+- `Actions ignored` means reviewed observations that were consciously not
+  applied now.
+- Writing or preserving a note by itself does not count as an action taken.
+- If a note is important enough to matter later, promote it into the future
+  task or plan and then record that promotion under `Actions taken`.
 
 ## Required Task File Fields
 

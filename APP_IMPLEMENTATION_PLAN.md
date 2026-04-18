@@ -314,7 +314,7 @@ This workflow is intentionally one task at a time.
 | `T30` | Dashboard summary + month breakdown | `todo` | `T21`-`T23` | dashboard contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-dashboard` | `strong` | dashboard renders real month summary and category breakdown |
 | `T31` | Documents list/detail + provenance | `todo` | `T21`-`T23` | documents contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-documents` | `strong` | document flows show detail plus provenance/source trace |
 | `T32` | Year reconciliation + anomalies | `todo` | `T21`-`T23` | reconciliation/anomaly contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-financials` | `strong` | yearly review and anomalies flow render from real data |
-| `T33` | Access/invite flows | `todo` | `T12`, `T21`-`T23` | auth/access routes, application, widgets | `gpt-5.4 / xhigh` | `slice-access` | `strong` | invite-only access flow works end to end |
+| `T33` | Access/invite flows | `todo` | `T12`, `T21`-`T23` | auth/access routes, application, widgets | `gpt-5.4 / xhigh` | `slice-access` | `strong` | invite-only access flow works end to end with real Postgres-backed auth coverage for credential and invite paths |
 
 ### Wave 4 — Hardening
 
@@ -354,10 +354,27 @@ Coordinator responsibilities:
 
 - read reviewer notes and `Coordinator notes`,
 - decide whether future tasks or docs need to change,
+- promote accepted future follow-ups into the relevant task file or this plan,
 - record `Coordinator final review`,
 - record `Actions taken`,
 - record `Actions ignored`,
 - merge reviewed work back into `main` when ready.
+
+### Meaning of `Actions taken`
+
+Use `Actions taken` only for concrete changes that were actually made, for
+example:
+
+- merged the reviewed branch,
+- updated a future dependent task file,
+- changed task ordering or status,
+- updated docs or architecture guidance,
+- created a new follow-up task.
+
+Do not use `Actions taken` for merely recording or preserving a note.
+
+If a completed-task observation matters later, carry it forward into the
+dependent task file or this plan and record that promotion as the action taken.
 
 ### Recommended reviewer model
 

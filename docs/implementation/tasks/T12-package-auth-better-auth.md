@@ -50,11 +50,10 @@
 - Coordinator final review:
   - merged the reviewer-approved T12 result into `master`
   - accepted the Better Auth package boundary and session-helper split as a good base for later access flows
-  - kept the `pg-mem` limitation note as future guidance for `T33`
+  - promoted the `pg-mem` auth-testing limitation into `T33` so it becomes an explicit future requirement
 - Actions taken:
   - merged `codex/T12-package-auth` into `master`
-  - preserved the reviewer-confirmed coverage for auth construction, session helpers, and disabled sign-up
-  - recorded the need for real Postgres-backed auth integration coverage before or during `T33`
+  - updated `T33` to require real Postgres-backed auth coverage for credential and invite paths
 - Actions ignored: none
 - Next handoff note: nothing right now
 

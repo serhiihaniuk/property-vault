@@ -99,11 +99,17 @@ Coordinator decides whether to:
 - update docs or architecture guidance,
 - ignore the note for now.
 
+If a note matters for a future task, promote it into that future task file or
+the implementation plan. Do not rely on the old completed task file alone.
+
 When coordinator finishes that pass, record:
 
 - `Coordinator final review`
 - `Actions taken`
 - `Actions ignored`
+
+`Actions taken` should list concrete repo or backlog changes actually made.
+Leaving a note by itself does not count.
 
 ## Naming Rule
 
