@@ -44,6 +44,12 @@ The reference direction is the dashboard draft provided by Serhii:
 - visible provenance, anomalies, and time context,
 - no playful SaaS hero styling.
 
+Important: this direction should stay close to the existing shadcn default
+style and the theme already started in `apps/web/app/globals.css`.
+
+Do not treat the draft as permission to invent a separate bespoke design
+system. Build from the current shadcn/Tailwind foundation first.
+
 ## What We Are Building
 
 The first useful UI is a property-operations dashboard and supporting evidence
@@ -101,6 +107,16 @@ Prefer Tailwind scale values and shadcn defaults as much as possible.
 Start from existing shared primitives in `apps/web/src/shared/ui`, not ad hoc
 component-local markup, when a standard UI building block already exists.
 
+The current theme in `apps/web/app/globals.css` is the source of truth for:
+
+- colors,
+- radii,
+- semantic surfaces,
+- typography tone,
+- dark/light behavior.
+
+Do not replace or locally fork that theme during ordinary feature work.
+
 Current shared baseline includes:
 
 - `Button`
@@ -119,6 +135,8 @@ shadcn-compatible patterns, instead of inventing a page-local one-off version.
 - prefer standard radii, borders, shadows, and text sizes
 - prefer shadcn variants before custom wrapper components
 - prefer composition of small shared primitives over large bespoke shells
+- keep the result recognizably close to the existing shadcn-default foundation
+  instead of restyling every primitive
 
 ### Avoid By Default
 
@@ -126,6 +144,7 @@ shadcn-compatible patterns, instead of inventing a page-local one-off version.
 - one-off hex colors or inline custom color values
 - custom radii, shadows, or spacing scattered across components
 - page-local design tokens
+- re-skinning core shadcn primitives without a strong shared reason
 - decorative gradients, glassmorphism, marketing-style hero sections
 - oversized whitespace that lowers dashboard density
 
@@ -150,6 +169,13 @@ Use the dashboard draft as the default tone:
 - small muted supporting labels,
 - strong metric emphasis,
 - sparse accent colors reserved for anomalies, warnings, or important status.
+
+But keep the implementation close to shadcn defaults:
+
+- use the current theme tokens,
+- use standard card/button/badge/separator behavior,
+- customize layout and composition more than primitive styling,
+- prefer "default shadcn, better arranged" over bespoke component skins.
 
 ### Good Patterns
 
@@ -209,6 +235,8 @@ For UI tasks, reviewer should validate all of this explicitly:
 - features are bounded interactions, not generic infrastructure
 - design-system discipline is preserved
 - shadcn/shared primitives are used where appropriate
+- the result still looks like the current shadcn-based theme, not a parallel
+  custom component library
 - arbitrary styling values are not spreading across the codebase
 - the result still matches the serious dark analytical dashboard direction
 - provenance, anomalies, and metrics remain readable and not visually buried
