@@ -1,30 +1,43 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import "./globals.css";
+import { cn } from "@/src/shared/lib/utils";
+import { ThemeProvider } from "@/src/shared/ui/theme-provider";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
+const geistSans = Geist({
   subsets: ["latin"],
-  variable: "--font-mono",
-})
+  variable: "--font-geist-sans",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: "Property Vault",
+    template: "%s | Property Vault",
+  },
+  description:
+    "Invite-only property operations workspace with local-first evidence and a contract-first web shell.",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
+      className={cn(geistSans.variable, geistMono.variable, "font-sans antialiased")}
     >
-      <body>
+      <body className="min-h-svh bg-background text-foreground">
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

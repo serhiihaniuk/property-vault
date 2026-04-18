@@ -1,17 +1,43 @@
 # T20 — Refactor `apps/web` into minimal FSD
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `coordinator`
 - Goal: Move the web app to the approved minimal FSD structure.
 - Dependencies: `T11`, `T12`, `T13`, `T14`, `T15`, `T16`
 - Write scope: `apps/web/app/**`, `apps/web/src/**`
+- Worker branch: `codex/T20-web-minimal-fsd`
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `web-shell`
 - Required verification: `strong`
 - Completion signal: web app compiles with minimal FSD boundaries and thin `app/` routes.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: avoid overbuilding FSD; keep only shared/entities/features/widgets/pages
+- Files changed:
+  - `apps/web/app/(app)/layout.tsx`
+  - `apps/web/app/(app)/page.tsx`
+  - `apps/web/app/globals.css`
+  - `apps/web/app/layout.tsx`
+  - `apps/web/app/page.tsx` (removed)
+  - `apps/web/src/entities/.gitkeep`
+  - `apps/web/src/features/.gitkeep`
+  - `apps/web/src/shared/api/.gitkeep`
+  - `apps/web/src/shared/auth/.gitkeep`
+  - `apps/web/src/shared/config/.gitkeep`
+  - `apps/web/src/shared/lib/utils.ts`
+  - `apps/web/src/shared/ui/app-shell.tsx`
+  - `apps/web/src/shared/ui/button.tsx`
+  - `apps/web/src/shared/ui/theme-provider.tsx`
+  - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
+  - `apps/web/src/widgets/dashboard-summary/ui/dashboard-summary-widget.tsx`
+  - `docs/implementation/tasks/T20-web-minimal-fsd.md`
+- Contracts changed: none in `packages/contracts`
+- Tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+- Coordinator notes:
+  - Observation: Next.js treats `src/pages` as the legacy Pages Router and fails builds when the App Router remains in root `app/`.
+  - Why it matters: the architecture sample's literal `src/pages/**` layer is incompatible with the current root-level App Router setup.
+  - Suggested follow-up: coordinator should decide whether to standardize the web page layer on `src/views/**` or move the router shell to `src/app/**` in the docs and future tasks.
+  - Urgency: `soon`
+- Next handoff note: start a reviewer chat and say `reviewer T20 branch codex/T20-web-minimal-fsd`. Branch setup is agent-managed.
 
 
