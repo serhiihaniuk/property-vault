@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -13,6 +13,7 @@ import {
   reindex,
   search,
   sql,
+  tagDocument,
   validate,
 } from './vault.ts';
 import type { VaultRecord } from './schemas/record.ts';
@@ -295,6 +296,55 @@ test('reindex rebuilds records, notes, and search index from canonical files', a
   }
 });
 
+test('reindex rebuilds canonical emails, asset tags, and anomalies', async () => {
+  const fixture = await createFixture();
+
+  try {
+    const logoPath = path.join(fixture.root, 'logo.png');
+    const missingPath = path.join(fixture.root, 'needs-extraction.txt');
+    await writeFile(logoPath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    await writeFile(missingPath, 'needs extraction', 'utf8');
+
+    const logo = await registerDocument({ path: logoPath }, fixture.root);
+    const missing = await registerDocument({ path: missingPath }, fixture.root);
+    await tagDocument(logo.hash, 'asset_logo', fixture.root);
+    await writeCanonicalEmailFixture(fixture.root, logo.hash);
+
+    const result = await reindex(fixture.root);
+    const rows = await sql<{
+      emails: number;
+      attachments: number;
+      taggedDocuments: number;
+      openAnomalies: number;
+    }>(
+      `
+        SELECT
+          (SELECT count(*) FROM emails) AS emails,
+          (SELECT count(*) FROM email_attachments) AS attachments,
+          (SELECT count(*) FROM documents WHERE asset_tag = 'asset_logo') AS taggedDocuments,
+          (SELECT count(*) FROM anomalies WHERE status = 'open') AS openAnomalies
+      `,
+      [],
+      fixture.root,
+    );
+    const work = await listExtractionWork(fixture.root);
+
+    assert.equal(result.emailsIndexed, 1);
+    assert.equal(result.emailAttachmentsIndexed, 1);
+    assert.equal(result.documentTagsIndexed, 1);
+    assert.equal(result.anomaliesOpen, 1);
+    assert.deepEqual(rows[0], {
+      emails: 1,
+      attachments: 1,
+      taggedDocuments: 1,
+      openAnomalies: 1,
+    });
+    assert.deepEqual(work.map((item) => item.hash), [missing.hash]);
+  } finally {
+    await fixture.remove();
+  }
+});
+
 test('listExtractionWork reports documents without records', async () => {
   const fixture = await createFixture();
 
@@ -384,6 +434,45 @@ test('strict validation catches missing Git ignore protections', async () => {
     await fixture.remove();
   }
 });
+
+async function writeCanonicalEmailFixture(root: string, hash: string): Promise<void> {
+  const emailDir = path.join(root, 'vault', 'emails', 'gmail-1');
+  await mkdir(emailDir, { recursive: true });
+  await writeFile(path.join(emailDir, 'body.txt'), 'Email body\n', 'utf8');
+  await writeFile(
+    path.join(emailDir, 'metadata.json'),
+    `${JSON.stringify({
+      id: 'gmail-1',
+      threadId: 'thread-1',
+      historyId: 'history-1',
+      internalDate: '1715587872000',
+      headers: { from: 'administrator4@locator.wroclaw.pl' },
+      subject: 'Locator message',
+      from: 'administrator4@locator.wroclaw.pl',
+      to: 'owner@example.test',
+      date: 'Mon, 13 May 2024 10:11:12 +0200',
+      bodyText: 'Email body',
+      attachments: [],
+    }, null, 2)}\n`,
+    'utf8',
+  );
+  await writeFile(
+    path.join(emailDir, 'attachments.json'),
+    `${JSON.stringify([
+      {
+        index: 0,
+        attachmentId: 'attachment-1',
+        originalFilename: 'logo.png',
+        declaredMime: 'image/png',
+        sniffedMime: 'image/png',
+        sizeBytes: 4,
+        hash,
+        failed: false,
+      },
+    ], null, 2)}\n`,
+    'utf8',
+  );
+}
 
 function makePdf(text: string): Buffer {
   const objects: string[] = [];

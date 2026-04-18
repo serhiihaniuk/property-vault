@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-17 18:50 Europe/Warsaw
+**Last updated:** 2026-04-18 07:48 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -27,10 +27,11 @@ Legend:
 | 4 | Manual extraction loop | [~] | 30 real records are stored; broader backfill queue is now empty. Fixture families for media_settlement, interest_note, account_statement still missing. |
 | 5 | Gmail import | [x] | OAuth, Locator listing, and a full historical backfill have run. |
 | 6 | Reports and anomalies | [~] | Inbox report and initial anomaly rules exist; financial comparison anomaly rules remain. |
-| 7 | Hardening | [~] | Backup create/verify exists and `validate --strict` passes after real import; restore workflow and backup-warning gates remain. |
+| 7 | Hardening | [~] | Backup create/verify exists, and `reindex` now rebuilds emails, attachment rows, asset tags, records, notes, and anomalies; restore workflow and backup-warning gates remain. |
 
 ### Latest Completed Commits
 
+- `pending` Harden reindex to rebuild canonical email, tag, and anomaly state.
 - `33646e0` Mark broader backfill queue complete.
 - `e08561c` Note February 2026 meeting commit hash.
 - `b4a6071` Record February 2026 annual meeting notice extraction.
@@ -79,12 +80,14 @@ Legend:
 - Add fixture records for media settlements, interest notes, and account
   statements (monthly charges now covered by `732269...`).
 - Implement remaining financial anomaly rules (FEE_DELTA, MISSING_PERIOD, etc.).
+- Add restore workflow and backup-warning gates on top of the now-hardened
+  `reindex` path.
 - Confirm voting outcomes for 6 pending uchwały from the March 2026 meeting
   notice, plus the blank Resolution 6/2022 DACH BUD ballot.
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-17 after extracting the second-half 2025 media settlement.
+Updated 2026-04-18 after hardening the reindex path.
 
 #### Vault state
 
@@ -94,10 +97,15 @@ Updated 2026-04-17 after extracting the second-half 2025 media settlement.
   `C:\Users\Serge\Desktop\dabrowskiego-backups\vault-2026-04-17.zip`.
 - Full Locator backfill has run: 30 emails in the vault, 97 messages seen total,
   and 32 canonical documents.
+- `npm run vault -- reindex --json` now restores 32 documents, 193 source
+  observations, 30 emails, 60 email attachments, 2 asset tags, 30 records,
+  30 notes, and 30 open anomalies from canonical vault files.
 - `npm run vault -- validate --strict --json` → `ok: true, errors: []`.
 - `reports/inbox.md` up to date; 30 open anomalies.
 - Current records: 30.
 - Current extraction queue: 0 documents.
+- Non-record assets are canonicalized in `vault/document-tags.json`; the two
+  logo PNGs remain tagged `asset_logo` after a reindex.
 - New broader-backfill extraction completed this step:
   `b35587a...` second-half 2025 media settlement (`media_settlement`, `ok`):
   the settlement shows a 754.66 PLN underpayment with a 2026-03-31 payment

@@ -16,6 +16,7 @@ export type VaultPaths = {
   recordsDir: string;
   notesDir: string;
   sourcesJsonl: string;
+  documentTagsJson: string;
   stateJson: string;
   indexDir: string;
   databasePath: string;
@@ -76,6 +77,7 @@ export function getVaultPaths(root = resolveRepoRoot()): VaultPaths {
     recordsDir: path.join(vaultDir, 'records'),
     notesDir: path.join(vaultDir, 'notes'),
     sourcesJsonl: path.join(vaultDir, 'sources.jsonl'),
+    documentTagsJson: path.join(vaultDir, 'document-tags.json'),
     stateJson: path.join(vaultDir, 'state.json'),
     indexDir,
     databasePath: path.join(indexDir, 'vault.db'),

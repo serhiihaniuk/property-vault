@@ -727,8 +727,12 @@ function printReindexResult(result: ReindexResult): void {
   console.log(`Documents indexed: ${result.documentsIndexed}`);
   console.log(`Sources indexed: ${result.sourcesIndexed}`);
   console.log(`Sources skipped: ${result.sourcesSkipped}`);
+  console.log(`Emails indexed: ${result.emailsIndexed}`);
+  console.log(`Email attachments indexed: ${result.emailAttachmentsIndexed}`);
+  console.log(`Document tags indexed: ${result.documentTagsIndexed}`);
   console.log(`Records indexed: ${result.recordsIndexed}`);
   console.log(`Notes indexed: ${result.notesIndexed}`);
+  console.log(`Open anomalies: ${result.anomaliesOpen}`);
 }
 
 function printDetectAnomaliesResult(result: DetectAnomaliesResult): void {

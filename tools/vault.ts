@@ -1,5 +1,5 @@
 import { constants } from 'node:fs';
-import { access, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileTypeFromBuffer } from 'file-type';
 import {
@@ -62,8 +62,12 @@ export type ReindexResult = {
   documentsIndexed: number;
   sourcesIndexed: number;
   sourcesSkipped: number;
+  emailsIndexed: number;
+  emailAttachmentsIndexed: number;
+  documentTagsIndexed: number;
   recordsIndexed: number;
   notesIndexed: number;
+  anomaliesOpen: number;
 };
 
 export type SearchOptions = {
@@ -171,6 +175,32 @@ type CanonicalRecord = {
 type CanonicalNote = {
   relativePath: string;
   markdown: string;
+};
+
+type CanonicalEmail = {
+  gmailId: string;
+  threadId: string;
+  historyId: string | null;
+  internalDate: string | null;
+  sentAt: string | null;
+  receivedAt: string | null;
+  sender: string | null;
+  recipients: string;
+  subject: string | null;
+  bodyPath: string;
+  rawHeaders: string;
+  attachments: CanonicalEmailAttachment[];
+};
+
+type CanonicalEmailAttachment = {
+  gmailId: string;
+  attachmentIndex: number;
+  attachmentId: string | null;
+  filename: string | null;
+  declaredMime: string | null;
+  sniffedMime: string | null;
+  sizeBytes: number | null;
+  hash: string | null;
 };
 
 export async function init(root = resolveRepoRoot()): Promise<InitResult> {
@@ -560,10 +590,15 @@ export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> 
   const sourceObservations = await readSourceObservations(paths.sourcesJsonl);
   const canonicalRecords = await readCanonicalRecords(paths);
   const canonicalNotes = await readCanonicalNotes(paths);
+  const canonicalEmails = await readCanonicalEmails(paths);
+  const canonicalDocumentTags = await readCanonicalDocumentTags(paths);
   const knownDocumentHashes = new Set(documentRows.map((row) => row.hash));
   let sourcesIndexed = 0;
   let sourcesSkipped = 0;
   let recordsIndexed = 0;
+  let emailsIndexed = 0;
+  let emailAttachmentsIndexed = 0;
+  let documentTagsIndexed = 0;
 
   const db = await openVaultDatabase(root);
 
@@ -615,6 +650,65 @@ export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> 
           @originalFilename
         )
       `);
+      const updateDocumentTag = db.prepare(`
+        UPDATE documents
+        SET asset_tag = @tag, updated_at = datetime('now')
+        WHERE hash = @hash
+      `);
+      const insertEmail = db.prepare(`
+        INSERT INTO emails (
+          gmail_id,
+          thread_id,
+          history_id,
+          internal_date,
+          sent_at,
+          received_at,
+          sender,
+          recipients,
+          subject,
+          labels,
+          body_path,
+          raw_headers,
+          updated_at
+        )
+        VALUES (
+          @gmailId,
+          @threadId,
+          @historyId,
+          @internalDate,
+          @sentAt,
+          @receivedAt,
+          @sender,
+          @recipients,
+          @subject,
+          '[]',
+          @bodyPath,
+          @rawHeaders,
+          datetime('now')
+        )
+      `);
+      const insertEmailAttachment = db.prepare(`
+        INSERT INTO email_attachments (
+          gmail_id,
+          attachment_index,
+          attachment_id,
+          filename,
+          declared_mime,
+          sniffed_mime,
+          size_bytes,
+          hash
+        )
+        VALUES (
+          @gmailId,
+          @attachmentIndex,
+          @attachmentId,
+          @filename,
+          @declaredMime,
+          @sniffedMime,
+          @sizeBytes,
+          @hash
+        )
+      `);
 
       for (const document of documentRows) {
         insertDocument.run(document);
@@ -639,6 +733,27 @@ export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> 
         }
       }
 
+      for (const [hash, tag] of canonicalDocumentTags) {
+        if (!knownDocumentHashes.has(hash)) {
+          continue;
+        }
+
+        const result = updateDocumentTag.run({ hash, tag });
+        if (result.changes > 0) {
+          documentTagsIndexed += 1;
+        }
+      }
+
+      for (const email of canonicalEmails) {
+        insertEmail.run(email);
+        emailsIndexed += 1;
+
+        for (const attachment of email.attachments) {
+          insertEmailAttachment.run(attachment);
+          emailAttachmentsIndexed += 1;
+        }
+      }
+
       for (const record of canonicalRecords) {
         if (!knownDocumentHashes.has(record.hash)) {
           continue;
@@ -654,13 +769,19 @@ export async function reindex(root = resolveRepoRoot()): Promise<ReindexResult> 
     db.close();
   }
 
+  const anomalyResult = await detectAnomaliesAfterReindex(root);
+
   return {
     root: paths.root,
     documentsIndexed: documentRows.length,
     sourcesIndexed,
     sourcesSkipped,
+    emailsIndexed,
+    emailAttachmentsIndexed,
+    documentTagsIndexed,
     recordsIndexed,
     notesIndexed: canonicalNotes.size,
+    anomaliesOpen: anomalyResult.open,
   };
 }
 
@@ -933,6 +1054,7 @@ export async function tagDocument(
   await init(root);
 
   const normalizedHash = normalizeSha256(hash);
+  const paths = getVaultPaths(root);
 
   await assertDocumentExists(normalizedHash, root);
 
@@ -951,6 +1073,8 @@ export async function tagDocument(
   } finally {
     db.close();
   }
+
+  await writeCanonicalDocumentTag(paths, normalizedHash, tag);
 
   return { hash: normalizedHash, tag };
 }
@@ -1455,6 +1579,79 @@ async function readCanonicalNotes(paths: VaultPaths): Promise<Map<string, Canoni
   return notes;
 }
 
+async function readCanonicalEmails(paths: VaultPaths): Promise<CanonicalEmail[]> {
+  const entries = await readdir(paths.emailsDir, { withFileTypes: true });
+  const emails: CanonicalEmail[] = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const emailDir = path.join(paths.emailsDir, entry.name);
+    const metadataPath = path.join(emailDir, 'metadata.json');
+    const attachmentsPath = path.join(emailDir, 'attachments.json');
+    const bodyPath = path.join(emailDir, 'body.txt');
+
+    if (!(await pathExists(metadataPath)) || !(await pathExists(attachmentsPath))) {
+      continue;
+    }
+
+    const metadata = parseJsonObject(await readFile(metadataPath, 'utf8'), metadataPath);
+    const attachments = parseJsonArray(await readFile(attachmentsPath, 'utf8'), attachmentsPath);
+    const gmailId = stringField(metadata, 'id');
+
+    emails.push({
+      gmailId,
+      threadId: stringField(metadata, 'threadId'),
+      historyId: nullableStringField(metadata, 'historyId'),
+      internalDate: nullableStringField(metadata, 'internalDate'),
+      sentAt: parseEmailDate(nullableStringField(metadata, 'date')),
+      receivedAt: parseInternalDate(nullableStringField(metadata, 'internalDate')),
+      sender: nullableStringField(metadata, 'from'),
+      recipients: JSON.stringify(nullableStringField(metadata, 'to') ? [metadata.to] : []),
+      subject: nullableStringField(metadata, 'subject'),
+      bodyPath: toRepoRelativePath(paths.root, bodyPath),
+      rawHeaders: JSON.stringify(isPlainRecord(metadata.headers) ? metadata.headers : {}),
+      attachments: attachments.map((attachment) =>
+        canonicalEmailAttachment(gmailId, attachment, attachmentsPath),
+      ),
+    });
+  }
+
+  return emails.sort((left, right) => left.gmailId.localeCompare(right.gmailId));
+}
+
+async function readCanonicalDocumentTags(paths: VaultPaths): Promise<Map<string, string>> {
+  if (!(await pathExists(paths.documentTagsJson))) {
+    return new Map();
+  }
+
+  const parsed = parseJsonObject(await readFile(paths.documentTagsJson, 'utf8'), paths.documentTagsJson);
+  const tags = new Map<string, string>();
+
+  for (const [hash, tag] of Object.entries(parsed)) {
+    tags.set(normalizeSha256(hash), stringValue(tag, `document tag for ${hash}`));
+  }
+
+  return tags;
+}
+
+async function writeCanonicalDocumentTag(
+  paths: VaultPaths,
+  hash: string,
+  tag: string,
+): Promise<void> {
+  const tags = await readCanonicalDocumentTags(paths);
+  tags.set(hash, tag);
+
+  const serialized = `${JSON.stringify(Object.fromEntries([...tags].sort()), null, 2)}\n`;
+  const tempPath = `${paths.documentTagsJson}.${process.pid}.${Date.now()}.tmp`;
+
+  await writeFile(tempPath, serialized, { encoding: 'utf8', flag: 'wx' });
+  await rename(tempPath, paths.documentTagsJson);
+}
+
 async function readCanonicalNote(
   paths: VaultPaths,
   hash: string,
@@ -1636,6 +1833,122 @@ function sourceReferenceForIdentity(
 function originalFilenameFromObservation(observation: SourceObservation): string | null {
   const value = observation.source.original_filename;
   return typeof value === 'string' ? value : null;
+}
+
+function canonicalEmailAttachment(
+  gmailId: string,
+  value: unknown,
+  sourcePath: string,
+): CanonicalEmailAttachment {
+  if (!isPlainRecord(value)) {
+    throw new Error(`Invalid email attachment entry in ${sourcePath}`);
+  }
+
+  const hash = nullableStringField(value, 'hash');
+
+  return {
+    gmailId,
+    attachmentIndex: numberField(value, 'index'),
+    attachmentId: nullableStringField(value, 'attachmentId'),
+    filename: nullableStringField(value, 'originalFilename'),
+    declaredMime: nullableStringField(value, 'declaredMime'),
+    sniffedMime: nullableStringField(value, 'sniffedMime'),
+    sizeBytes: nullableNumberField(value, 'sizeBytes'),
+    hash: hash === null ? null : normalizeSha256(hash),
+  };
+}
+
+function parseJsonObject(raw: string, sourcePath: string): Record<string, unknown> {
+  const parsed = JSON.parse(raw) as unknown;
+
+  if (!isPlainRecord(parsed)) {
+    throw new Error(`Expected JSON object at ${sourcePath}`);
+  }
+
+  return parsed;
+}
+
+function parseJsonArray(raw: string, sourcePath: string): unknown[] {
+  const parsed = JSON.parse(raw) as unknown;
+
+  if (!Array.isArray(parsed)) {
+    throw new Error(`Expected JSON array at ${sourcePath}`);
+  }
+
+  return parsed;
+}
+
+function stringField(record: Record<string, unknown>, key: string): string {
+  return stringValue(record[key], key);
+}
+
+function stringValue(value: unknown, label: string): string {
+  if (typeof value !== 'string') {
+    throw new Error(`Expected string for ${label}`);
+  }
+
+  return value;
+}
+
+function nullableStringField(record: Record<string, unknown>, key: string): string | null {
+  const value = record[key];
+
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return stringValue(value, key);
+}
+
+function numberField(record: Record<string, unknown>, key: string): number {
+  const value = record[key];
+
+  if (!Number.isInteger(value)) {
+    throw new Error(`Expected integer for ${key}`);
+  }
+
+  return value;
+}
+
+function nullableNumberField(record: Record<string, unknown>, key: string): number | null {
+  const value = record[key];
+
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value !== 'number') {
+    throw new Error(`Expected number for ${key}`);
+  }
+
+  return value;
+}
+
+function parseEmailDate(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function parseInternalDate(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return null;
+  }
+
+  return new Date(numeric).toISOString();
+}
+
+async function detectAnomaliesAfterReindex(root: string): Promise<{ open: number }> {
+  const { detectAnomalies } = await import('./anomalies.ts');
+  return detectAnomalies({ root });
 }
 
 async function appendSourceObservationIfMissing(
