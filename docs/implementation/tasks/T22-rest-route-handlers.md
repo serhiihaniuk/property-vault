@@ -1,7 +1,7 @@
 # T22 — Add thin REST route handler structure
 
 - Status: `done`
-- Owner: `implementer`
+- Owner: `coordinator`
 - Goal: Implement REST endpoints with thin Next.js route handlers.
 - Dependencies: `T13`, `T14`, `T20`
 - Write scope: `apps/web/app/api/**`, transport adapters only
@@ -46,9 +46,15 @@
 - Merge status: `ready for coordinator merge`
 - Architecture note: acceptable and aligned. `apps/web/app/api/_lib/**` stays a thin transport layer over `packages/application` and `packages/contracts`, and the reviewed health handler now honors the declared contract by returning `200` for degraded checks and `503` only when a dependency is actually unavailable.
 - Coordinator notes review: valid and still worth scheduling soon. The root `@dabrowskiego/db` barrel currently exports migrations alongside runtime DB helpers, so a small follow-up before the first DB-backed route slice is still the right place to add a server-safe entrypoint or subpath export. An unrelated local modification to `APP_IMPLEMENTATION_PLAN.md` was already present in this worktree and was left untouched because that file is coordinator-owned.
-- Coordinator final review: pending review
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - merged the reviewer-approved T22 result into `master`
+  - accepted the thin route-handler transport layer and contract-aligned error/health response behavior as the correct base for later web slices
+  - promoted the DB entrypoint follow-up into `T30` so the first DB-backed route slice addresses the runtime-safe `@dabrowskiego/db` import path explicitly
+- Actions taken:
+  - merged `codex/T22-rest-route-handlers` into `master`
+  - recorded T22 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - updated `T30` with the server-safe DB entrypoint follow-up for the first DB-backed route slice
+- Actions ignored: none
+- Next handoff note: nothing right now.
 
 
