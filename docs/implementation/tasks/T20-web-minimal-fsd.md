@@ -68,6 +68,15 @@
   - Remaining custom layout choices are limited and localized rather than scattered. If similar non-scale layout patterns start repeating later, they should be centralized in shared primitives instead of copied sideways across pages or widgets.
 - Coordinator notes review:
   - Confirmed. The ownership fix and styling cleanup addressed the prior block, and the only carry-forward item left is to align future docs/tasks with the `src/views/**` page-layer interpretation while the App Router remains in root `app/`.
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - merged the reviewer-approved T20 result into `master`
+  - accepted the minimal FSD ownership, import direction, and low-ceremony Tailwind/shadcn baseline as the web-shell foundation for later tasks
+  - promoted the `src/views/**` page-layer clarification into `ARCHITECTURE.md` so future App Router work does not reintroduce the legacy `src/pages/**` conflict
+- Actions taken:
+  - merged `codex/T20-web-minimal-fsd` into `master`
+  - recorded T20 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - updated `ARCHITECTURE.md` to document `src/views/**` as the route-level screen layer while the App Router remains rooted in `app/`
+- Actions ignored: none
+- Next handoff note: nothing right now.
 
 

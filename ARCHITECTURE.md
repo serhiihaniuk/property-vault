@@ -149,7 +149,7 @@ Owns:
 - Next.js App Router shell,
 - route handlers implementing REST,
 - auth-protected UI,
-- minimal FSD pages/widgets/features/entities/shared layers.
+- minimal FSD views/widgets/features/entities/shared layers.
 
 ### `tools/`
 
@@ -292,12 +292,18 @@ apps/web/
       anomaly-feed/
       document-detail/
       yearly-reconciliation/
-    pages/
+    views/
       dashboard/
       documents/
       financials/
       settings/
 ```
+
+Use `src/views/**` as the route-level screen layer while the Next.js App
+Router stays rooted in `app/`.
+
+Do not add `src/pages/**` in this setup. Next.js treats that as the legacy
+Pages Router, which conflicts with the root App Router structure.
 
 Keep it light. The point is predictable ownership, not ceremony.
 
