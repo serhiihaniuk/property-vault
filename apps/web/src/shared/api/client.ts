@@ -33,6 +33,9 @@ export interface PropertyVaultApiTransport extends ContractClientTransport {
 }
 
 export type PropertyVaultApiClient = PropertyVaultApiTransport & PropertyVaultContractClient;
+export type DashboardMonthBreakdownData = Awaited<
+  ReturnType<PropertyVaultContractClient["getDashboardMonthBreakdown"]>
+>;
 
 export class PropertyVaultApiError extends Error {
   readonly problem?: PropertyVaultApiProblem;

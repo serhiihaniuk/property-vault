@@ -42,7 +42,11 @@ test('property vault OpenAPI generation exposes system routes and shared compone
   assert.equal(document.info.version, 'test-version');
   assert.ok(document.paths['/api']?.get);
   assert.ok(document.paths['/api/health']?.get);
+  assert.ok(document.paths['/api/dashboard/month-breakdown']?.get);
   assert.deepEqual(document.paths['/api/health']?.get?.tags, ['system']);
+  assert.deepEqual(document.paths['/api/dashboard/month-breakdown']?.get?.tags, [
+    'dashboard',
+  ]);
   assert.ok(document.components.schemas.ApiProblem);
   assert.ok(document.components.schemas.MoneyAmount);
 
@@ -53,6 +57,10 @@ test('property vault OpenAPI generation exposes system routes and shared compone
   assert.deepEqual(unavailableResponse, {
     $ref: '#/components/schemas/ApiProblem',
   });
+  assert.equal(
+    document.paths['/api/dashboard/month-breakdown']?.get?.parameters?.[0]?.name,
+    'month',
+  );
 });
 
 test('parameter schemas convert to OpenAPI parameters with required path params', () => {

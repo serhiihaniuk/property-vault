@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { createDatabase } from '@dabrowskiego/db';
+import { resolveMigrationsFolder } from '@dabrowskiego/db/migrations';
 import {
   init,
   putNote,
@@ -15,7 +16,6 @@ import {
 import { newDb } from 'pg-mem';
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { resolveMigrationsFolder } from '@dabrowskiego/db';
 import { rebuildVaultSchema, syncVaultToDatabase } from './sync.ts';
 
 test('syncVaultToDatabase mirrors canonical vault data into Postgres idempotently', async () => {

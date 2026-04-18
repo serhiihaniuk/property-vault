@@ -7,9 +7,14 @@ import {
   createSystemApplicationService,
   type SystemApplicationService,
 } from './system.ts';
+import {
+  createDashboardApplicationService,
+  type DashboardApplicationService,
+} from './dashboard.ts';
 
 export interface PropertyVaultApplication {
   context: PropertyVaultApplicationContext;
+  dashboard: DashboardApplicationService;
   system: SystemApplicationService;
 }
 
@@ -20,6 +25,7 @@ export function createPropertyVaultApplication(
 
   return {
     context,
+    dashboard: createDashboardApplicationService(context),
     system: createSystemApplicationService(context),
   };
 }

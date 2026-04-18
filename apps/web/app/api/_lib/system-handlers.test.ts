@@ -125,6 +125,9 @@ function createTestRuntime(
 
   return {
     application,
+    getDbApplication() {
+      return application;
+    },
     openApiDocument,
   };
 }

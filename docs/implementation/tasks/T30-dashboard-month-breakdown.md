@@ -1,6 +1,6 @@
 # T30 — Dashboard summary + month breakdown
 
-- Status: `claimed`
+- Status: `done`
 - Owner: `coordinator`
 - Goal: Deliver the first dashboard slice with month summary and category breakdown.
 - Dependencies: `T21`, `T22`, `T23`
@@ -10,13 +10,47 @@
 - Wave group: `slice-dashboard`
 - Required verification: `strong`
 - Completion signal: dashboard renders real month summary and normalized breakdown data.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `apps/web/app/api/_lib/dashboard-handlers.ts`
+  - `apps/web/app/api/_lib/dashboard-handlers.test.ts`
+  - `apps/web/app/api/_lib/runtime.ts`
+  - `apps/web/app/api/_lib/system-handlers.test.ts`
+  - `apps/web/app/api/dashboard/month-breakdown/route.ts`
+  - `apps/web/src/shared/api/client.ts`
+  - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
+  - `apps/web/src/widgets/dashboard-foundation/ui/dashboard-foundation-widget.tsx`
+  - `apps/web/src/widgets/dashboard-overview/ui/dashboard-overview-widget.tsx`
+  - `apps/web/src/widgets/dashboard-summary/ui/dashboard-summary-widget.tsx`
+  - `docs/implementation/tasks/T30-dashboard-month-breakdown.md`
+  - `packages/application/src/application.ts`
+  - `packages/application/src/dashboard.ts`
+  - `packages/application/src/dashboard.test.ts`
+  - `packages/application/src/index.ts`
+  - `packages/auth/src/auth.test.ts`
+  - `packages/contracts/src/contracts.test.ts`
+  - `packages/contracts/src/dashboard.ts`
+  - `packages/contracts/src/generated/client.ts`
+  - `packages/contracts/src/generated/openapi.json`
+  - `packages/contracts/src/index.ts`
+  - `packages/contracts/src/system.ts`
+  - `packages/db/package.json`
+  - `packages/db/src/index.ts`
+  - `packages/db/src/runtime.ts`
+  - `packages/sync/src/sync.test.ts`
+- Contracts changed:
+  - added `GET /api/dashboard/month-breakdown` in `packages/contracts/src/dashboard.ts` with month selection, summary, breakdown, supporting document, and RFC7807 missing-month responses
+  - exported the dashboard route catalog through `packages/contracts/src/system.ts` and `packages/contracts/src/index.ts`
+  - regenerated `packages/contracts/src/generated/client.ts` and `packages/contracts/src/generated/openapi.json`
+- Tests run:
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `npm run --workspace @dabrowskiego/application test`
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/system-handlers.test.ts apps/web/app/api/_lib/dashboard-handlers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
 - Coordinator notes:
-  - Carry-forward from `T22`: before this first DB-backed route slice ships, expose a server-safe `@dabrowskiego/db` runtime entrypoint or subpath export so Next route/runtime code can consume DB helpers without pulling migrations into the app bundle.
-  - Why it matters: importing the current root DB package barrel from web runtime code pulls `packages/db/src/migrations.ts`, which breaks Turbopack because the migrations path is filesystem-only.
-  - Expected outcome: `T30` should use a runtime-safe DB import path and avoid bundling migrations into web route execution.
-- Next handoff note: keep dashboard slice isolated from documents/reconciliation slices
+  - Resolved the carry-forward from `T22` inside this task by adding runtime-safe `@dabrowskiego/db/runtime` and `@dabrowskiego/db/migrations` exports, so Next route code no longer pulls filesystem-only migrations through the root package barrel.
+  - No additional backlog-shaping follow-up was needed during implementation.
+- Next handoff note: start a reviewer chat and say `reviewer T30`. Review should use branch `codex/T30-dashboard`; branch setup is agent-managed.
 
 

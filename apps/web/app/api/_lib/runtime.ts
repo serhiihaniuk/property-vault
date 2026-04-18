@@ -2,6 +2,7 @@ import {
   createPropertyVaultApplication,
   type PropertyVaultApplication,
 } from '@dabrowskiego/application';
+import { getRuntimeDatabase } from '@dabrowskiego/db/runtime';
 import {
   generatePropertyVaultOpenApiDocument,
   type OpenApiDocument,
@@ -11,6 +12,7 @@ const PROPERTY_VAULT_DEFAULT_APP_ORIGIN = 'http://localhost:3000';
 
 export interface PropertyVaultApiRuntime {
   application: PropertyVaultApplication;
+  getDbApplication: () => PropertyVaultApplication;
   openApiDocument: OpenApiDocument;
 }
 
@@ -27,9 +29,17 @@ export function createPropertyVaultApiRuntime(
 ): PropertyVaultApiRuntime {
   const env = options.env ?? process.env;
   const serverUrl = resolveServerUrl(env);
+  let dbApplication: PropertyVaultApplication | undefined;
 
   return {
     application: createPropertyVaultApplication(),
+    getDbApplication() {
+      dbApplication ??= createPropertyVaultApplication({
+        db: getRuntimeDatabase(),
+      });
+
+      return dbApplication;
+    },
     openApiDocument: generatePropertyVaultOpenApiDocument({
       servers: serverUrl
         ? [

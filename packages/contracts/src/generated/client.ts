@@ -12,6 +12,9 @@ import { propertyVaultRouteCatalog } from '../system.ts';
 type PropertyVaultRouteCatalog = typeof propertyVaultRouteCatalog;
 
 export interface PropertyVaultContractClient {
+  getDashboardMonthBreakdown(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getDashboardMonthBreakdown']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getDashboardMonthBreakdown']>>;
   getApiIndex(
     ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getApiIndex']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getApiIndex']>>;
@@ -24,6 +27,7 @@ export function createPropertyVaultContractClient(
   transport: ContractClientTransport,
 ): PropertyVaultContractClient {
   return {
+    getDashboardMonthBreakdown: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDashboardMonthBreakdown),
     getApiIndex: buildContractClientMethod(transport, propertyVaultRouteCatalog.getApiIndex),
     getApiHealth: buildContractClientMethod(transport, propertyVaultRouteCatalog.getApiHealth),
   };

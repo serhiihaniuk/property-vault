@@ -171,6 +171,345 @@
         ],
         "description": "Runtime environment label."
       },
+      "DashboardMonthBreakdownResponse": {
+        "type": "object",
+        "properties": {
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "object",
+                  "properties": {
+                    "amountMinor": {
+                      "type": "integer",
+                      "description": "Integer amount in grosz or other currency minor unit."
+                    },
+                    "currency": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{3}$",
+                      "description": "Three-letter ISO currency code."
+                    }
+                  },
+                  "required": [
+                    "amountMinor",
+                    "currency"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Monetary amount stored as minor units."
+                },
+                "category": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "categoryGroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "nullable": true
+                },
+                "categoryGroupLabel": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "categoryLabel": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "changeStatus": {
+                  "type": "string",
+                  "enum": [
+                    "up",
+                    "down",
+                    "flat",
+                    "new",
+                    "no_previous"
+                  ],
+                  "description": "Month-over-month change status for a dashboard metric."
+                },
+                "delta": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
+                    }
+                  ],
+                  "nullable": true,
+                  "description": "Monetary amount stored as minor units."
+                },
+                "previousAmount": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
+                    }
+                  ],
+                  "nullable": true,
+                  "description": "Monetary amount stored as minor units."
+                },
+                "sharePercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "sourceDocuments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "hash": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Canonical document hash."
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Display title for the document."
+                      },
+                      "documentType": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Normalized document type."
+                      },
+                      "documentDate": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                        "description": "ISO 8601 calendar date.",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "hash",
+                      "title",
+                      "documentType"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Reference to a canonical source document."
+                  }
+                }
+              },
+              "required": [
+                "amount",
+                "category",
+                "categoryGroup",
+                "categoryGroupLabel",
+                "categoryLabel",
+                "changeStatus",
+                "delta",
+                "previousAmount",
+                "sharePercent",
+                "sourceDocuments"
+              ],
+              "additionalProperties": false,
+              "description": "Normalized category breakdown row for the selected dashboard month."
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp with timezone offset."
+          },
+          "months": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "period": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "month",
+                        "quarter",
+                        "year",
+                        "custom"
+                      ],
+                      "description": "Supported aggregation period kinds."
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable period label."
+                    },
+                    "startDate": {
+                      "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/sourceDocuments/items/properties/documentDate",
+                      "description": "ISO 8601 calendar date."
+                    },
+                    "endDate": {
+                      "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/sourceDocuments/items/properties/documentDate",
+                      "description": "ISO 8601 calendar date."
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "label"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Normalized reporting period reference."
+                },
+                "totalCharges": {
+                  "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
+                }
+              },
+              "required": [
+                "period",
+                "totalCharges"
+              ],
+              "additionalProperties": false,
+              "description": "Monthly dashboard total for a selectable reporting period."
+            }
+          },
+          "previousMonth": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/months/items/properties/period"
+              }
+            ],
+            "nullable": true,
+            "description": "Normalized reporting period reference."
+          },
+          "selectedMonth": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/months/items/properties/period"
+              }
+            ],
+            "nullable": true,
+            "description": "Normalized reporting period reference."
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "categoryCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "changedCategoryCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "largestCategory": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
+                  },
+                  "category": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "categoryLabel": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "amount",
+                  "category",
+                  "categoryLabel"
+                ],
+                "additionalProperties": false,
+                "description": "Largest category in the selected dashboard month.",
+                "nullable": true
+              },
+              "previousTotalCharges": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
+                  }
+                ],
+                "nullable": true,
+                "description": "Monetary amount stored as minor units."
+              },
+              "topChange": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "categoryLabel": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "changeStatus": {
+                    "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/changeStatus"
+                  },
+                  "delta": {
+                    "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
+                  }
+                },
+                "required": [
+                  "category",
+                  "categoryLabel",
+                  "changeStatus",
+                  "delta"
+                ],
+                "additionalProperties": false,
+                "description": "Largest category change between the selected and previous dashboard month.",
+                "nullable": true
+              },
+              "totalCharges": {
+                "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
+              },
+              "totalDelta": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
+                  }
+                ],
+                "nullable": true,
+                "description": "Monetary amount stored as minor units."
+              }
+            },
+            "required": [
+              "categoryCount",
+              "changedCategoryCount",
+              "largestCategory",
+              "previousTotalCharges",
+              "topChange",
+              "totalCharges",
+              "totalDelta"
+            ],
+            "additionalProperties": false,
+            "description": "Headline dashboard summary metrics for the selected month.",
+            "nullable": true
+          },
+          "supportingDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/sourceDocuments/items"
+            }
+          }
+        },
+        "required": [
+          "breakdown",
+          "generatedAt",
+          "months",
+          "previousMonth",
+          "selectedMonth",
+          "summary",
+          "supportingDocuments"
+        ],
+        "additionalProperties": false,
+        "description": "Dashboard month summary, history, and normalized category breakdown."
+      },
+      "getDashboardMonthBreakdownQuery": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}$",
+            "description": "Reporting month in YYYY-MM format."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Optional selected dashboard month."
+      },
       "ApiIndexResponse": {
         "type": "object",
         "properties": {
@@ -274,6 +613,50 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "openapi": "3.1.0",
   "paths": {
+    "/api/dashboard/month-breakdown": {
+      "get": {
+        "operationId": "getDashboardMonthBreakdown",
+        "responses": {
+          "200": {
+            "description": "Dashboard month summary and normalized category breakdown.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardMonthBreakdownResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested dashboard month was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get dashboard month summary and category breakdown.",
+        "tags": [
+          "dashboard"
+        ],
+        "parameters": [
+          {
+            "description": "Reporting month in YYYY-MM format.",
+            "in": "query",
+            "name": "month",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}$",
+              "description": "Reporting month in YYYY-MM format."
+            }
+          }
+        ]
+      }
+    },
     "/api": {
       "get": {
         "operationId": "getApiIndex",

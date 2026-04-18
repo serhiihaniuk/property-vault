@@ -3,7 +3,8 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import test from 'node:test';
 import { APIError } from 'better-auth/api';
-import { createDatabase, resolveMigrationsFolder } from '@dabrowskiego/db';
+import { createDatabase } from '@dabrowskiego/db';
+import { resolveMigrationsFolder } from '@dabrowskiego/db/migrations';
 import { newDb } from 'pg-mem';
 import { createPropertyVaultAuth } from './auth.ts';
 import {
