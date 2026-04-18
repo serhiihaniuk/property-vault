@@ -2,7 +2,7 @@
 
 **Status:** In progress
 **Based on:** `DESIGN.md` draft v3
-**Last updated:** 2026-04-18 07:48 Europe/Warsaw
+**Last updated:** 2026-04-18 10:20 Europe/Warsaw
 **Owner:** Serhii
 
 ---
@@ -31,6 +31,8 @@ Legend:
 
 ### Latest Completed Commits
 
+- `4b417ac` Normalize financial row categories for dashboard-facing records.
+- `9bdcc58` Fix TypeScript check errors.
 - `0db190f` Harden reindex to rebuild canonical email, tag, and anomaly state.
 - `33646e0` Mark broader backfill queue complete.
 - `e08561c` Note February 2026 meeting commit hash.
@@ -87,7 +89,8 @@ Legend:
 
 ### Current Handoff Checkpoint
 
-Updated 2026-04-18 after hardening the reindex path.
+Updated 2026-04-18 after hardening the reindex path and normalizing financial
+row categories for dashboard queries.
 
 #### Vault state
 
@@ -104,6 +107,11 @@ Updated 2026-04-18 after hardening the reindex path.
 - `reports/inbox.md` up to date; 30 open anomalies.
 - Current records: 30.
 - Current extraction queue: 0 documents.
+- Financial categories now normalize during `put-record` and canonical-record
+  reads, preserving `category_original` while mapping dashboard categories such
+  as `woda_i_scieki`, `woda ciepla`, `ciepla woda`, and
+  `zaliczka_czesc_wspolna` into stable keys like `cold_water_and_sewage`,
+  `hot_water_heating`, and `shared_property_advance`.
 - Non-record assets are canonicalized in `vault/document-tags.json`; the two
   logo PNGs remain tagged `asset_logo` after a reindex.
 - New broader-backfill extraction completed this step:
