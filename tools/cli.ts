@@ -1,6 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
+  rebuildVaultSchema,
+  syncVaultToDatabase,
+  type VaultSyncResult,
+} from '@dabrowskiego/sync';
+import {
   detectAnomalies,
   listOpenAnomalies,
   type DetectAnomaliesResult,
@@ -59,6 +64,7 @@ Commands:
   setup                         Create vault, index, reports, state, and DB schema
   validate [--json] [--strict]  Validate vault structure and derived index
   reindex [--json]              Rebuild SQLite index from canonical vault files
+  sync [--json] [--rebuild]     Sync canonical vault files into Postgres
   context [--json]              Print current vault summary
   register-document <path>      Register a local file by content hash
   put-record <hash> <json>      Store and index a validated extraction record
@@ -86,6 +92,7 @@ Options:
   --limit <number>              Maximum search results (default: 20)
   --scale <number>              Render scale for render-pdf (default: 1.5)
   --desired-width <px>          Target render width for render-pdf
+  --rebuild                     Clear derived Postgres vault tables before sync
   --json                        Print machine-readable JSON
   -h, --help                    Show help
 `;
@@ -94,6 +101,7 @@ const COMMANDS = new Set([
   'setup',
   'validate',
   'reindex',
+  'sync',
   'context',
   'register-document',
   'put-record',
@@ -138,6 +146,8 @@ async function main(argv: string[]): Promise<number> {
       return runValidate(context);
     case 'reindex':
       return runReindex(context);
+    case 'sync':
+      return runSync(context);
     case 'context':
       return runContext(context);
     case 'register-document':
@@ -309,6 +319,20 @@ async function runReindex(context: CommandContext): Promise<number> {
     printJson(result);
   } else {
     printReindexResult(result);
+  }
+
+  return 0;
+}
+
+async function runSync(context: CommandContext): Promise<number> {
+  const result = context.args.flags.has('rebuild')
+    ? await rebuildVaultSchema()
+    : await syncVaultToDatabase();
+
+  if (context.json) {
+    printJson(result);
+  } else {
+    printVaultSyncResult(result);
   }
 
   return 0;
@@ -739,6 +763,19 @@ function printDetectAnomaliesResult(result: DetectAnomaliesResult): void {
   console.log(`Anomalies detected: ${result.detected}`);
   console.log(`Open anomalies: ${result.open}`);
   console.log(`Resolved anomalies: ${result.resolved}`);
+}
+
+function printVaultSyncResult(result: VaultSyncResult): void {
+  console.log(`Postgres vault sync: ${result.mode}`);
+  console.log(`Run: ${result.runRef}`);
+  console.log(`Started: ${result.startedAt}`);
+  console.log(`Finished: ${result.finishedAt}`);
+  console.log(`Documents: ${result.summary.snapshot.documents}`);
+  console.log(`Sources: ${result.summary.snapshot.sourceObservations}`);
+  console.log(`Records: ${result.summary.snapshot.records}`);
+  console.log(`Notes: ${result.summary.snapshot.notes}`);
+  console.log(`Emails: ${result.summary.snapshot.emails}`);
+  console.log(`Email attachments: ${result.summary.snapshot.emailAttachments}`);
 }
 
 function printOpenAnomalies(anomalies: StoredAnomaly[]): void {
