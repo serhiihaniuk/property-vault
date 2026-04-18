@@ -777,7 +777,7 @@ function yesNo(value: boolean): string {
   return value ? 'yes' : 'no';
 }
 
-function unreachable(value: never): never {
+function unreachable(value: unknown): never {
   throw new Error(`Unhandled command: ${value}`);
 }
 

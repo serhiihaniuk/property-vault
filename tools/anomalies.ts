@@ -363,7 +363,7 @@ function detectDeadlines(
     kind: string;
   }>;
 
-  return rows.flatMap((row) => {
+  return rows.flatMap((row): DetectedAnomaly[] => {
     if (row.date < today) {
       if (isPaymentDeadline(row)) {
         return [{

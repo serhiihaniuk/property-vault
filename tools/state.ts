@@ -117,7 +117,7 @@ export function validateState(value: unknown): VaultState {
 function numberField(record: Record<string, unknown>, key: string): number {
   const value = record[key];
 
-  if (!Number.isInteger(value)) {
+  if (typeof value !== 'number' || !Number.isInteger(value)) {
     throw new StateError(`Vault state field ${key} must be an integer`);
   }
 

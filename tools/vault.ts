@@ -1903,7 +1903,7 @@ function nullableStringField(record: Record<string, unknown>, key: string): stri
 function numberField(record: Record<string, unknown>, key: string): number {
   const value = record[key];
 
-  if (!Number.isInteger(value)) {
+  if (typeof value !== 'number' || !Number.isInteger(value)) {
     throw new Error(`Expected integer for ${key}`);
   }
 
