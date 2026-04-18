@@ -47,4 +47,4 @@ answers.
 
 - `DESIGN.md` contains the system design and data model.
 - `IMPLEMENTATION_PLAN.md` contains the phased build plan.
-- `AGENT.md` is the startup guide for future Codex sessions.
+- `AGENTS.md` is the startup guide for future Codex sessions.

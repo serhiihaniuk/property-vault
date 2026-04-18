@@ -298,7 +298,7 @@ dabrowskiego/
 |   |-- check-anomalies.md
 |   `-- write-inbox.md
 |
-|-- AGENT.md
+|-- AGENTS.md
 |-- README.md
 |-- DESIGN.md
 |-- package.json
@@ -1113,7 +1113,7 @@ Codex answers questions by using structured data first, then notes/text search.
 
 New Codex chats should start with:
 
-1. Read `AGENT.md`.
+1. Read `AGENTS.md`.
 2. Run `npm run vault -- context`.
 3. Use `npm run vault -- search` or read cited records/notes before answering.
 
@@ -1162,7 +1162,7 @@ v1 runbooks:
 4. `write-inbox.md`
 5. `answer-question.md`
 
-`AGENT.md` is the entry point Codex reads first.
+`AGENTS.md` is the entry point Codex reads first.
 
 Automation behavior:
 
@@ -1297,7 +1297,7 @@ Tracked:
 - `tools/`
 - `.codex/`
 - schemas
-- `AGENT.md`
+- `AGENTS.md`
 - `README.md`
 - `DESIGN.md`
 - `package.json`
@@ -1410,12 +1410,12 @@ If access should be removed:
 
 ### Phase 1: Skeleton
 
-- Create `package.json`, `.gitignore`, `README.md`, `AGENT.md`.
+- Create `package.json`, `.gitignore`, `README.md`, `AGENTS.md`.
 - Create folder setup command.
 - Create `vault.init`, `vault.validate`, and `vault.reindex`.
 - Create initial SQLite schema.
 - Create CLI wrappers for every v1 library function Codex needs.
-- Create `AGENT.md` with "read this first" instructions for new Codex chats.
+- Create `AGENTS.md` with "read this first" instructions for new Codex chats.
 
 ### Phase 2: Manual Document Flow
 

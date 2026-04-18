@@ -199,7 +199,7 @@ wrong.
 - `package.json`
 - `.gitignore`
 - `README.md`
-- `AGENT.md`
+- `AGENTS.md`
 - `.codex/sync-gmail.md`
 - `.codex/extract-document.md`
 - `.codex/answer-question.md`
@@ -228,7 +228,7 @@ node_modules/
 .env
 ```
 
-- Add `AGENT.md` with instructions for new Codex chats:
+- Add `AGENTS.md` with instructions for new Codex chats:
   - read `DESIGN.md`,
   - run `npm run vault -- context`,
   - never copy raw passwords,
@@ -772,7 +772,7 @@ Automation rules:
 
 New chat readiness:
 
-- `AGENT.md` tells Codex how to start.
+- `AGENTS.md` tells Codex how to start.
 - `npm run vault -- context` gives property identity, latest state, open anomalies,
   and next useful files.
 - Search and SQL commands expose local context without requiring prior chat
