@@ -342,9 +342,13 @@ The reviewer agent is optional but recommended.
 
 - verify the worker stayed inside the write scope,
 - check contract and boundary discipline,
+- check whether implementation-level architectural choices are acceptable and
+  aligned with `ARCHITECTURE.md`,
 - run the required verification gate,
 - make small bounded fixes if needed,
 - update the task file with review notes,
+- leave an `Architecture note` when the implementation made a meaningful local
+  design choice,
 - validate coordinator-facing notes,
 - declare the task `merge ready` or `blocked`.
 
@@ -427,6 +431,7 @@ The reviewer should also append a short review note before merge:
 - `Reviewer`
 - `Review tests run`
 - `Merge status`
+- `Architecture note`
 - `Coordinator notes review`
 
 Coordinator should append a final disposition note:

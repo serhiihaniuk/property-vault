@@ -266,6 +266,9 @@ leaving only a note.
    - otherwise verify that the reviewer chat is already attached to the
      finished task branch before trusting the local task file
 2. Review the worker result in isolation.
+   - check whether any meaningful implementation-level architectural choices
+     stay consistent with `ARCHITECTURE.md`, package boundaries, and task
+     intent
 3. Make small bounded fixes if needed.
 4. Run the required review verification.
 5. Update the task file with:
@@ -273,6 +276,7 @@ leaving only a note.
    - `Reviewer`
    - `Review tests run`
    - `Merge status`
+   - `Architecture note`
    - `Coordinator notes review`
 6. Hand off a `merge ready` or `blocked` result to the coordinator.
 
@@ -327,6 +331,7 @@ Every task file must keep these fields current:
 - `Reviewer`
 - `Review tests run`
 - `Merge status`
+- `Architecture note`
 - `Coordinator notes review`
 - `Coordinator final review`
 - `Actions taken`

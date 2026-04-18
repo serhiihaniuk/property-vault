@@ -15,6 +15,8 @@ and then declare the task `merge ready` or `blocked`.
 - read the task file and relevant architecture docs,
 - inspect the finished task branch,
 - check scope discipline, tests, and obvious regressions,
+- evaluate whether implementation-level architectural choices made inside the
+  task are acceptable,
 - make small bounded fixes when helpful,
 - rerun the required verification,
 - update the task file with review notes,
@@ -81,6 +83,9 @@ When review starts:
 - if this chat is on `main`, switch to that exact task branch yourself,
 - only trust the local task file when the reviewer chat is already attached to
   the correct task branch.
+- check whether the task introduced meaningful architectural choices and
+  whether they align with `ARCHITECTURE.md`, task scope, and package
+  boundaries.
 
 ## Coordinator Notes Rule
 
@@ -93,6 +98,22 @@ You may:
 - reject it if it is unsupported.
 
 But the coordinator still decides what actions are taken or ignored.
+
+## Architecture Note Rule
+
+Reviewer should leave a short `Architecture note` whenever the implementation
+made a meaningful local design choice, such as:
+
+- choosing a package boundary interpretation,
+- introducing a reusable helper surface,
+- shaping a transport or application abstraction,
+- selecting a pattern that later tasks are likely to follow.
+
+That note should say one of:
+
+- the choice is acceptable and aligned,
+- the choice is acceptable but should be propagated later,
+- the choice is risky or wrong and the task should be `blocked`.
 
 ## Naming Rule
 
