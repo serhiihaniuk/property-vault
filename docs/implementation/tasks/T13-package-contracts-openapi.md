@@ -42,11 +42,16 @@
   - `npm run lint`
   - `npm run build`
   - `npm run test:contracts`
-- Merge status: `merge ready`
+- Merge status: `merged codex/T13-package-contracts into master`
 - Coordinator notes review: no blocking findings; implementation stays inside scope and the required verification passes on `codex/T13-package-contracts`
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: start a reviewer chat on `codex/T13-package-contracts` and say `reviewer T13 branch codex/T13-package-contracts`
+- Coordinator final review:
+  - merged the reviewer-approved T13 result into `master`
+  - accepted the shared transport DTO set and OpenAPI helper surface as the new contract foundation for later route and client tasks
+  - no extra carry-forward task changes were needed beyond the merged package and task metadata
+- Actions taken:
+  - merged `codex/T13-package-contracts` into `master`
+  - recorded T13 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored: none
+- Next handoff note: nothing right now
 
 
