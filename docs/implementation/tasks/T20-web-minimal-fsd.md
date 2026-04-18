@@ -11,16 +11,25 @@
 - Required verification: `strong`
 - Completion signal: web app compiles with minimal FSD boundaries and thin `app/` routes.
 - Files changed:
+  - `apps/web/README.md`
   - `apps/web/app/(app)/layout.tsx`
   - `apps/web/app/(app)/page.tsx`
   - `apps/web/app/globals.css`
   - `apps/web/app/layout.tsx`
   - `apps/web/app/page.tsx` (removed)
+  - `apps/web/components.json`
+  - `apps/web/components/.gitkeep` (removed)
+  - `apps/web/components/theme-provider.tsx` (removed)
+  - `apps/web/components/ui/button.tsx` (removed)
+  - `apps/web/hooks/.gitkeep` (removed)
+  - `apps/web/lib/.gitkeep` (removed)
+  - `apps/web/lib/utils.ts` (removed)
   - `apps/web/src/entities/.gitkeep`
   - `apps/web/src/features/.gitkeep`
   - `apps/web/src/shared/api/.gitkeep`
   - `apps/web/src/shared/auth/.gitkeep`
   - `apps/web/src/shared/config/.gitkeep`
+  - `apps/web/src/shared/hooks/.gitkeep`
   - `apps/web/src/shared/lib/utils.ts`
   - `apps/web/src/shared/ui/app-shell.tsx`
   - `apps/web/src/shared/ui/button.tsx`
@@ -38,6 +47,18 @@
   - Why it matters: the architecture sample's literal `src/pages/**` layer is incompatible with the current root-level App Router setup.
   - Suggested follow-up: coordinator should decide whether to standardize the web page layer on `src/views/**` or move the router shell to `src/app/**` in the docs and future tasks.
   - Urgency: `soon`
-- Next handoff note: start a reviewer chat and say `reviewer T20 branch codex/T20-web-minimal-fsd`. Branch setup is agent-managed.
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `Invoke-WebRequest http://127.0.0.1:3000` against the already-running `apps/web` dev server to confirm the rendered shell contains `Property Vault` and `Dashboard shell`
+- Merge status: `ready`
+- Architecture note:
+  - The `src/views/**` page layer is an acceptable local interpretation of the approved minimal FSD shape while the App Router stays rooted in `app/`, and the review fix now aligns the shadcn generator aliases with `src/shared/**` so later web tasks do not drift back into legacy folders.
+- Coordinator notes review:
+  - Confirmed. Keeping root `app/` while standardizing actual page implementations under `src/views/**` is consistent with the current Next.js constraints, and future docs/tasks should reflect that same interpretation so `src/pages/**` and legacy generator aliases do not reappear.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
 
 

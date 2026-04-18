@@ -11,11 +11,12 @@ npx shadcn@latest add button
 ```
 
 This will place the ui components in the `components` directory.
+This will place shared UI components in `src/shared/ui`.
 
 ## Using components
 
 To use the components in your app, import them as follows:
 
 ```tsx
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/shared/ui/button";
 ```
