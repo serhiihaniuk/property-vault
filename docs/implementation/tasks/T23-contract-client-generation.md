@@ -50,9 +50,14 @@
 - Merge status: `ready for coordinator merge`
 - Architecture note: acceptable and aligned. `packages/contracts` remains the owner of both the OpenAPI snapshot and the generated typed client, and the reviewer fix keeps that client honest by making contract-defined required inputs compile-time-required before later vertical slices depend on it.
 - Coordinator notes review: no follow-up needed. Reviewer tightened the typed client surface inside the declared task scope so later route additions cannot silently compile with missing required inputs.
-- Coordinator final review: pending coordinator finalization.
-- Actions taken: none yet.
+- Coordinator final review:
+  - merged the reviewer-approved T23 result into `master`
+  - accepted `packages/contracts` as the owner of the generated OpenAPI snapshot, typed client artifacts, and contract-client runtime helpers
+  - accepted the reviewer type-safety tightening so later slices cannot compile with missing contract-required inputs
+- Actions taken:
+  - merged `codex/T23-contract-client-generation` into `master`
+  - recorded T23 as `done` in `APP_IMPLEMENTATION_PLAN.md`
 - Actions ignored: none.
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Next handoff note: nothing right now.
 
 
