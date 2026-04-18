@@ -1,7 +1,7 @@
 # T12 — Create `packages/auth` with Better Auth
 
 - Status: `done`
-- Owner: `Codex on codex/T12-package-auth`
+- Owner: `coordinator`
 - Goal: Add the auth package and isolate Better Auth setup.
 - Dependencies: `T11`
 - Write scope: `packages/auth/**`, shared auth config only
@@ -44,12 +44,18 @@
   - `npm run lint`
   - `npm run build`
   - `npm test`
-- Merge status: merge ready
+- Merge status: `merged codex/T12-package-auth into master`
 - Coordinator notes review:
   - Confirmed: the `pg-mem` limitation is real, the current package tests still provide useful coverage for auth construction and session helpers, and a real Postgres-backed path should be added before or during `T33`.
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: switch to the coordinator chat on `master` and say `merge latest reviewed task`
+- Coordinator final review:
+  - merged the reviewer-approved T12 result into `master`
+  - accepted the Better Auth package boundary and session-helper split as a good base for later access flows
+  - kept the `pg-mem` limitation note as future guidance for `T33`
+- Actions taken:
+  - merged `codex/T12-package-auth` into `master`
+  - preserved the reviewer-confirmed coverage for auth construction, session helpers, and disabled sign-up
+  - recorded the need for real Postgres-backed auth integration coverage before or during `T33`
+- Actions ignored: none
+- Next handoff note: nothing right now
 
 
