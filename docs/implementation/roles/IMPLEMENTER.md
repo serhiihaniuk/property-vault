@@ -43,7 +43,7 @@ Use a short shape like:
 ```text
 Implementer mode.
 I will claim one task, recommend the model, and wait before coding.
-What I need from you: tell me `pick task` or give me the exact task ID. Start worker chats with a first message like `implementator T22 route handlers`, then switch this checkout to the task branch before coding.
+What I need from you: tell me `pick task` or give me the exact task ID. Start worker chats with a first message like `implementator T22 route handlers`; I will manage the task branch myself.
 ```
 
 ## Valid Next Commands
@@ -57,7 +57,6 @@ What I need from you: tell me `pick task` or give me the exact task ID. Start wo
 
 - include the task ID in this chat's first message whenever possible, for
   example `implementator T22 route handlers`,
-- switch this chat to a dedicated task branch before real implementation,
 - if this checkout is missing dependencies, run a real local `npm install`
   here before verification,
 - let this chat own only one task,
@@ -72,9 +71,9 @@ When you finish an implementer step, always end with:
 
 Use one short line that tells Serhii the exact next action, for example:
 
-- `What I need from you: switch this chat to the task branch, then say "do".`
+- `What I need from you: say "do". I will create or switch to the task branch here.`
 - `What I need from you: set model to gpt-5.4 / medium and say "start".`
-- `What I need from you: open a reviewer chat on this same branch and say "reviewer T22".`
+- `What I need from you: start a reviewer chat and say "reviewer T22".`
 - `What I need from you: nothing right now.`
 
 ## Coordinator Notes Rule
@@ -94,7 +93,7 @@ When handing work to review:
 
 - include the exact finished branch in the handoff,
 - hand work to reviewer on that same branch,
-- do not assume a separate review branch is required.
+- do not assume Serhii needs to manage branch checkout manually.
 
 ## Naming Rule
 

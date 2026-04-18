@@ -92,9 +92,9 @@ That handoff should say:
 
 Examples:
 
-- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", switch that chat to branch "codex/T10-package-vault", then say "do".`
-- `What I need from you: open a reviewer chat on branch "codex/T10-package-vault" and say "reviewer T10".`
-- `What I need from you: switch back to main and say "merge latest reviewed task".`
+- `What I need from you: start a new worker chat with first message "implementator T10 package vault", then say "do". Branch setup is agent-managed.`
+- `What I need from you: start a reviewer chat and say "reviewer T10". Branch setup is agent-managed.`
+- `What I need from you: say "merge latest reviewed task".`
 - `What I need from you: set model to gpt-5.4 / high and say "start".`
 
 If nothing is needed, say that clearly:
@@ -117,6 +117,8 @@ If nothing is needed, say that clearly:
 - For new app work, follow package boundaries and rules from `ARCHITECTURE.md`
   and `APP_IMPLEMENTATION_PLAN.md`.
 - This repo currently uses branches only, not parallel worktrees.
+- Agents manage branch creation and checkout themselves; Serhii should not need
+  to manually switch branches during normal task flow.
 - When a task is active on its task branch, the task-file copy on that branch
   is authoritative until it is merged back into `main`.
 - Finish or merge the current task branch before starting another

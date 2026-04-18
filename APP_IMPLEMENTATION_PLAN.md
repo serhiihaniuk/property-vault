@@ -14,6 +14,8 @@ for extraction history or ad hoc notes.
 - This file is the execution backlog and coordination reference.
 - `main` is the integration branch.
 - Each worker agent should work on one task branch at a time.
+- Agents manage branch creation and checkout themselves; Serhii should not need
+  to do manual branch management during normal flow.
 - Only the coordinator edits:
   - `ARCHITECTURE.md`
   - this file
@@ -67,6 +69,7 @@ Expected workflow:
 
 2. `do`
    - re-read the task file
+   - create or switch to the task branch
    - mark it `in_progress`
    - report the recommended model/effort and verification gate
    - wait for `start`
@@ -99,7 +102,8 @@ before the task actually runs.
 Use this workflow for sequential branch execution:
 
 1. `main` is the integration branch and should stay mergeable.
-2. Create or switch to one task branch, usually named with the task ID.
+2. The active role creates or switches to one task branch, usually named with
+   the task ID.
 3. The worker agent edits and commits only on that task branch.
 4. The reviewer agent checks that same task branch, fixes small issues if
    needed, and hands a `merge ready` or `blocked` result to coordinator.
@@ -159,6 +163,7 @@ That means:
 - the copy of `docs/implementation/tasks/Txx-*.md` visible on `main` may lag,
 - the task branch copy is the live execution view,
 - coordinator should switch back to `main` before picking more work,
+- branch checkout is handled by the active role, not by Serhii,
 - this backlog table may be updated by coordinator so the queue stays readable
   from `main`,
 - do not start another task while one task branch is still awaiting review or

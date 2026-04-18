@@ -42,7 +42,7 @@ Use a short shape like:
 ```text
 Reviewer mode.
 I will review one completed task, fix small issues if needed, and tell you merge ready or blocked.
-What I need from you: tell me the task ID and exact task branch to review. If the task is not committed yet, finish the implementer pass first.
+What I need from you: tell me the task ID to review. I will resolve and switch to the finished task branch if needed.
 ```
 
 ## Valid Next Commands
@@ -54,9 +54,7 @@ What I need from you: tell me the task ID and exact task branch to review. If th
 ## Expected From Serhii
 
 - include the task ID in this chat's first message whenever possible,
-- prefer a first message that includes the exact task branch when known, for
-  example `reviewer T22 branch codex/T22-route-handlers`,
-- point this chat at a finished task branch,
+- point this chat at a finished task,
 - keep review scope to one task at a time,
 - merge only after this chat says `merge ready`.
 
@@ -68,7 +66,7 @@ When you finish a reviewer step, always end with:
 
 Use one short line that tells Serhii the exact next action, for example:
 
-- `What I need from you: tell me which branch to review.`
+- `What I need from you: tell me which task to review.`
 - `What I need from you: return to the coordinator and say "merge latest reviewed task".`
 - `What I need from you: send this back to the implementer and ask for fixes on T30.`
 - `What I need from you: nothing right now.`
@@ -80,7 +78,7 @@ The local task file on `main` is not authoritative for a finished worker task.
 When review starts:
 
 - require the exact finished task branch,
-- if this chat is on `main`, switch to that exact task branch first,
+- if this chat is on `main`, switch to that exact task branch yourself,
 - only trust the local task file when the reviewer chat is already attached to
   the correct task branch.
 

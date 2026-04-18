@@ -86,9 +86,9 @@ That handoff must say:
 
 Examples:
 
-- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", switch that chat to branch "codex/T10-package-vault", then say "do".`
-- `What I need from you: open a reviewer chat on branch "codex/T10-package-vault" and say "reviewer T10".`
-- `What I need from you: switch back to main and say "merge latest reviewed task".`
+- `What I need from you: start a new worker chat with first message "implementator T10 package vault", then say "do". Branch setup is agent-managed.`
+- `What I need from you: start a reviewer chat and say "reviewer T10". Branch setup is agent-managed.`
+- `What I need from you: say "merge latest reviewed task".`
 - `What I need from you: choose gpt-5.4 / high, then say "start".`
 - `What I need from you: nothing right now.`
 
@@ -100,6 +100,7 @@ actually required.
 - `main` is the integration branch.
 - Use one active task branch at a time.
 - Workers and reviewers use the same task branch sequentially.
+- Agents manage branch creation and checkout themselves.
 - Workers do not commit directly to `main`.
 - Do not start a new task until the current task branch is merged or
   intentionally abandoned.
@@ -113,8 +114,8 @@ That means:
 - `main` may still show `todo` or `claimed` while the live task branch already
   says `in_progress` or `done`,
 - the active task branch is authoritative for that task until merge,
-- before picking more work, return to `main` and make sure no other task branch
-  is still mid-flight.
+- before picking more work, the coordinator should switch back to `main` and
+  make sure no other task branch is still mid-flight.
 
 ## Reviewer Target Rule
 
@@ -124,7 +125,8 @@ That means:
 
 - `reviewer T10` is only sufficient when the reviewer chat is already attached
   to the finished task branch,
-- if the reviewer chat opens on `main`, switch to the exact task branch first,
+- if the reviewer chat opens on `main`, the reviewer should switch to the exact
+  task branch first,
 - reviewer should not treat the `main` copy of the task file as authoritative
   for a finished task result.
 
@@ -159,11 +161,13 @@ Do not implement yet.
 Do this when asked to prepare execution.
 
 1. Re-read the selected task file.
-2. Change status to `in_progress`.
-3. Reply with:
+2. Ensure the expected task branch exists and switch the checkout to it.
+3. Change status to `in_progress`.
+4. Reply with:
    - status set to `in_progress`,
-   - note that this live status is now on the task branch until merge,
-   - branch reminder,
+   - note that the branch is now active and this live status stays there until
+     merge,
+   - exact branch in use,
    - recommended model/effort pair,
    - optional cheaper fallback when it would still be acceptable,
    - short reason,
@@ -189,8 +193,8 @@ Do this when asked to execute.
    - contracts changed,
    - tests run,
    - status,
-   - next handoff note telling Serhii to open or switch to a reviewer chat on
-     the same task branch and say `reviewer Txx`
+   - next handoff note telling Serhii to start a reviewer chat and say
+     `reviewer Txx`
 7. Commit with the task ID in the subject.
 8. Hand off directly to reviewer on the same task branch instead of merging
    yourself.

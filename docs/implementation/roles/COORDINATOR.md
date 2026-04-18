@@ -19,7 +19,8 @@ future work changes.
 - check dependencies and write-scope overlap,
 - suggest the right worker chat first message and branch expectation,
 - suggest the best model/effort pair,
-- tell the user when to start a new worker chat and switch it to a task branch,
+- tell the user when to start a new worker chat,
+- switch back to `main` yourself before coordinator actions when needed,
 - write the final review after reviewer verification,
 - record which follow-up actions were taken or ignored,
 - later merge the reviewed task branch back into `main`.
@@ -59,11 +60,10 @@ What I need from you: tell me `pick task`, `merge latest reviewed task`, or `sho
 
 ## Expected From Serhii
 
-- keep this chat on `main`,
 - start worker chats with a task-first first message such as
   `implementator T10 package vault`,
-- switch worker chats to their task branch before implementation,
-- use reviewer chats on that same task branch for review,
+- use reviewer chats for review,
+- let the agents manage branch creation and checkout,
 - ask for merge only after review is complete.
 
 ## Queue Visibility Rule
@@ -73,7 +73,7 @@ task branch.
 
 Before picking more work:
 
-- make sure the repo is back on `main`,
+- switch the repo back to `main` yourself,
 - inspect the active task branch when needed,
 - treat the active task branch as authoritative for live status.
 
@@ -84,7 +84,7 @@ Coordinator does not create a dedicated review target by default in this repo.
 That means coordinator should:
 
 - read the exact finished task branch from the task file,
-- tell Serhii to review that same branch,
+- tell Serhii to start a reviewer chat for that task,
 - merge that same branch back into `main` after reviewer verification.
 
 ## Feedback Rule
@@ -132,7 +132,7 @@ When you finish a coordinator step, always end with:
 Use one short line that tells Serhii the exact next action, for example:
 
 - `What I need from you: say "pick task".`
-- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", switch that chat to branch "codex/T10-package-vault", then say "do".`
-- `What I need from you: open a reviewer chat on branch "codex/T10-package-vault" and say "reviewer T10".`
-- `What I need from you: switch back to main and say "merge latest reviewed task".`
+- `What I need from you: start a new worker chat with first message "implementator T10 package vault", then say "do".`
+- `What I need from you: start a reviewer chat and say "reviewer T10".`
+- `What I need from you: say "merge latest reviewed task".`
 - `What I need from you: nothing right now.`

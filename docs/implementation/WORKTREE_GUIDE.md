@@ -4,6 +4,9 @@ This repo currently uses plain git branches and one shared checkout.
 
 We are not using parallel worktrees as the default workflow.
 
+Agents manage branch creation and checkout themselves.
+Serhii does not need to manually switch branches during the normal flow.
+
 ## Why branches only
 
 The branch-only flow is simpler in the current Codex UI:
@@ -37,12 +40,13 @@ Use `main` for:
 - recording final coordinator decisions,
 - merging reviewed work.
 
-Before asking the coordinator to pick or merge, switch the checkout back to
-`main`.
+Before coordinator actions such as `pick task` or `merge latest reviewed task`,
+the coordinator should switch the checkout back to `main`.
 
-### 2. Create or switch to one task branch
+### 2. Let the active role create or switch to one task branch
 
-For implementation, create or switch to a task branch such as:
+For implementation, the implementer should create or switch to a task branch
+such as:
 
 ```powershell
 git switch -c codex/T10-package-vault
@@ -80,9 +84,9 @@ If this checkout is fresh or missing dependencies:
 Recommended flow:
 
 1. coordinator picks the task on `main`
-2. implementer switches to `codex/Txx-...`
+2. implementer creates or switches to `codex/Txx-...`
 3. implementer finishes and commits on `codex/Txx-...`
-4. reviewer opens on that same branch
+4. reviewer opens for that task and switches to the same branch if needed
 5. reviewer makes bounded fixes if needed
 6. reviewer reruns verification
 7. reviewer returns `merge ready` or `blocked`
@@ -111,6 +115,7 @@ So when coordinating from `main`:
 
 - the task branch copy is the live source of truth,
 - `main` may still show stale task status,
+- branch switching is handled by the active role, not by Serhii,
 - do not pick another task while one task branch is still active and unmerged.
 
 ## Rules
