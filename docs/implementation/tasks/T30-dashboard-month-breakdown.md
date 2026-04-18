@@ -1,10 +1,11 @@
 # T30 — Dashboard summary + month breakdown
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Deliver the first dashboard slice with month summary and category breakdown.
 - Dependencies: `T21`, `T22`, `T23`
 - Write scope: dashboard contracts, application services, routes, widgets
+- Worker branch: `codex/T30-dashboard`
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `slice-dashboard`
 - Required verification: `strong`
