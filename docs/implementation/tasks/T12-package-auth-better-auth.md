@@ -35,14 +35,21 @@
   - Why it matters: current package tests can verify auth construction, session helpers, and disabled sign-up, but later credential and invite flows will need a real Postgres-backed integration path for honest coverage.
   - Suggested follow-up: add real Postgres integration coverage before or during `T33` access/invite flows.
   - Urgency: `soon`
-- Review result: pending review
-- Reviewer: unassigned
-- Review tests run: none yet
-- Merge status: pending review
-- Coordinator notes review: none yet
+- Review result: merge ready
+- Reviewer: `Codex reviewer on codex/T12-package-auth`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/auth typecheck`
+  - `npm run --workspace @dabrowskiego/auth test`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `npm test`
+- Merge status: merge ready
+- Coordinator notes review:
+  - Confirmed: the `pg-mem` limitation is real, the current package tests still provide useful coverage for auth construction and session helpers, and a real Postgres-backed path should be added before or during `T33`.
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: open a reviewer chat on branch `codex/T12-package-auth` and say `reviewer T12`
+- Next handoff note: switch to the coordinator chat on `main` and say `merge latest reviewed task`
 
 
