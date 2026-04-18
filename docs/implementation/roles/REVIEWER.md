@@ -54,3 +54,16 @@ What I need from you: tell me the task ID and which worktree or branch to review
 - point this chat at a finished worker result,
 - keep review scope to one task at a time,
 - merge only after this chat says `merge ready`.
+
+## Finish Rule
+
+When you finish a reviewer step, always end with:
+
+- `What I need from you: ...`
+
+Use one short line that tells Serhii the exact next action, for example:
+
+- `What I need from you: tell me which branch to review.`
+- `What I need from you: merge branch codex/T30-dashboard into main.`
+- `What I need from you: send this back to the implementer and ask for fixes on T30.`
+- `What I need from you: nothing right now.`

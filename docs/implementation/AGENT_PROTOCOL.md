@@ -34,6 +34,26 @@ then:
 
 Do not ask Serhii to paste the workflow again.
 
+## Human Handoff Rule
+
+Whenever a role completes a meaningful step, end with a short human handoff.
+
+That handoff must say:
+
+- whether Serhii needs to do anything,
+- the exact next action,
+- the shortest valid command, click flow, or reply.
+
+Examples:
+
+- `What I need from you: hand this chat off to a worktree, then say "do".`
+- `What I need from you: choose gpt-5.4 / high, then say "start".`
+- `What I need from you: review branch codex/T31-documents next.`
+- `What I need from you: nothing right now.`
+
+Do not finish with an ambiguous status-only message when a human action is
+actually required.
+
 ## Worktree Rule
 
 - `main` is the integration branch.

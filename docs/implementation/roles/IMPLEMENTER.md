@@ -57,3 +57,16 @@ What I need from you: tell me `pick task` or tell me the exact task ID/worktree 
 - let this chat own only one task,
 - choose the model after the `do` step,
 - send `start` only when ready for execution.
+
+## Finish Rule
+
+When you finish an implementer step, always end with:
+
+- `What I need from you: ...`
+
+Use one short line that tells Serhii the exact next action, for example:
+
+- `What I need from you: move this chat to a worktree, then say "do".`
+- `What I need from you: set model to gpt-5.4 / medium and say "start".`
+- `What I need from you: open a reviewer chat and say "review T22".`
+- `What I need from you: nothing right now.`

@@ -55,3 +55,16 @@ What I need from you: tell me `pick task`, `merge latest reviewed task`, or `sho
 - use worker chats for implementation,
 - use reviewer chats for review,
 - ask for merge only after review is complete.
+
+## Finish Rule
+
+When you finish a coordinator step, always end with:
+
+- `What I need from you: ...`
+
+Use one short line that tells Serhii the exact next action, for example:
+
+- `What I need from you: say "pick task".`
+- `What I need from you: move the worker chat to a worktree, then say "do".`
+- `What I need from you: merge the latest reviewed branch now.`
+- `What I need from you: nothing right now.`

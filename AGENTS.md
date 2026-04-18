@@ -71,6 +71,27 @@ reply briefly with:
 Keep that reply short and operational. Do not require Serhii to restate the
 whole workflow.
 
+## Human Handoff Rule
+
+When a role-based task or subtask finishes, always end with a short human
+handoff when Serhii needs to do something next.
+
+That handoff should say:
+
+- whether anything is needed from Serhii,
+- the exact next action,
+- the shortest valid command or click flow.
+
+Examples:
+
+- `What I need from you: move this chat to a worktree, then say "do".`
+- `What I need from you: set model to gpt-5.4 / high and say "start".`
+- `What I need from you: merge branch codex/T30-dashboard into main.`
+
+If nothing is needed, say that clearly:
+
+- `What I need from you: nothing right now.`
+
 ## Operating Rules
 
 - Canonical data lives in `vault/`.
