@@ -1,0 +1,764 @@
+{
+  "$ref": "#/definitions/PropertyVaultRecordV1",
+  "definitions": {
+    "PropertyVaultRecordV1": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "number",
+          "const": 1
+        },
+        "extractor_version": {
+          "type": "string"
+        },
+        "extracted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "extracted_by": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "needs_review",
+            "failed"
+          ]
+        },
+        "language": {
+          "type": "string",
+          "const": "pl"
+        },
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "monthly_charges",
+            "media_settlement",
+            "shared_property_settlement",
+            "interest_note",
+            "account_statement",
+            "resolution",
+            "meeting_notice",
+            "service_notice",
+            "correspondence",
+            "other"
+          ]
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "period": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "month"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}$"
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "year"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^\\d{4}$"
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "range"
+                },
+                "start": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              },
+              "required": [
+                "kind",
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "none"
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "summary_plain": {
+          "type": "string"
+        },
+        "key_facts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "financial_rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "row_type": {
+                "type": "string",
+                "enum": [
+                  "charge",
+                  "settlement",
+                  "payment",
+                  "credit",
+                  "debit",
+                  "interest",
+                  "balance"
+                ]
+              },
+              "category": {
+                "type": "string"
+              },
+              "category_original": {
+                "type": "string"
+              },
+              "category_group": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "period": {
+                "$ref": "#/definitions/PropertyVaultRecordV1/properties/period"
+              },
+              "money": {
+                "type": "object",
+                "properties": {
+                  "amount_minor": {
+                    "type": "integer"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "const": "PLN"
+                  }
+                },
+                "required": [
+                  "amount_minor",
+                  "currency"
+                ],
+                "additionalProperties": false
+              },
+              "quantity": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "number"
+                      },
+                      "unit": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "unit"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unit_price_minor": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "source_page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "row_type",
+              "category",
+              "category_original",
+              "category_group",
+              "period",
+              "money",
+              "quantity",
+              "unit_price_minor",
+              "confidence",
+              "source_page",
+              "note"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "meter_readings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "meter_kind": {
+                "type": "string",
+                "enum": [
+                  "cold_water",
+                  "hot_water",
+                  "heat_energy",
+                  "other"
+                ]
+              },
+              "meter_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reading_date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "reading_value": {
+                "type": "number"
+              },
+              "usage_value": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "unit": {
+                "type": "string"
+              },
+              "source_page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "meter_kind",
+              "meter_number",
+              "reading_date",
+              "reading_value",
+              "usage_value",
+              "unit",
+              "source_page"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "ledger_entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "operation_date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "due_date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "document_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "obligation": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/PropertyVaultRecordV1/properties/financial_rows/items/properties/money"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "payment": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/PropertyVaultRecordV1/properties/financial_rows/items/properties/money"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "balance_after": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/PropertyVaultRecordV1/properties/financial_rows/items/properties/money"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "comment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source_page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "operation_date",
+              "due_date",
+              "document_number",
+              "obligation",
+              "payment",
+              "balance_after",
+              "comment",
+              "source_page"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "interest_entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "due_date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "obligation": {
+                "$ref": "#/definitions/PropertyVaultRecordV1/properties/financial_rows/items/properties/money"
+              },
+              "obligation_document": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payment_date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "payment": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/PropertyVaultRecordV1/properties/financial_rows/items/properties/money"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "payment_document": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "days_late": {
+                "type": "integer"
+              },
+              "interest_rate_percent": {
+                "type": "number"
+              },
+              "interest": {
+                "$ref": "#/definitions/PropertyVaultRecordV1/properties/financial_rows/items/properties/money"
+              },
+              "source_page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "due_date",
+              "obligation",
+              "obligation_document",
+              "payment_date",
+              "payment",
+              "payment_document",
+              "days_late",
+              "interest_rate_percent",
+              "interest",
+              "source_page"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "important_dates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "label": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "deadline",
+                  "meeting",
+                  "vote",
+                  "effective_from",
+                  "booking",
+                  "other"
+                ]
+              }
+            },
+            "required": [
+              "date",
+              "label",
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "resolutions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "number": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "pending_vote",
+                  "rejected",
+                  "unknown"
+                ]
+              },
+              "voting_method": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "money_limit": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/PropertyVaultRecordV1/properties/financial_rows/items/properties/money"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "number",
+              "subject",
+              "outcome",
+              "voting_method",
+              "money_limit",
+              "note"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "reference_numbers": {
+          "type": "object",
+          "properties": {
+            "document_ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "property_code": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "unit_code": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "bank_account": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source_document_numbers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "document_ref",
+            "property_code",
+            "unit_code",
+            "bank_account"
+          ],
+          "additionalProperties": false
+        },
+        "sensitive_findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "password",
+                  "login",
+                  "email",
+                  "bank_account",
+                  "personal_data"
+                ]
+              },
+              "label": {
+                "type": "string"
+              },
+              "value_redacted": {
+                "type": "string"
+              },
+              "source_page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "label",
+              "value_redacted",
+              "source_page"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "mentions": {
+          "type": "object",
+          "properties": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "addresses": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "emails": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "phones": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "reference_numbers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
+          "additionalProperties": false
+        },
+        "questions_for_user": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "schema_version",
+        "extractor_version",
+        "extracted_at",
+        "extracted_by",
+        "confidence",
+        "status",
+        "language",
+        "document_type",
+        "document_date",
+        "period",
+        "title",
+        "summary_plain",
+        "key_facts",
+        "reference_numbers",
+        "mentions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

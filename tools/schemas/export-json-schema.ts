@@ -1,22 +1,8 @@
-import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import { RecordSchema } from './record.ts';
+import { exportRecordJsonSchema } from '../../packages/vault/src/schemas/export-json-schema.ts';
 
-export async function exportRecordJsonSchema(outputPath = defaultOutputPath()): Promise<string> {
-  const schema = zodToJsonSchema(RecordSchema, {
-    name: 'PropertyVaultRecordV1',
-    $refStrategy: 'root',
-  });
-
-  await writeFile(outputPath, `${JSON.stringify(schema, null, 2)}\n`, 'utf8');
-  return outputPath;
-}
-
-function defaultOutputPath(): string {
-  return path.join(path.dirname(fileURLToPath(import.meta.url)), 'record.v1.json');
-}
+export { exportRecordJsonSchema };
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   exportRecordJsonSchema(process.argv[2]).then(

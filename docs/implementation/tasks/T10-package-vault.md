@@ -1,7 +1,7 @@
 # T10 — Create `packages/vault`
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `codex/package-vault-for-t10`
 - Goal: Move canonical vault helpers into a dedicated package.
 - Dependencies: `T00`, `T01`, `T02`, `T03`, `T04`
 - Write scope: `packages/vault/**`, thin CLI integrations only
@@ -9,8 +9,31 @@
 - Parallel group: `core-a`
 - Required verification: `strong`
 - Completion signal: canonical vault helpers live in `packages/vault` and existing callers can use them.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: pick only after Wave 0 is done and no other task owns vault package work
+- Files changed:
+  - `.gitignore`
+  - `package-lock.json`
+  - `packages/vault/package.json`
+  - `packages/vault/tsconfig.json`
+  - `packages/vault/src/**`
+  - `tools/anomalies.ts`
+  - `tools/backup.ts`
+  - `tools/db.ts`
+  - `tools/financial-categories.ts`
+  - `tools/hash.ts`
+  - `tools/paths.ts`
+  - `tools/pdf.ts`
+  - `tools/reports.ts`
+  - `tools/schemas/export-json-schema.ts`
+  - `tools/schemas/record.ts`
+  - `tools/state.ts`
+  - `tools/vault.ts`
+- Contracts changed: none
+- Tests run:
+  - `npm run vault -- context --json`
+  - `npm run typecheck`
+  - `npm test`
+  - `npm run lint`
+  - `npm run build`
+  - `npm run --workspace @dabrowskiego/vault typecheck`
+- Next handoff note: open a reviewer chat on this branch with first message `reviewer T10`
 

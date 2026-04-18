@@ -1,6 +1,6 @@
-vault/
-index/
-reports/
+/vault/
+/index/
+/reports/
 node_modules/
 .turbo/
 .lock
