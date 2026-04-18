@@ -88,10 +88,14 @@ export const healthCheckRoute = defineRoute({
   tags: ['system'],
 });
 
-export const propertyVaultBaseRoutes = [
-  apiIndexRoute,
-  healthCheckRoute,
-] as const satisfies readonly RouteContract[];
+export const propertyVaultRouteCatalog = {
+  getApiIndex: apiIndexRoute,
+  getApiHealth: healthCheckRoute,
+} as const;
+
+export const propertyVaultBaseRoutes = Object.values(
+  propertyVaultRouteCatalog,
+) as readonly RouteContract[];
 
 export interface GeneratePropertyVaultOpenApiOptions
   extends Partial<Omit<GenerateOpenApiDocumentOptions, 'components' | 'routes'>> {}

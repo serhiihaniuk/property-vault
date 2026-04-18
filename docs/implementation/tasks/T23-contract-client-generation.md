@@ -1,17 +1,42 @@
 # T23 — Add contract/client generation flow
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `coordinator`
 - Goal: Generate OpenAPI output and typed client flow from shared contracts.
 - Dependencies: `T13`, `T22`
 - Write scope: contracts generation config and web client wiring only
+- Worker branch: `codex/T23-contract-client-generation`
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `web-shell`
 - Required verification: `standard`
 - Completion signal: OpenAPI generation works and the web app can consume the generated client.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: treat generation outputs and their ownership explicitly
+- Files changed:
+  - `apps/web/src/shared/api/client.test.ts`
+  - `apps/web/src/shared/api/client.ts`
+  - `docs/implementation/tasks/T23-contract-client-generation.md`
+  - `packages/contracts/src/client-runtime.ts`
+  - `packages/contracts/src/generate-openapi.ts`
+  - `packages/contracts/src/generated/client.ts`
+  - `packages/contracts/src/generated/openapi.json`
+  - `packages/contracts/src/index.ts`
+  - `packages/contracts/src/system.ts`
+- Contracts changed:
+  - added a script-owned generated artifacts flow under `packages/contracts/src/generated/**` for the committed OpenAPI snapshot and typed contract client
+  - added `propertyVaultRouteCatalog` plus shared contract-client runtime helpers so generated methods can validate inputs and parse contract-defined success payloads
+  - wired the web shared API client to compose the generated contract client over the existing fetch transport while preserving base-path support and RFC 7807 problem parsing
+- Tests run:
+  - `npm run --workspace @dabrowskiego/contracts typecheck`
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `node --experimental-strip-types --test apps/web/src/shared/api/client.test.ts`
+  - `npm run --workspace @dabrowskiego/contracts openapi:generate -- --check`
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run test:contracts`
+  - `npm run --workspace @dabrowskiego/contracts build`
+  - `npm run --workspace @dabrowskiego/web build`
+- Coordinator notes: none.
+- Next handoff note: start a reviewer chat and say `reviewer T23 branch codex/T23-contract-client-generation`. Branch setup is agent-managed.
 
 

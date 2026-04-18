@@ -1,0 +1,330 @@
+{
+  "components": {
+    "schemas": {
+      "ApiProblem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Problem type identifier."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Short human-readable error summary."
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "detail": {
+            "type": "string",
+            "minLength": 1
+          },
+          "instance": {
+            "type": "string",
+            "minLength": 1
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
+        "additionalProperties": false,
+        "description": "RFC 7807-style API problem details payload."
+      },
+      "DocumentReference": {
+        "type": "object",
+        "properties": {
+          "hash": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Canonical document hash."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Display title for the document."
+          },
+          "documentType": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Normalized document type."
+          },
+          "documentDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "ISO 8601 calendar date.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "hash",
+          "title",
+          "documentType"
+        ],
+        "additionalProperties": false,
+        "description": "Reference to a canonical source document."
+      },
+      "MoneyAmount": {
+        "type": "object",
+        "properties": {
+          "amountMinor": {
+            "type": "integer",
+            "description": "Integer amount in grosz or other currency minor unit."
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "description": "Three-letter ISO currency code."
+          }
+        },
+        "required": [
+          "amountMinor",
+          "currency"
+        ],
+        "additionalProperties": false,
+        "description": "Monetary amount stored as minor units."
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "totalItems": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages"
+        ],
+        "additionalProperties": false,
+        "description": "Pagination metadata for list endpoints."
+      },
+      "PeriodReference": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "month",
+              "quarter",
+              "year",
+              "custom"
+            ],
+            "description": "Supported aggregation period kinds."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable period label."
+          },
+          "startDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "ISO 8601 calendar date."
+          },
+          "endDate": {
+            "$ref": "#/components/schemas/PeriodReference/properties/startDate",
+            "description": "ISO 8601 calendar date."
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "kind",
+          "label"
+        ],
+        "additionalProperties": false,
+        "description": "Normalized reporting period reference."
+      },
+      "RuntimeEnvironment": {
+        "type": "string",
+        "enum": [
+          "development",
+          "test",
+          "production"
+        ],
+        "description": "Runtime environment label."
+      },
+      "ApiIndexResponse": {
+        "type": "object",
+        "properties": {
+          "healthPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "openApiPath": {
+            "type": "string",
+            "minLength": 1
+          },
+          "serviceName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "development",
+              "test",
+              "production"
+            ],
+            "description": "Runtime environment label."
+          }
+        },
+        "required": [
+          "healthPath",
+          "openApiPath",
+          "serviceName",
+          "version",
+          "environment"
+        ],
+        "additionalProperties": false,
+        "description": "Top-level API metadata and discovery links."
+      },
+      "HealthCheckResponse": {
+        "type": "object",
+        "properties": {
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "ok",
+                    "degraded",
+                    "down"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "status"
+              ],
+              "additionalProperties": false,
+              "description": "Health status for a single dependency or subsystem."
+            }
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp with timezone offset."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ]
+          }
+        },
+        "required": [
+          "checks",
+          "generatedAt",
+          "status"
+        ],
+        "additionalProperties": false,
+        "description": "Aggregate API health response."
+      }
+    }
+  },
+  "info": {
+    "description": "REST transport contracts for the private Property Vault application.",
+    "title": "Property Vault API",
+    "version": "0.1.0"
+  },
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "openapi": "3.1.0",
+  "paths": {
+    "/api": {
+      "get": {
+        "operationId": "getApiIndex",
+        "responses": {
+          "200": {
+            "description": "API metadata and discovery links.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiIndexResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get API entry metadata.",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "getApiHealth",
+        "responses": {
+          "200": {
+            "description": "Current API health status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "One or more core dependencies are unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get API health status.",
+        "tags": [
+          "system"
+        ]
+      }
+    }
+  }
+}

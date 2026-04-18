@@ -1,3 +1,10 @@
+import {
+  createPropertyVaultContractClient,
+  type ContractClientTransport,
+  type ContractClientTransportRequestOptions,
+  type PropertyVaultContractClient,
+} from "@dabrowskiego/contracts";
+
 import { resolvePropertyVaultPublicConfig } from "../config/public-env.ts";
 
 export interface PropertyVaultApiProblem {
@@ -14,23 +21,18 @@ export interface PropertyVaultApiClientOptions {
   fetch?: typeof fetch;
 }
 
-export interface PropertyVaultApiRequestOptions<TResponse>
-  extends Omit<RequestInit, "body" | "headers" | "method"> {
-  body?: BodyInit | FormData | Record<string, unknown> | undefined;
-  headers?: HeadersInit;
-  method?: string;
-  parse?: (payload: unknown) => TResponse;
-  path: `/${string}` | string;
-  query?: Record<string, string | number | boolean | null | undefined>;
-}
+export type PropertyVaultApiRequestOptions<TResponse> =
+  ContractClientTransportRequestOptions<TResponse>;
 
-export interface PropertyVaultApiClient {
+export interface PropertyVaultApiTransport extends ContractClientTransport {
   get<TResponse>(
     path: PropertyVaultApiRequestOptions<TResponse>["path"],
     options?: Omit<PropertyVaultApiRequestOptions<TResponse>, "method" | "path">,
   ): Promise<TResponse>;
   request<TResponse>(options: PropertyVaultApiRequestOptions<TResponse>): Promise<TResponse>;
 }
+
+export type PropertyVaultApiClient = PropertyVaultApiTransport & PropertyVaultContractClient;
 
 export class PropertyVaultApiError extends Error {
   readonly problem?: PropertyVaultApiProblem;
@@ -83,13 +85,13 @@ export function createPropertyVaultApiClient(
     }
 
     if (requestOptions.parse) {
-      return requestOptions.parse(payload);
+      return requestOptions.parse(payload, response);
     }
 
     return payload as TResponse;
   }
 
-  return {
+  const transport: PropertyVaultApiTransport = {
     get(path, requestOptions) {
       return request({
         ...requestOptions,
@@ -98,6 +100,20 @@ export function createPropertyVaultApiClient(
       });
     },
     request,
+  };
+  const contractTransport: PropertyVaultApiTransport = {
+    ...transport,
+    request(requestOptions) {
+      return transport.request({
+        ...requestOptions,
+        path: stripContractBasePath(requestOptions.path, baseUrl),
+      });
+    },
+  };
+
+  return {
+    ...contractTransport,
+    ...createPropertyVaultContractClient(contractTransport),
   };
 }
 
@@ -109,12 +125,44 @@ function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.replace(/\/+$/, "");
 }
 
+function stripContractBasePath(path: string, baseUrl: string) {
+  const basePath = getBasePathname(baseUrl);
+
+  if (path === basePath) {
+    return "";
+  }
+
+  if (path.startsWith(`${basePath}/`)) {
+    return path.slice(basePath.length);
+  }
+
+  return path;
+}
+
+function getBasePathname(baseUrl: string) {
+  if (baseUrl.startsWith("/")) {
+    return normalizeBaseUrl(baseUrl);
+  }
+
+  try {
+    return normalizeBaseUrl(new URL(baseUrl).pathname || "/");
+  } catch {
+    return normalizeBaseUrl(baseUrl);
+  }
+}
+
 function buildRequestUrl(
   baseUrl: string,
   path: string,
   query: PropertyVaultApiRequestOptions<unknown>["query"],
 ) {
-  const requestUrl = `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+  const normalizedPath =
+    path === "" || path === "/"
+      ? ""
+      : path.startsWith("/")
+        ? path
+        : `/${path}`;
+  const requestUrl = `${baseUrl}${normalizedPath}`;
   const searchParams = new URLSearchParams();
 
   for (const [key, value] of Object.entries(query ?? {})) {
@@ -162,7 +210,10 @@ async function parseResponsePayload(response: Response): Promise<unknown> {
 
   const contentType = response.headers.get("content-type");
 
-  if (!contentType?.includes("application/json")) {
+  if (
+    !contentType?.includes("application/json") &&
+    !contentType?.includes("application/problem+json")
+  ) {
     return undefined;
   }
 
