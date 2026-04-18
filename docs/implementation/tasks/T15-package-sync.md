@@ -1,7 +1,7 @@
 # T15 — Create `packages/sync`
 
 - Status: `done`
-- Owner: `Codex implementer on codex/T15-package-sync`
+- Owner: `coordinator`
 - Goal: Add canonical-vault to Postgres sync and rebuild logic.
 - Dependencies: `T10`, `T11`
 - Write scope: `packages/sync/**`, thin CLI integrations only
@@ -59,6 +59,15 @@
 - Coordinator notes review: the carry-forward note about possible future sync
   metadata consolidation is valid and should stay as a later follow-up, not a
   blocker for `T15`.
-- Next handoff note: return to the coordinator chat on `master` and say `merge latest reviewed task`
+- Coordinator final review:
+  - merged the reviewer-approved T15 result into `master`
+  - accepted the split between current status in `app.sync_state` and append-only history in `vault.sync_runs` as aligned for now with the rebuildable-vs-app-owned boundary
+  - promoted the future sync-metadata consolidation decision into `T41` so the later freshness/status task can decide deliberately instead of inheriting it implicitly
+- Actions taken:
+  - merged `codex/T15-package-sync` into `master`
+  - recorded T15 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - updated `T41` with the sync metadata follow-up about `app.sync_state` versus `vault.sync_runs`
+- Actions ignored: none
+- Next handoff note: nothing right now
 
 

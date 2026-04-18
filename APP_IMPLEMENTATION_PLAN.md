@@ -303,7 +303,7 @@ This workflow is intentionally one task at a time.
 | `T12` | Create `packages/auth` with Better Auth | `done` | `T11` | `packages/auth/**`, workspace config as needed | `gpt-5.4 / xhigh` | `core-b` | `strong` | Better Auth setup exists behind package helpers |
 | `T13` | Create `packages/contracts` with Zod + OpenAPI generation | `done` | `T11` | `packages/contracts/**`, workspace config as needed | `gpt-5.4 / xhigh` | `core-b` | `strong` | shared request/response contracts and OpenAPI generation exist |
 | `T14` | Create `packages/application` | `done` | `T11`, `T13` | `packages/application/**` | `gpt-5.4 / xhigh` | `core-c` | `strong` | use cases exist outside transport and UI |
-| `T15` | Create `packages/sync` | `todo` | `T10`, `T11` | `packages/sync/**`, thin CLI call sites | `gpt-5.4 / xhigh` | `core-c` | `strong` | canonical-to-Postgres sync layer exists and is idempotent |
+| `T15` | Create `packages/sync` | `done` | `T10`, `T11` | `packages/sync/**`, thin CLI call sites | `gpt-5.4 / xhigh` | `core-c` | `strong` | canonical-to-Postgres sync layer exists and is idempotent |
 | `T16` | Add local Docker bootstrap | `todo` | `T11`, `T12` | root dev config, docker files, docs | `gpt-5.4-mini / medium` | `core-d` | `standard` | local Postgres + app boot flow is documented and runnable |
 
 ### Wave 2 — Web shell
