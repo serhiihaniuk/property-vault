@@ -1,0 +1,24 @@
+{
+  "name": "@dabrowskiego/application",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@dabrowskiego/contracts": "0.1.0",
+    "@dabrowskiego/db": "0.1.0",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "pg-mem": "^3.0.14",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "npm run typecheck",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --experimental-strip-types src/**/*.test.ts"
+  }
+}
