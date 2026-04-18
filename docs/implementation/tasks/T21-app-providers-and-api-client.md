@@ -32,6 +32,17 @@
   - `npm run lint`
   - `node --experimental-strip-types --test apps/web/src/shared/config/public-env.test.ts apps/web/src/shared/api/client.test.ts`
   - `npm run --workspace @dabrowskiego/web build`
-- Next handoff note: start a reviewer chat on this branch and say `reviewer T21 branch codex/T21-app-providers-and-api-client`.
+- Coordinator notes: none.
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `node --experimental-strip-types --test apps/web/src/shared/config/public-env.test.ts apps/web/src/shared/api/client.test.ts`
+  - `npm run --workspace @dabrowskiego/web build`
+- Merge status: `ready for coordinator merge`
+- Architecture note: acceptable and aligned. `app/providers.tsx` stays thin while shared auth/query/theme/API client infrastructure lives under `apps/web/src/shared/**`, which matches the approved web-shell boundary for later T22/T23 work.
+- Coordinator notes review: no follow-up needed for the runtime implementation. Reverted the worker edit to `APP_IMPLEMENTATION_PLAN.md` because that file is coordinator-owned and should only be updated during final coordination on `master`.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
 
 
