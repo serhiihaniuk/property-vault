@@ -1,16 +1,41 @@
 # T11 — Create `packages/db` with Drizzle and Postgres
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `codex/add-db-package-setup`
 - Goal: Introduce the shared Postgres + Drizzle data layer.
 - Dependencies: `T00`, `T01`, `T02`, `T03`, `T04`
 - Write scope: `packages/db/**`, root workspace config as needed
+- Worker branch: `codex/add-db-package-setup`
+- Review branch: `none yet`
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Parallel group: `core-a`
 - Required verification: `strong`
 - Completion signal: Drizzle schema, client, and migrations exist for the approved Postgres model.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: coordinate with future auth/contracts/application tasks before changing shared interfaces
+- Files changed:
+  - `package.json`
+  - `package-lock.json`
+  - `packages/db/**`
+- Contracts changed: none
+- Tests run:
+  - `npm run --workspace @dabrowskiego/db typecheck`
+  - `npm run --workspace @dabrowskiego/db db:generate`
+  - `npm run --workspace @dabrowskiego/db test`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `npm test`
+- Coordinator notes:
+  - Observation: Drizzle Kit generated correct cross-schema tables for `pgSchema(...)` but did not include `CREATE SCHEMA` statements for a blank database.
+  - Why it matters: future migrations can look valid in source control but fail on first-run databases unless schema bootstrap is kept explicit.
+  - Suggested follow-up: preserve schema-bootstrap statements at the top of future multi-schema migrations or add a shared migration template before more schema tasks land.
+  - Urgency: `soon`
+- Review result: not reviewed yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Merge status: not merged
+- Next handoff note: return to the coordinator chat and say `prepare review T11`
 
