@@ -1,9 +1,30 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import test from 'node:test';
 import { newDb } from 'pg-mem';
 import { createDatabase } from './client.ts';
 import { resolveMigrationsFolder } from './migrations.ts';
+
+async function readMigrationStatements(migrationsFolder: string): Promise<string[]> {
+  const statements: string[] = [];
+  const migrationFiles = (await readdir(migrationsFolder))
+    .filter((entry) => entry.endsWith('.sql'))
+    .sort();
+
+  for (const migrationFile of migrationFiles) {
+    const migrationSql = await readFile(join(migrationsFolder, migrationFile), 'utf8');
+
+    statements.push(
+      ...migrationSql
+        .split('--> statement-breakpoint')
+        .map((value) => value.trim())
+        .filter(Boolean),
+    );
+  }
+
+  return statements;
+}
 
 test('migrations create auth, app, and vault schemas with usable tables', async () => {
   const memory = newDb({ autoCreateForeignKeyIndices: true });
@@ -14,15 +35,10 @@ test('migrations create auth, app, and vault schemas with usable tables', async 
   assert.equal(handle.pool, pool);
   assert.ok(handle.db);
 
-  const migrationSql = await readFile(
-    `${resolveMigrationsFolder()}\\0000_silly_power_man.sql`,
-    'utf8',
-  );
+  const statements = await readMigrationStatements(resolveMigrationsFolder());
+  assert.ok(statements.length > 0, 'expected generated SQL migrations');
 
-  for (const statement of migrationSql
-    .split('--> statement-breakpoint')
-    .map((value) => value.trim())
-    .filter(Boolean)) {
+  for (const statement of statements) {
     await pool.query(statement);
   }
 
