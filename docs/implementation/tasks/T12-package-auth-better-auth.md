@@ -50,6 +50,6 @@
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: switch to the coordinator chat on `main` and say `merge latest reviewed task`
+- Next handoff note: switch to the coordinator chat on `master` and say `merge latest reviewed task`
 
 
