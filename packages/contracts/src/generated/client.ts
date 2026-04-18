@@ -3,7 +3,7 @@
 
 import {
   buildContractClientMethod,
-  type ContractClientMethodOptions,
+  type ContractClientMethodArgs,
   type ContractClientTransport,
   type ContractRouteSuccessResponse,
 } from '../client-runtime.ts';
@@ -13,10 +13,10 @@ type PropertyVaultRouteCatalog = typeof propertyVaultRouteCatalog;
 
 export interface PropertyVaultContractClient {
   getApiIndex(
-    options?: ContractClientMethodOptions<PropertyVaultRouteCatalog['getApiIndex']>,
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getApiIndex']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getApiIndex']>>;
   getApiHealth(
-    options?: ContractClientMethodOptions<PropertyVaultRouteCatalog['getApiHealth']>,
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getApiHealth']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getApiHealth']>>;
 }
 

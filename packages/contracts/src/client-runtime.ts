@@ -4,7 +4,7 @@ import type {
   input as ZodInput,
   output as ZodOutput,
 } from 'zod';
-import type { ResponseContract, RouteContract } from './openapi.ts';
+import type { JsonRequestBody, ResponseContract, RouteContract } from './openapi.ts';
 
 type QueryValue = boolean | null | number | string | undefined;
 type SuccessfulStatusCode = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226;
@@ -14,6 +14,9 @@ type RouteSuccessfulStatusCode<TRoute extends RouteContract> = Extract<
   RouteStatusCode<TRoute>,
   SuccessfulStatusCode
 >;
+type RequiredKeys<TValue extends object> = {
+  [TKey in keyof TValue]-?: {} extends Pick<TValue, TKey> ? never : TKey;
+}[keyof TValue];
 type Simplify<TValue> = { [TKey in keyof TValue]: TValue[TKey] } & {};
 
 type ContractResponseOutput<TResponse extends ResponseContract> =
@@ -69,24 +72,71 @@ export interface ContractClientTransport {
   request<TResponse>(options: ContractClientTransportRequestOptions<TResponse>): Promise<TResponse>;
 }
 
+type ContractRoutePathParamsOption<TRoute extends RouteContract> = TRoute extends {
+  pathParams: AnyZodObject;
+}
+  ? {
+      pathParams: ContractRoutePathParamsInput<TRoute>;
+    }
+  : {};
+
+type ContractRouteQueryOption<TRoute extends RouteContract> = TRoute extends {
+  query: infer TQuery extends AnyZodObject;
+}
+  ? RequiredKeys<ZodInput<TQuery>> extends never
+    ? {
+        query?: ContractRouteQueryInput<TRoute>;
+      }
+    : {
+        query: ContractRouteQueryInput<TRoute>;
+      }
+  : {};
+
+type ContractRouteRequestBodyOption<TRoute extends RouteContract> = TRoute extends {
+  requestBody: infer TRequestBody extends JsonRequestBody;
+}
+  ? TRequestBody extends {
+      required: false;
+    }
+    ? {
+        body?: ContractRouteRequestBodyInput<TRoute>;
+      }
+    : {
+        body: ContractRouteRequestBodyInput<TRoute>;
+      }
+  : {};
+
 export type ContractClientMethodOptions<TRoute extends RouteContract> = Simplify<
   Omit<
     ContractClientTransportRequestOptions<ContractRouteSuccessResponse<TRoute>>,
     'body' | 'method' | 'parse' | 'path' | 'query'
-  > & {
-    body?: ContractRouteRequestBodyInput<TRoute>;
-    pathParams?: ContractRoutePathParamsInput<TRoute>;
-    query?: ContractRouteQueryInput<TRoute>;
-  }
+  > &
+    ContractRouteRequestBodyOption<TRoute> &
+    ContractRoutePathParamsOption<TRoute> &
+    ContractRouteQueryOption<TRoute>
 >;
+
+export type ContractClientMethodArgs<TRoute extends RouteContract> =
+  RequiredKeys<ContractClientMethodOptions<TRoute>> extends never
+    ? [options?: ContractClientMethodOptions<TRoute>]
+    : [options: ContractClientMethodOptions<TRoute>];
+
+type ContractClientMethodRuntimeOptions<TRoute extends RouteContract> = ContractClientMethodOptions<
+  TRoute
+> & {
+  body?: ContractRouteRequestBodyInput<TRoute>;
+  pathParams?: ContractRoutePathParamsInput<TRoute>;
+  query?: ContractRouteQueryInput<TRoute>;
+};
 
 export function buildContractClientMethod<TRoute extends RouteContract>(
   transport: ContractClientTransport,
   route: TRoute,
 ) {
   return async function contractClientMethod(
-    options: ContractClientMethodOptions<TRoute> = {} as ContractClientMethodOptions<TRoute>,
+    ...args: ContractClientMethodArgs<TRoute>
   ): Promise<ContractRouteSuccessResponse<TRoute>> {
+    const options = (args[0] ?? {}) as ContractClientMethodRuntimeOptions<TRoute>;
     const { body, pathParams, query, ...requestOptions } = options;
 
     return transport.request({

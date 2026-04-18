@@ -15,6 +15,7 @@
   - `apps/web/src/shared/api/client.ts`
   - `docs/implementation/tasks/T23-contract-client-generation.md`
   - `packages/contracts/src/client-runtime.ts`
+  - `packages/contracts/src/client-runtime.typecheck.ts`
   - `packages/contracts/src/generate-openapi.ts`
   - `packages/contracts/src/generated/client.ts`
   - `packages/contracts/src/generated/openapi.json`
@@ -23,6 +24,7 @@
 - Contracts changed:
   - added a script-owned generated artifacts flow under `packages/contracts/src/generated/**` for the committed OpenAPI snapshot and typed contract client
   - added `propertyVaultRouteCatalog` plus shared contract-client runtime helpers so generated methods can validate inputs and parse contract-defined success payloads
+  - tightened generated client method typings so required path params, required request bodies, and required query fields are enforced at compile time
   - wired the web shared API client to compose the generated contract client over the existing fetch transport while preserving base-path support and RFC 7807 problem parsing
 - Tests run:
   - `npm run --workspace @dabrowskiego/contracts typecheck`
@@ -37,6 +39,20 @@
   - `npm run --workspace @dabrowskiego/contracts build`
   - `npm run --workspace @dabrowskiego/web build`
 - Coordinator notes: none.
-- Next handoff note: start a reviewer chat and say `reviewer T23 branch codex/T23-contract-client-generation`. Branch setup is agent-managed.
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run test:contracts`
+  - `node --experimental-strip-types --test apps/web/src/shared/api/client.test.ts`
+  - `npm run --workspace @dabrowskiego/contracts openapi:generate -- --check`
+- Merge status: `ready for coordinator merge`
+- Architecture note: acceptable and aligned. `packages/contracts` remains the owner of both the OpenAPI snapshot and the generated typed client, and the reviewer fix keeps that client honest by making contract-defined required inputs compile-time-required before later vertical slices depend on it.
+- Coordinator notes review: no follow-up needed. Reviewer tightened the typed client surface inside the declared task scope so later route additions cannot silently compile with missing required inputs.
+- Coordinator final review: pending coordinator finalization.
+- Actions taken: none yet.
+- Actions ignored: none.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
 
 

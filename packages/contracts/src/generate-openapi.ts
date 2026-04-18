@@ -109,7 +109,7 @@ function renderGeneratedClientSource(): string {
   const methodSignatures = operationIds
     .map(
       (operationId) => `  ${operationId}(
-    options?: ContractClientMethodOptions<PropertyVaultRouteCatalog['${operationId}']>,
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['${operationId}']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['${operationId}']>>;`,
     )
     .join('\n');
@@ -125,7 +125,7 @@ function renderGeneratedClientSource(): string {
 
 import {
   buildContractClientMethod,
-  type ContractClientMethodOptions,
+  type ContractClientMethodArgs,
   type ContractClientTransport,
   type ContractRouteSuccessResponse,
 } from '../client-runtime.ts';
