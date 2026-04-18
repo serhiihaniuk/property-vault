@@ -94,22 +94,26 @@ async function runVaultSync(
   const syncRunKind = options.syncRunKind ?? DEFAULT_SYNC_RUN_KIND;
 
   return withDatabase(options, async (db) => {
-    await setSyncStateRunning(db, {
-      snapshot,
-      snapshotHash,
-      startedAt,
-      syncStateKey,
-    });
-
-    const runRef = await createSyncRun(db, {
-      mode,
-      snapshot,
-      snapshotHash,
-      startedAt,
-      syncRunKind,
-    });
+    let syncStateMarkedRunning = false;
+    let syncRunCreated = false;
 
     try {
+      await setSyncStateRunning(db, {
+        snapshot,
+        snapshotHash,
+        startedAt,
+        syncStateKey,
+      });
+      syncStateMarkedRunning = true;
+
+      const runRef = await createSyncRun(db, {
+        mode,
+        snapshot,
+        snapshotHash,
+        startedAt,
+        syncRunKind,
+      });
+      syncRunCreated = true;
       const summary = await db.transaction(async (tx) => {
         let anomaliesCleared = 0;
 
@@ -154,26 +158,30 @@ async function runVaultSync(
       const finishedAt = (options.now ?? (() => new Date()))().toISOString();
       const errorMessage = error instanceof Error ? error.message : String(error);
 
-      await finishSyncRun(
-        db,
-        {
+      if (syncRunCreated) {
+        await finishSyncRun(
+          db,
+          {
+            startedAt,
+            syncRunKind,
+          },
+          'failed',
+          {
+            error: errorMessage,
+            mode,
+            snapshot: snapshot.counts,
+            snapshotHash,
+          },
+          finishedAt,
+        );
+      }
+      if (syncStateMarkedRunning) {
+        await setSyncStateFailed(db, syncStateKey, snapshotHash, {
+          errorMessage,
+          finishedAt,
           startedAt,
-          syncRunKind,
-        },
-        'failed',
-        {
-          error: errorMessage,
-          mode,
-          snapshot: snapshot.counts,
-          snapshotHash,
-        },
-        finishedAt,
-      );
-      await setSyncStateFailed(db, syncStateKey, snapshotHash, {
-        errorMessage,
-        finishedAt,
-        startedAt,
-      });
+        });
+      }
 
       throw error;
     }
@@ -703,11 +711,13 @@ function hashSnapshot(snapshot: CanonicalVaultSnapshot): string {
         gmailId: email.gmailId,
         historyId: email.historyId,
       })),
-      notes: [...snapshot.notes.values()].map((note) => ({
-        hash: note.hash,
-        markdownHash: sha256Text(note.markdown),
-        relativePath: note.relativePath,
-      })),
+      notes: [...snapshot.notes.values()]
+        .sort((left, right) => left.hash.localeCompare(right.hash))
+        .map((note) => ({
+          hash: note.hash,
+          markdownHash: sha256Text(note.markdown),
+          relativePath: note.relativePath,
+        })),
       records: snapshot.records.map((entry) => ({
         hash: entry.hash,
         recordHash: sha256Text(stableStringify(entry.record)),

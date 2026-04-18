@@ -185,6 +185,48 @@ test('rebuildVaultSchema clears derived vault rows but preserves app sync state'
   }
 });
 
+test('syncVaultToDatabase marks sync state as error when run logging fails before the transaction starts', async () => {
+  const fixture = await createFixture();
+  const memory = newDb({ autoCreateForeignKeyIndices: true });
+  const adapter = memory.adapters.createPg();
+  const pool = new adapter.Pool();
+  patchPgMemPool(pool);
+  const { db } = createDatabase({ pool });
+
+  try {
+    await seedCanonicalVault(fixture.root);
+    await applyMigrations(pool);
+    await pool.query('DROP TABLE "vault"."sync_runs"');
+
+    await assert.rejects(() =>
+      syncVaultToDatabase({
+        db,
+        now: () => new Date('2026-04-18T14:00:00.000Z'),
+        root: fixture.root,
+      }),
+    );
+
+    const syncState = await pool.query(`
+      SELECT
+        status,
+        last_error,
+        last_finished_at
+      FROM "app"."sync_state"
+      WHERE key = 'canonical_vault'
+    `);
+
+    assert.equal(syncState.rows[0]?.status, 'error');
+    assert.match(String(syncState.rows[0]?.last_error), /sync_runs/i);
+    assert.equal(
+      normalizeTimestamp(syncState.rows[0]?.last_finished_at),
+      '2026-04-18T14:00:00.000Z',
+    );
+  } finally {
+    await pool.end();
+    await fixture.remove();
+  }
+});
+
 async function applyMigrations(pool: { query: (sql: string) => Promise<unknown> }): Promise<void> {
   const statements = await readMigrationStatements(resolveMigrationsFolder());
 

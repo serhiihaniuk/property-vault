@@ -43,6 +43,22 @@
     cleanup whether `vault.sync_runs` stays as historical audit data or should
     move into `app`.
   - Urgency: `later`
-- Next handoff note: start a reviewer chat on `codex/T15-package-sync` and say `reviewer T15 branch codex/T15-package-sync`
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer on codex/T15-package-sync`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/sync test`
+  - `npm run --workspace @dabrowskiego/sync typecheck`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+- Merge status: `merge ready`
+- Architecture note: keeping current run status in `app.sync_state` and
+  append-only history in `vault.sync_runs` is acceptable and aligned with the
+  rebuildable-vs-app-owned split in `ARCHITECTURE.md`; the coordinator note for
+  future `T41` cleanup is valid but non-blocking.
+- Coordinator notes review: the carry-forward note about possible future sync
+  metadata consolidation is valid and should stay as a later follow-up, not a
+  blocker for `T15`.
+- Next handoff note: return to the coordinator chat on `master` and say `merge latest reviewed task`
 
 
