@@ -5,7 +5,7 @@
 - Goal: Deliver yearly review and anomaly surfaces for the first financial slice.
 - Dependencies: `T21`, `T22`, `T23`
 - Write scope: reconciliation/anomaly contracts, application services, routes, widgets
-- Recommended execution model: `gpt-5.4 / xhigh`
+- Recommended execution model: `gpt-5.4 / high`
 - Parallel group: `slice-financials`
 - Required verification: `strong`
 - Completion signal: yearly reconciliation and anomalies render from real data and pass targeted tests.

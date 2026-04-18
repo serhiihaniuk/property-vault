@@ -5,7 +5,7 @@
 - Goal: Deliver the first dashboard slice with month summary and category breakdown.
 - Dependencies: `T21`, `T22`, `T23`
 - Write scope: dashboard contracts, application services, routes, widgets
-- Recommended execution model: `gpt-5.4 / xhigh`
+- Recommended execution model: `gpt-5.4 / high`
 - Parallel group: `slice-dashboard`
 - Required verification: `strong`
 - Completion signal: dashboard renders real month summary and normalized breakdown data.

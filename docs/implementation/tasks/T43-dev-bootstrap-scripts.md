@@ -5,7 +5,7 @@
 - Goal: Make local developer bootstrap and run flows simple.
 - Dependencies: `T16`, `T20`, `T21`, `T22`, `T23`
 - Write scope: root scripts, docs, and local setup helpers
-- Recommended execution model: `gpt-5.4-mini / medium`
+- Recommended execution model: `gpt-5.4-mini / low`
 - Parallel group: `hardening-d`
 - Required verification: `standard`
 - Completion signal: local bootstrap/run commands are documented and reproducible.

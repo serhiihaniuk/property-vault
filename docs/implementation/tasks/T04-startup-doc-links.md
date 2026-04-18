@@ -5,7 +5,7 @@
 - Goal: Point repo startup docs to architecture and protocol materials.
 - Dependencies: `T00`, `T01`, `T02`
 - Write scope: `README.md`, `AGENTS.md`
-- Recommended execution model: `gpt-5.4-mini / medium`
+- Recommended execution model: `gpt-5.4-mini / low`
 - Parallel group: `docs-core`
 - Required verification: `standard`
 - Completion signal: `README.md` and `AGENTS.md` point to architecture, app plan, and protocol docs.

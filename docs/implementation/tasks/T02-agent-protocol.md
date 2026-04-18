@@ -5,7 +5,7 @@
 - Goal: Create the short execution protocol for spawned agents.
 - Dependencies: `T00`, `T01`
 - Write scope: `docs/implementation/AGENT_PROTOCOL.md`
-- Recommended execution model: `gpt-5.4-mini / medium`
+- Recommended execution model: `gpt-5.4-mini / low`
 - Parallel group: `docs-core`
 - Required verification: `light`
 - Completion signal: protocol supports `pick task` -> `do` -> `start`.

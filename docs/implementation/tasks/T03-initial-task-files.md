@@ -5,7 +5,7 @@
 - Goal: Create one tracked task file per planned app task.
 - Dependencies: `T01`, `T02`
 - Write scope: `docs/implementation/tasks/**`
-- Recommended execution model: `gpt-5.4-mini / medium`
+- Recommended execution model: `gpt-5.4-mini / low`
 - Parallel group: `docs-core`
 - Required verification: `light`
 - Completion signal: every planned task has a task file with required fields.

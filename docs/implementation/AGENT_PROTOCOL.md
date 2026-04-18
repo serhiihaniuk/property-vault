@@ -51,9 +51,8 @@ Do this when asked to prepare execution.
 3. Reply with:
    - status set to `in_progress`,
    - worktree/branch reminder,
-   - recommended model:
-     - `gpt-5.4-mini / medium`, or
-     - `gpt-5.4 / xhigh`
+   - recommended model/effort pair,
+   - optional cheaper fallback when it would still be acceptable,
    - short reason,
    - required tests,
    - next command: `start`
@@ -151,6 +150,25 @@ Use the task ID in the subject:
 
 - `T30 Add dashboard summary routes and application service`
 - `T31 Add document detail contracts and provenance widget`
+
+## Model Recommendation Rule
+
+Do not force model choices into only two buckets.
+
+When reporting the recommended execution model:
+
+- choose the actual best-fit model and effort for the task,
+- use any valid pairing available in the current Codex UI,
+- examples include:
+  - `gpt-5.4-mini / low`
+  - `gpt-5.4-mini / medium`
+  - `gpt-5.4 / medium`
+  - `gpt-5.4 / high`
+  - `gpt-5.4 / xhigh`
+- include a cheaper fallback only when the task can safely tolerate it.
+
+Task-file recommendations are defaults, not hard limits. If the real situation
+has changed, say so briefly and recommend a better pairing before execution.
 
 ## Stop Conditions
 

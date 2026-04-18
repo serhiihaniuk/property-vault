@@ -121,10 +121,23 @@ Important rules:
 
 ## 5. Model Selection
 
-Use only these recommendations in task files:
+Task files should store the best default model/effort pair for that task, not a
+fake forced choice. Agents may recommend a different pairing at execution time
+if the repo state or task shape has changed.
 
+Common valid recommendations include:
+
+- `gpt-5.4-mini / low`
 - `gpt-5.4-mini / medium`
+- `gpt-5.4 / medium`
+- `gpt-5.4 / high`
 - `gpt-5.4 / xhigh`
+
+### Prefer `gpt-5.4-mini / low` for
+
+- doc-only cleanup,
+- rote task-file updates,
+- simple metadata/status maintenance.
 
 ### Prefer `gpt-5.4-mini / medium` for
 
@@ -134,6 +147,18 @@ Use only these recommendations in task files:
 - generated-client plumbing,
 - UI composition on stable contracts,
 - straightforward tests and fixtures.
+
+### Prefer `gpt-5.4 / medium` for
+
+- bounded feature work on already-stable interfaces,
+- route/application wiring with limited cross-package risk,
+- focused UI/API slices that are more than scaffolding but not architecture work.
+
+### Prefer `gpt-5.4 / high` for
+
+- vertical slices that cross contracts, application logic, and UI,
+- reviewer passes on non-trivial tasks,
+- cross-package work where the boundaries are known but the implementation is substantial.
 
 ### Prefer `gpt-5.4 / xhigh` for
 
@@ -202,10 +227,10 @@ contracts, it must stop and report `blocked`.
 | ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T00` | Write `ARCHITECTURE.md` | `done` | none | root docs | `gpt-5.4 / xhigh` | `docs-core` | `standard` | architecture doc exists and matches approved direction |
-| `T01` | Write `APP_IMPLEMENTATION_PLAN.md` | `done` | `T00` | root docs | `gpt-5.4 / xhigh` | `docs-core` | `standard` | detailed task backlog exists with model/gate data |
-| `T02` | Write `docs/implementation/AGENT_PROTOCOL.md` | `done` | `T00`, `T01` | `docs/implementation/**` | `gpt-5.4-mini / medium` | `docs-core` | `light` | protocol file exists and supports `pick task` -> `do` -> `start` |
-| `T03` | Create initial task handoff files | `done` | `T01`, `T02` | `docs/implementation/tasks/**` | `gpt-5.4-mini / medium` | `docs-core` | `light` | one task file exists for each planned task |
-| `T04` | Update startup docs and doc links | `done` | `T00`, `T01`, `T02` | `README.md`, `AGENTS.md` | `gpt-5.4-mini / medium` | `docs-core` | `standard` | startup docs point to new architecture and protocol docs |
+| `T01` | Write `APP_IMPLEMENTATION_PLAN.md` | `done` | `T00` | root docs | `gpt-5.4 / high` | `docs-core` | `standard` | detailed task backlog exists with model/gate data |
+| `T02` | Write `docs/implementation/AGENT_PROTOCOL.md` | `done` | `T00`, `T01` | `docs/implementation/**` | `gpt-5.4-mini / low` | `docs-core` | `light` | protocol file exists and supports `pick task` -> `do` -> `start` |
+| `T03` | Create initial task handoff files | `done` | `T01`, `T02` | `docs/implementation/tasks/**` | `gpt-5.4-mini / low` | `docs-core` | `light` | one task file exists for each planned task |
+| `T04` | Update startup docs and doc links | `done` | `T00`, `T01`, `T02` | `README.md`, `AGENTS.md` | `gpt-5.4-mini / low` | `docs-core` | `standard` | startup docs point to new architecture and protocol docs |
 
 ### Wave 1 — Core packages
 
@@ -225,16 +250,16 @@ contracts, it must stop and report `blocked`.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T20` | Refactor `apps/web` into minimal FSD | `todo` | `T11`-`T16` | `apps/web/app/**`, `apps/web/src/**` | `gpt-5.4-mini / medium` | `web-shell` | `strong` | web app has stable minimal FSD layout and compiles |
 | `T21` | Add app providers and API client | `todo` | `T12`, `T13`, `T20` | `apps/web/src/shared/**`, provider wiring | `gpt-5.4-mini / medium` | `web-shell` | `standard` | auth/query/theme/API client providers are wired |
-| `T22` | Add thin REST route handler structure | `todo` | `T13`, `T14`, `T20` | `apps/web/app/api/**` and transport adapters | `gpt-5.4-mini / medium` | `web-shell` | `strong` | route handlers validate, delegate, and return contract DTOs |
+| `T22` | Add thin REST route handler structure | `todo` | `T13`, `T14`, `T20` | `apps/web/app/api/**` and transport adapters | `gpt-5.4 / medium` | `web-shell` | `strong` | route handlers validate, delegate, and return contract DTOs |
 | `T23` | Add contract/client generation flow | `todo` | `T13`, `T22` | contracts generation config and web client wiring | `gpt-5.4-mini / medium` | `web-shell` | `standard` | OpenAPI generation and typed client flow are working |
 
 ### Wave 3 — First vertical slices
 
 | ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `T30` | Dashboard summary + month breakdown | `todo` | `T21`-`T23` | dashboard contracts, application, routes, widgets | `gpt-5.4 / xhigh` | `slice-dashboard` | `strong` | dashboard renders real month summary and category breakdown |
-| `T31` | Documents list/detail + provenance | `todo` | `T21`-`T23` | documents contracts, application, routes, widgets | `gpt-5.4 / xhigh` | `slice-documents` | `strong` | document flows show detail plus provenance/source trace |
-| `T32` | Year reconciliation + anomalies | `todo` | `T21`-`T23` | reconciliation/anomaly contracts, application, routes, widgets | `gpt-5.4 / xhigh` | `slice-financials` | `strong` | yearly review and anomalies flow render from real data |
+| `T30` | Dashboard summary + month breakdown | `todo` | `T21`-`T23` | dashboard contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-dashboard` | `strong` | dashboard renders real month summary and category breakdown |
+| `T31` | Documents list/detail + provenance | `todo` | `T21`-`T23` | documents contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-documents` | `strong` | document flows show detail plus provenance/source trace |
+| `T32` | Year reconciliation + anomalies | `todo` | `T21`-`T23` | reconciliation/anomaly contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-financials` | `strong` | yearly review and anomalies flow render from real data |
 | `T33` | Access/invite flows | `todo` | `T12`, `T21`-`T23` | auth/access routes, application, widgets | `gpt-5.4 / xhigh` | `slice-access` | `strong` | invite-only access flow works end to end |
 
 ### Wave 4 — Hardening
@@ -242,10 +267,10 @@ contracts, it must stop and report `blocked`.
 | ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T40` | Import-boundary lint rules | `todo` | `T20` | lint config and slice boundary rules | `gpt-5.4-mini / medium` | `hardening-a` | `standard` | forbidden cross-slice imports fail lint |
-| `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T30`-`T32` | application, contracts, widgets for freshness/status | `gpt-5.4 / xhigh` | `hardening-b` | `strong` | UI exposes last sync/freshness clearly |
+| `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T30`-`T32` | application, contracts, widgets for freshness/status | `gpt-5.4 / high` | `hardening-b` | `strong` | UI exposes last sync/freshness clearly |
 | `T42` | Error, empty, and loading states | `todo` | `T30`-`T33` | slice UI states only | `gpt-5.4-mini / medium` | `hardening-c` | `standard` | primary screens have consistent non-happy-path states |
-| `T43` | Dev/bootstrap scripts | `todo` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / medium` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
-| `T44` | Final documentation cleanup | `todo` | `T40`-`T43` | root/package docs only | `gpt-5.4-mini / medium` | `hardening-e` | `light` | architecture, package docs, and task docs reflect reality |
+| `T43` | Dev/bootstrap scripts | `todo` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / low` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
+| `T44` | Final documentation cleanup | `todo` | `T40`-`T43` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, and task docs reflect reality |
 
 ## 9. Reviewer Workflow
 
@@ -277,7 +302,10 @@ Use a stronger model for the reviewer when the task is:
 
 Typical reviewer default:
 
-- `gpt-5.4 / xhigh`
+- `gpt-5.4 / high`
+
+Escalate reviewer effort to `gpt-5.4 / xhigh` for schema, auth, sync, or
+shared-boundary tasks.
 
 ## 10. Worker Reporting Requirements
 
@@ -375,3 +403,4 @@ An agent must stop and mark `blocked` if:
 - auth/session behavior changes outside the owned scope,
 - contract changes break parallel work,
 - tests reveal an architectural contradiction rather than a local bug.
+

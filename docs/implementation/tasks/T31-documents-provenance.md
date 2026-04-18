@@ -5,7 +5,7 @@
 - Goal: Deliver document browsing with provenance/source trace.
 - Dependencies: `T21`, `T22`, `T23`
 - Write scope: documents contracts, application services, routes, widgets
-- Recommended execution model: `gpt-5.4 / xhigh`
+- Recommended execution model: `gpt-5.4 / high`
 - Parallel group: `slice-documents`
 - Required verification: `strong`
 - Completion signal: documents list/detail flow renders and exposes provenance.

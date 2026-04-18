@@ -5,7 +5,7 @@
 - Goal: Implement REST endpoints with thin Next.js route handlers.
 - Dependencies: `T13`, `T14`, `T20`
 - Write scope: `apps/web/app/api/**`, transport adapters only
-- Recommended execution model: `gpt-5.4-mini / medium`
+- Recommended execution model: `gpt-5.4 / medium`
 - Parallel group: `web-shell`
 - Required verification: `strong`
 - Completion signal: route handlers validate, delegate, and return contract DTOs without owning business logic.

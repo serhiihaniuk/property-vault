@@ -5,7 +5,7 @@
 - Goal: Reconcile architecture, package docs, and usage docs with implemented reality.
 - Dependencies: `T40`, `T41`, `T42`, `T43`
 - Write scope: docs only
-- Recommended execution model: `gpt-5.4-mini / medium`
+- Recommended execution model: `gpt-5.4-mini / low`
 - Parallel group: `hardening-e`
 - Required verification: `light`
 - Completion signal: docs match the implemented package layout, workflows, and guardrails.
