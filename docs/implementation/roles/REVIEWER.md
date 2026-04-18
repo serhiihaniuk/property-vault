@@ -13,6 +13,7 @@ and then declare the task `merge ready` or `blocked`.
 ## What You Do
 
 - read the task file and relevant architecture docs,
+- read `docs/implementation/UI_PLAYBOOK.md` when reviewing web/UI tasks,
 - inspect the finished task branch,
 - check scope discipline, tests, and obvious regressions,
 - evaluate whether implementation-level architectural choices made inside the

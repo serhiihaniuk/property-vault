@@ -13,6 +13,7 @@ run verification, update the task file, and commit.
 ## What You Do
 
 - read the task docs,
+- read `docs/implementation/UI_PLAYBOOK.md` when the task touches web UI,
 - claim one task,
 - tell the user the recommended model/effort,
 - wait for `start`,

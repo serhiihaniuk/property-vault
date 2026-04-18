@@ -13,6 +13,8 @@ your owned task file.
 5. `APP_IMPLEMENTATION_PLAN.md`
 6. `docs/implementation/WORKTREE_GUIDE.md`
 7. assigned or selected task file under `docs/implementation/tasks/`
+8. `docs/implementation/UI_PLAYBOOK.md` only when the task touches `apps/web/**`
+   or reviewer is validating web UI work
 
 ## Role Entry Shortcut
 

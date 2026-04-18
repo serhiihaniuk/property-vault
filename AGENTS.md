@@ -49,8 +49,10 @@ The repo currently has:
 5. Read `APP_IMPLEMENTATION_PLAN.md`.
 6. Read the assigned task file under `docs/implementation/tasks/` if doing app
    implementation.
-7. Run `npm run vault -- context` when local vault/runtime context matters.
-8. Use local records, notes, SQLite, or cited source files before answering
+7. If the task touches `apps/web/**` or web UI review, read
+   `docs/implementation/UI_PLAYBOOK.md`.
+8. Run `npm run vault -- context` when local vault/runtime context matters.
+9. Use local records, notes, SQLite, or cited source files before answering
    factual questions.
 
 ## Role Shortcuts

@@ -2,6 +2,10 @@
 
 This is a Next.js template with shadcn/ui.
 
+For actual product UI work in this repo, also read:
+
+- `docs/implementation/UI_PLAYBOOK.md`
+
 ## Adding components
 
 To add components to your app, run the following command:
