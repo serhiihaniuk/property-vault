@@ -2,5 +2,6 @@ vault/
 index/
 reports/
 node_modules/
+.turbo/
 .lock
 .env
