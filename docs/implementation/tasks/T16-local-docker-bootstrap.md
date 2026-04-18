@@ -34,7 +34,6 @@
     bootstrap statements.
   - Expected outcome: documented startup from empty local Postgres proves the
     multi-schema migration path really works.
-- Next handoff note: start a reviewer chat on `codex/T16-local-docker-bootstrap` and say `reviewer T16 branch codex/T16-local-docker-bootstrap`
 - Review result: `merge ready`
 - Reviewer: `Codex reviewer`
 - Review tests run:
@@ -54,5 +53,14 @@
   - Confirmed. The reviewed flow now proves the blank-database migration path
     against local Docker and verifies the expected `app`, `auth`, and `vault`
     schemas exist after migration.
+- Coordinator final review:
+  - merged the reviewer-approved T16 result into `master`
+  - accepted the explicit Docker/bootstrap flow and Postgres healthcheck wait as the right local startup baseline for later web and tooling tasks
+  - no extra carry-forward task changes were needed beyond the merged bootstrap docs and scripts
+- Actions taken:
+  - merged `codex/T16-local-docker-bootstrap` into `master`
+  - recorded T16 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored: none
+- Next handoff note: nothing right now
 
 
