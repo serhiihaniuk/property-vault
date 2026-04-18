@@ -21,10 +21,21 @@ for extraction history or ad hoc notes.
 - The reviewer agent may:
   - review worker results,
   - make bounded fixes in the worker worktree or a dedicated reviewer worktree,
-  - merge approved task branches back into `main`.
+  - mark reviewed work `merge ready` or `blocked`.
 - Worker agents edit:
   - owned code files
   - their own task file under `docs/implementation/tasks/`
+- Coordinator may update the table statuses in this file for at-a-glance queue
+  visibility on `main`.
+- Coordinator also records final review decisions and merges reviewed work back
+  into `main`.
+- Coordinator may create a dedicated reviewer branch/worktree from a finished
+  worker branch when review should be isolated from the worker checkout.
+- Foundational package tasks may also touch minimal root metadata when needed
+  to make the new package trackable and installable, such as `.gitignore`,
+  `package-lock.json`, and workspace-level package-manager metadata.
+- Private-data ignore rules must stay root-anchored such as `/vault/`,
+  `/index/`, and `/reports/` so nested workspace paths are not ignored.
 
 ## 2. Status Model
 
@@ -66,11 +77,24 @@ Expected workflow:
    - update the task file
    - commit with task ID in the subject
 
-4. reviewer pass
-   - review the worker branch in isolation
+4. coordinator review-prep pass
+   - read the finished worker task file and exact worker branch
+   - create a dedicated review branch/worktree from that worker branch when
+     needed
+   - record the review branch and hand off the exact reviewer target
+
+5. reviewer pass
+   - review the prepared review branch/worktree in isolation
    - make bounded fixes if needed
    - run the required review verification
-   - merge back to `main` only after the task is `done`
+   - validate coordinator-facing notes
+   - declare `merge ready` or `blocked`
+
+6. coordinator final pass
+   - read reviewer output and coordinator notes
+   - decide which follow-up actions are taken or ignored
+   - merge back to `main` when ready
+   - update backlog/docs if future work changes
 
 `start` and `do` are intentionally separate so Serhii can choose model/cost
 before the task actually runs.
@@ -83,14 +107,23 @@ Use this workflow for parallel agent execution:
 2. Create one worktree per worker agent.
 3. Give each worktree its own branch, usually named with the task ID.
 4. The worker agent edits and commits only inside its own worktree.
-5. The reviewer agent checks the worker result, fixes small issues if needed,
-   and merges the task branch back into `main`.
+5. Coordinator may create a dedicated review branch/worktree from the finished
+   worker branch.
+6. The reviewer agent checks the prepared review result, fixes small issues if
+   needed, and hands a `merge ready` or `blocked` result to coordinator.
+7. The coordinator records final decisions and merges the review branch back into
+   `main`.
 
 Recommended branch shape:
 
 - `codex/T10-package-vault`
 - `codex/T11-package-db`
 - `codex/T30-dashboard`
+- `codex/review-t10`
+
+If the Codex worktree flow creates a different but still task-identifiable
+branch slug, use the actual checked-out branch as the source of truth in task
+handoffs and task files.
 
 Recommended worktree shape:
 
@@ -102,6 +135,7 @@ Example local commands:
 ```powershell
 git worktree add ..\dabrowskiego-T10 -b codex/T10-package-vault
 git worktree add ..\dabrowskiego-T11 -b codex/T11-package-db
+git worktree add ..\dabrowskiego-review-T10 -b codex/review-t10 codex/T10-package-vault
 git worktree list
 ```
 
@@ -117,7 +151,52 @@ Important rules:
 - never let two worker agents share one worktree,
 - never let workers commit directly on `main`,
 - coordinator stays mostly in the main checkout,
-- reviewer merges only after verification and task-file update.
+- coordinator prepares reviewer targets when needed,
+- reviewer verifies and hands off,
+- coordinator merges after reviewer verification and final decision logging.
+
+### Coordinator-managed review prep
+
+The safest review target is a dedicated review branch/worktree created from the
+finished worker branch.
+
+Use this when:
+
+- the worker branch is already checked out elsewhere,
+- the Codex UI cannot create a review worktree from the correct base branch,
+- you want reviewer fixes isolated from the worker checkout.
+
+In that case coordinator should:
+
+- read the worker branch from the task file,
+- create `codex/review-txx` from that worker branch,
+- hand the reviewer the exact review branch/worktree.
+
+### Dependency readiness in fresh worktrees
+
+Fresh worktrees are not assumed to be dependency-ready.
+
+Before verification in a worker worktree:
+
+- run a real local install in that worktree, usually `npm install`,
+- do not symlink or junction `node_modules` from another checkout,
+- treat shared `node_modules` links as unsupported because Next.js/Turbopack
+  may reject paths that point outside the worktree root.
+
+### Queue visibility from `main`
+
+Worker task-file edits are branch-local while the task is in progress.
+
+That means:
+
+- the copy of `docs/implementation/tasks/Txx-*.md` visible on `main` may lag,
+- the worker worktree copy is the live execution view,
+- coordinator should check `git worktree list` and inspect active worker
+  worktrees before picking more tasks,
+- this backlog table may be updated by coordinator so the queue stays readable
+  from `main`.
+- once review prep is complete, the prepared review branch/worktree becomes the
+  authoritative review surface.
 
 ## 5. Model Selection
 
@@ -188,6 +267,8 @@ Common valid recommendations include:
   - `npm run build`
   - targeted integration tests
   - relevant Playwright flow when UI/API surface changes
+  - for foundational package tasks, add a package-local workspace verification
+    such as `npm run --workspace @dabrowskiego/vault typecheck` when available
 
 - `release`
   - full suite
@@ -220,7 +301,7 @@ Parallel work is allowed only when:
 If a task must change shared architecture, schema ownership, or auth/session
 contracts, it must stop and report `blocked`.
 
-## 8. Task Waves
+## 9. Task Waves
 
 ### Wave 0 — Docs and protocol
 
@@ -236,7 +317,7 @@ contracts, it must stop and report `blocked`.
 
 | ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `T10` | Create `packages/vault` | `todo` | `T00`-`T04` | `packages/vault/**`, thin CLI call sites | `gpt-5.4 / xhigh` | `core-a` | `strong` | canonical vault helpers live in package and tools can call them |
+| `T10` | Create `packages/vault` | `done` | `T00`-`T04` | `packages/vault/**`, thin CLI call sites | `gpt-5.4 / xhigh` | `core-a` | `strong` | canonical vault helpers live in package and tools can call them |
 | `T11` | Create `packages/db` with Drizzle and Postgres | `todo` | `T00`-`T04` | `packages/db/**`, root workspace config as needed | `gpt-5.4 / xhigh` | `core-a` | `strong` | Drizzle schema, client, and migrations exist for Postgres |
 | `T12` | Create `packages/auth` with Better Auth | `todo` | `T11` | `packages/auth/**`, workspace config as needed | `gpt-5.4 / xhigh` | `core-b` | `strong` | Better Auth setup exists behind package helpers |
 | `T13` | Create `packages/contracts` with Zod + OpenAPI generation | `todo` | `T11` | `packages/contracts/**`, workspace config as needed | `gpt-5.4 / xhigh` | `core-b` | `strong` | shared request/response contracts and OpenAPI generation exist |
@@ -272,7 +353,7 @@ contracts, it must stop and report `blocked`.
 | `T43` | Dev/bootstrap scripts | `todo` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / low` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
 | `T44` | Final documentation cleanup | `todo` | `T40`-`T43` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, and task docs reflect reality |
 
-## 9. Reviewer Workflow
+## 10. Reviewer Workflow
 
 The reviewer agent is optional but recommended.
 
@@ -283,13 +364,27 @@ The reviewer agent is optional but recommended.
 - run the required verification gate,
 - make small bounded fixes if needed,
 - update the task file with review notes,
-- merge the task branch back into `main`.
+- validate coordinator-facing notes,
+- declare the task `merge ready` or `blocked`.
 
 ### Reviewer limits
 
 The reviewer should not silently redesign shared architecture during review.
 If review exposes a bigger architectural problem, the reviewer marks the task
 `blocked` and reports it to the coordinator instead of freelancing a redesign.
+
+## 11. Coordinator Finalization
+
+After reviewer verification, coordinator does the final high-context pass.
+
+Coordinator responsibilities:
+
+- read reviewer notes and `Coordinator notes`,
+- decide whether future tasks or docs need to change,
+- record `Coordinator final review`,
+- record `Actions taken`,
+- record `Actions ignored`,
+- merge reviewed work back into `main` when ready.
 
 ### Recommended reviewer model
 
@@ -307,7 +402,7 @@ Typical reviewer default:
 Escalate reviewer effort to `gpt-5.4 / xhigh` for schema, auth, sync, or
 shared-boundary tasks.
 
-## 10. Worker Reporting Requirements
+## 12. Worker Reporting Requirements
 
 Each worker task file must include:
 
@@ -316,9 +411,12 @@ Each worker task file must include:
 - `Recommended execution model`
 - `Dependencies`
 - `Write scope`
+- `Worker branch`
+- `Review branch`
 - `Files changed`
 - `Contracts changed`
 - `Tests run`
+- `Coordinator notes`
 - `Next handoff note`
 
 Every task commit must include the task ID, for example:
@@ -332,8 +430,15 @@ The reviewer should also append a short review note before merge:
 - `Reviewer`
 - `Review tests run`
 - `Merge status`
+- `Coordinator notes review`
 
-## 11. Test Strategy
+Coordinator should append a final disposition note:
+
+- `Coordinator final review`
+- `Actions taken`
+- `Actions ignored`
+
+## 13. Test Strategy
 
 ### Unit/package tests
 
@@ -387,7 +492,7 @@ For major UI tasks:
 - check runtime/console errors,
 - verify the changed flow visually.
 
-## 12. Autonomous Stop Rules
+## 14. Autonomous Stop Rules
 
 An agent may continue without Serhii only if:
 

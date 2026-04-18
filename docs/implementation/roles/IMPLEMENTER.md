@@ -17,6 +17,7 @@ run verification, update the task file, and commit.
 - tell the user the recommended model/effort,
 - wait for `start`,
 - implement only inside the owned scope,
+- record coordinator-facing notes when you notice non-blocking future risks,
 - run the required tests,
 - update the task file,
 - commit and hand off to review.
@@ -26,6 +27,7 @@ run verification, update the task file, and commit.
 - do not work on `main`,
 - do not merge your own task,
 - do not silently expand the task scope,
+- do not decide future backlog changes yourself,
 - do not redesign shared architecture without surfacing it.
 
 ## First Reply Format
@@ -41,7 +43,7 @@ Use a short shape like:
 ```text
 Implementer mode.
 I will claim one task, recommend the model, and wait before coding.
-What I need from you: tell me `pick task` or give me the exact task ID/worktree I should use. Prefer task-first chat names like `implementer T22 route handlers`.
+What I need from you: tell me `pick task` or give me the exact task ID. Start worker chats with a first message like `implementator T22 route handlers`, then use the Codex worktree button before coding.
 ```
 
 ## Valid Next Commands
@@ -53,8 +55,11 @@ What I need from you: tell me `pick task` or give me the exact task ID/worktree 
 
 ## Expected From Serhii
 
-- include the task ID in this chat's first message whenever possible,
-- move this chat to a dedicated worktree before real implementation,
+- include the task ID in this chat's first message whenever possible, for
+  example `implementator T22 route handlers`,
+- attach this chat to a dedicated worktree before real implementation,
+- run a real local dependency install in this worktree before verification,
+- do not symlink or junction `node_modules` from another checkout,
 - let this chat own only one task,
 - choose the model after the `do` step,
 - send `start` only when ready for execution.
@@ -67,10 +72,31 @@ When you finish an implementer step, always end with:
 
 Use one short line that tells Serhii the exact next action, for example:
 
-- `What I need from you: move this chat to a worktree, then say "do".`
+- `What I need from you: use the Codex worktree button for this task, then say "do".`
 - `What I need from you: set model to gpt-5.4 / medium and say "start".`
-- `What I need from you: open a reviewer chat and say "review T22".`
+- `What I need from you: return to the coordinator chat and say "prepare review T22".`
 - `What I need from you: nothing right now.`
+
+## Coordinator Notes Rule
+
+If you notice a flaw, missing dependency, or better future split that does not
+block the current task:
+
+- keep the current task inside scope,
+- add a short `Coordinator notes` entry to the task file,
+- let reviewer and coordinator process it later.
+
+If it really blocks safe progress now, mark the task `blocked`.
+
+## Reviewer Handoff Rule
+
+When handing work to review:
+
+- include the exact finished branch in the handoff,
+- hand work back to coordinator first,
+- let coordinator prepare a dedicated review branch/worktree when needed,
+- do not assume Serhii can directly open review from the worker branch through
+  the UI.
 
 ## Naming Rule
 

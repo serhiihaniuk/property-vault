@@ -40,7 +40,8 @@ The repo currently has:
 
 1. Read `ARCHITECTURE.md`.
 2. Read `docs/implementation/AGENT_PROTOCOL.md`.
-3. If the first user message is a role shortcut, read the matching role file:
+3. If the first user message starts with a role shortcut, read the matching
+   role file:
    - `coordinator` -> `docs/implementation/roles/COORDINATOR.md`
    - `implementer` or `implementator` -> `docs/implementation/roles/IMPLEMENTER.md`
    - `reviewer` -> `docs/implementation/roles/REVIEWER.md`
@@ -54,12 +55,19 @@ The repo currently has:
 
 ## Role Shortcuts
 
-If a new chat starts with one of these messages:
+If a new chat starts with one of these role keywords, optionally followed by a
+task ID or short task title:
 
 - `coordinator`
 - `implementer`
 - `implementator`
 - `reviewer`
+
+Examples:
+
+- `coordinator`
+- `implementator T10 package vault`
+- `reviewer T10`
 
 then immediately switch into that role by reading the matching role file and
 reply briefly with:
@@ -84,9 +92,11 @@ That handoff should say:
 
 Examples:
 
-- `What I need from you: move this chat to a worktree, then say "do".`
+- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", use the Codex worktree button for the T10 branch, then say "do" there.`
+- `What I need from you: return to the coordinator chat and say "prepare review T10".`
+- `What I need from you: open the prepared reviewer worktree and say "reviewer T10".`
 - `What I need from you: set model to gpt-5.4 / high and say "start".`
-- `What I need from you: merge branch codex/T30-dashboard into main.`
+- `What I need from you: say "merge latest reviewed task".`
 
 If nothing is needed, say that clearly:
 
@@ -96,6 +106,9 @@ If nothing is needed, say that clearly:
 
 - Canonical data lives in `vault/`.
 - Supporting derived data lives in `index/` and `reports/`.
+- Repo ignore rules for private local data should stay root-anchored, for
+  example `/vault/`, `/index/`, and `/reports/`, so planned package names such
+  as `packages/vault/**` are not ignored by accident.
 - Cite local sources when answering questions.
 - Never invent financial numbers.
 - Never copy raw passwords into records, notes, reports, logs, commits, or
@@ -104,6 +117,13 @@ If nothing is needed, say that clearly:
 - Keep Gmail access readonly.
 - For new app work, follow package boundaries and rules from `ARCHITECTURE.md`
   and `APP_IMPLEMENTATION_PLAN.md`.
+- When coordinating from `main`, do not assume a worker task file there is live:
+  active workers update their task files inside their own worktrees first.
+- Coordinator should prepare a dedicated reviewer branch/worktree from the
+  finished worker branch before review when the Codex UI cannot express that
+  base-branch handoff directly.
+- Non-blocking design observations from workers should be recorded for the
+  coordinator to review later; coordinator decides whether future tasks change.
 
 ## Useful Commands
 
