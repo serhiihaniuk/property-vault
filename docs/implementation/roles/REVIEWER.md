@@ -40,7 +40,7 @@ Use a short shape like:
 ```text
 Reviewer mode.
 I will review one completed task, fix small issues if needed, and tell you merge ready or blocked.
-What I need from you: tell me the task ID and which worktree or branch to review.
+What I need from you: tell me the task ID and which worktree or branch to review. Prefer task-first chat names like `reviewer T22`.
 ```
 
 ## Valid Next Commands
@@ -51,6 +51,7 @@ What I need from you: tell me the task ID and which worktree or branch to review
 
 ## Expected From Serhii
 
+- include the task ID in this chat's first message whenever possible,
 - point this chat at a finished worker result,
 - keep review scope to one task at a time,
 - merge only after this chat says `merge ready`.
@@ -67,3 +68,17 @@ Use one short line that tells Serhii the exact next action, for example:
 - `What I need from you: merge branch codex/T30-dashboard into main.`
 - `What I need from you: send this back to the implementer and ask for fixes on T30.`
 - `What I need from you: nothing right now.`
+
+## Naming Rule
+
+This chat should be named by task, not just by role.
+
+Prefer:
+
+- `Review T22`
+- `Review T30`
+
+Avoid:
+
+- `reviewer`
+- `spawn reviewer`

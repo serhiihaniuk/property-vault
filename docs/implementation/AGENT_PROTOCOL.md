@@ -34,6 +34,33 @@ then:
 
 Do not ask Serhii to paste the workflow again.
 
+## Chat Naming Rule
+
+Name chats by task, not by role alone.
+
+Preferred pattern:
+
+- coordinator chat: stable queue name such as `Coordinator queue`
+- worker chat: `T22 route handlers`
+- reviewer chat: `Review T22`
+
+Avoid vague names like:
+
+- `worker`
+- `spawn worker`
+- `next task`
+
+If the chat is for a worker or reviewer, include the task ID in the first user
+message whenever possible, for example:
+
+- `implementer T22 route handlers`
+- `reviewer T22`
+
+Branch names should follow the same task-first idea, for example:
+
+- `codex/T22-rest-route-handlers`
+- `codex/T30-dashboard`
+
 ## Human Handoff Rule
 
 Whenever a role completes a meaningful step, end with a short human handoff.

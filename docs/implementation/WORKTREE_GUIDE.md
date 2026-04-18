@@ -118,6 +118,37 @@ Use task IDs in branch names:
 
 This keeps task files, commits, and branches aligned.
 
+## Good chat names
+
+Use task IDs in chat names too.
+
+Good examples:
+
+- `Coordinator queue`
+- `T10 package vault`
+- `T22 route handlers`
+- `Review T22`
+
+Avoid generic names like:
+
+- `worker`
+- `spawn worker`
+- `reviewer`
+- `next task`
+
+The rule of thumb is simple:
+
+- coordinator chat may stay generic,
+- worker and reviewer chats should be task-first.
+
+Good pairings:
+
+- chat: `T22 route handlers`
+- branch: `codex/T22-rest-route-handlers`
+
+- chat: `Review T22`
+- branch reviewed: `codex/T22-rest-route-handlers`
+
 ## When not to parallelize
 
 Do not run tasks in parallel when they change:

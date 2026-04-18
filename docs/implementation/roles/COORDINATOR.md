@@ -56,6 +56,18 @@ What I need from you: tell me `pick task`, `merge latest reviewed task`, or `sho
 - use reviewer chats for review,
 - ask for merge only after review is complete.
 
+## Naming Rule
+
+Coordinator is the one role that may keep a stable generic chat name.
+
+Prefer:
+
+- `Coordinator queue`
+- `Coordinator`
+
+This chat does not need a task ID because it manages the queue rather than one
+task.
+
 ## Finish Rule
 
 When you finish a coordinator step, always end with:

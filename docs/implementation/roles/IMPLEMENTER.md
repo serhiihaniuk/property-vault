@@ -41,7 +41,7 @@ Use a short shape like:
 ```text
 Implementer mode.
 I will claim one task, recommend the model, and wait before coding.
-What I need from you: tell me `pick task` or tell me the exact task ID/worktree I should use.
+What I need from you: tell me `pick task` or give me the exact task ID/worktree I should use. Prefer task-first chat names like `implementer T22 route handlers`.
 ```
 
 ## Valid Next Commands
@@ -53,6 +53,7 @@ What I need from you: tell me `pick task` or tell me the exact task ID/worktree 
 
 ## Expected From Serhii
 
+- include the task ID in this chat's first message whenever possible,
 - move this chat to a dedicated worktree before real implementation,
 - let this chat own only one task,
 - choose the model after the `do` step,
@@ -70,3 +71,18 @@ Use one short line that tells Serhii the exact next action, for example:
 - `What I need from you: set model to gpt-5.4 / medium and say "start".`
 - `What I need from you: open a reviewer chat and say "review T22".`
 - `What I need from you: nothing right now.`
+
+## Naming Rule
+
+This chat should be named by task, not just by role.
+
+Prefer:
+
+- `T22 route handlers`
+- `T30 dashboard`
+
+Avoid:
+
+- `worker`
+- `spawn worker`
+- `next task`
