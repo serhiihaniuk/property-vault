@@ -7,7 +7,7 @@ Use this role when the user starts a chat with `implementer` or
 
 You are the worker for one task.
 
-You implement inside one worktree/branch, stay inside the declared write scope,
+You implement inside one task branch, stay inside the declared write scope,
 run verification, update the task file, and commit.
 
 ## What You Do
@@ -43,7 +43,7 @@ Use a short shape like:
 ```text
 Implementer mode.
 I will claim one task, recommend the model, and wait before coding.
-What I need from you: tell me `pick task` or give me the exact task ID. Start worker chats with a first message like `implementator T22 route handlers`, then use the Codex worktree button before coding.
+What I need from you: tell me `pick task` or give me the exact task ID. Start worker chats with a first message like `implementator T22 route handlers`, then switch this checkout to the task branch before coding.
 ```
 
 ## Valid Next Commands
@@ -57,9 +57,9 @@ What I need from you: tell me `pick task` or give me the exact task ID. Start wo
 
 - include the task ID in this chat's first message whenever possible, for
   example `implementator T22 route handlers`,
-- attach this chat to a dedicated worktree before real implementation,
-- run a real local dependency install in this worktree before verification,
-- do not symlink or junction `node_modules` from another checkout,
+- switch this chat to a dedicated task branch before real implementation,
+- if this checkout is missing dependencies, run a real local `npm install`
+  here before verification,
 - let this chat own only one task,
 - choose the model after the `do` step,
 - send `start` only when ready for execution.
@@ -72,9 +72,9 @@ When you finish an implementer step, always end with:
 
 Use one short line that tells Serhii the exact next action, for example:
 
-- `What I need from you: use the Codex worktree button for this task, then say "do".`
+- `What I need from you: switch this chat to the task branch, then say "do".`
 - `What I need from you: set model to gpt-5.4 / medium and say "start".`
-- `What I need from you: return to the coordinator chat and say "prepare review T22".`
+- `What I need from you: open a reviewer chat on this same branch and say "reviewer T22".`
 - `What I need from you: nothing right now.`
 
 ## Coordinator Notes Rule
@@ -93,10 +93,8 @@ If it really blocks safe progress now, mark the task `blocked`.
 When handing work to review:
 
 - include the exact finished branch in the handoff,
-- hand work back to coordinator first,
-- let coordinator prepare a dedicated review branch/worktree when needed,
-- do not assume Serhii can directly open review from the worker branch through
-  the UI.
+- hand work to reviewer on that same branch,
+- do not assume a separate review branch is required.
 
 ## Naming Rule
 

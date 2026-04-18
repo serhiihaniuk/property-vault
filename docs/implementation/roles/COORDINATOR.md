@@ -14,22 +14,21 @@ future work changes.
 
 - read the current architecture and implementation plan,
 - pick the next ready task,
-- inspect active worker worktrees before trusting the `main` task-file copy,
+- inspect the active task branch state before trusting the `main` task-file
+  copy,
 - check dependencies and write-scope overlap,
-- suggest the right worker chat first message and worktree/branch expectation,
-- prepare dedicated reviewer branches/worktrees from finished worker branches
-  when needed,
+- suggest the right worker chat first message and branch expectation,
 - suggest the best model/effort pair,
-- tell the user when to start a new worker chat and attach it to a worktree,
+- tell the user when to start a new worker chat and switch it to a task branch,
 - write the final review after reviewer verification,
 - record which follow-up actions were taken or ignored,
-- later merge reviewed work back into `main`.
+- later merge the reviewed task branch back into `main`.
 
 ## What You Do Not Do
 
 - do not implement feature code,
 - do not claim multiple overlapping tasks,
-- do not work inside a worker worktree unless the user explicitly asks,
+- do not work inside a task branch unless the user explicitly asks,
 - do not drift into reviewer mode.
 
 ## Model Rule
@@ -55,41 +54,38 @@ What I need from you: tell me `pick task`, `merge latest reviewed task`, or `sho
 ## Valid Next Commands
 
 - `pick task`
-- `prepare review Txx`
 - `show current queue`
 - `merge latest reviewed task`
-- `what should we run in parallel`
 
 ## Expected From Serhii
 
 - keep this chat on `main`,
 - start worker chats with a task-first first message such as
   `implementator T10 package vault`,
-- use worker chats for implementation,
-- use reviewer chats for review,
+- switch worker chats to their task branch before implementation,
+- use reviewer chats on that same task branch for review,
 - ask for merge only after review is complete.
 
 ## Queue Visibility Rule
 
-The `main` checkout is not the live execution view once a worker starts inside
-its own worktree.
+The `main` checkout is not the live execution view once a worker starts on a
+task branch.
 
 Before picking more work:
 
-- check `git worktree list`,
-- inspect active worker task files when needed,
-- treat the active worker worktree as authoritative for live status.
+- make sure the repo is back on `main`,
+- inspect the active task branch when needed,
+- treat the active task branch as authoritative for live status.
 
-## Review Prep Rule
+## Review Routing Rule
 
-Coordinator owns reviewer setup when review should happen outside the worker
-checkout.
+Coordinator does not create a dedicated review target by default in this repo.
 
-That means coordinator may:
+That means coordinator should:
 
-- read the exact finished worker branch from the task file,
-- create `codex/review-txx` from that worker branch,
-- tell Serhii the exact reviewer worktree/branch to open next.
+- read the exact finished task branch from the task file,
+- tell Serhii to review that same branch,
+- merge that same branch back into `main` after reviewer verification.
 
 ## Feedback Rule
 
@@ -130,8 +126,7 @@ When you finish a coordinator step, always end with:
 Use one short line that tells Serhii the exact next action, for example:
 
 - `What I need from you: say "pick task".`
-- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", use the Codex worktree button for the T10 branch, then say "do" there.`
-- `What I need from you: say "prepare review T10".`
-- `What I need from you: open the prepared reviewer worktree and say "reviewer T10".`
-- `What I need from you: merge the latest reviewed branch now.`
+- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", switch that chat to branch "codex/T10-package-vault", then say "do".`
+- `What I need from you: open a reviewer chat on branch "codex/T10-package-vault" and say "reviewer T10".`
+- `What I need from you: switch back to main and say "merge latest reviewed task".`
 - `What I need from you: nothing right now.`

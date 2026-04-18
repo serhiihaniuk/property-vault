@@ -40,7 +40,7 @@ Examples:
 - `coordinator`
 - `implementator T10 package vault`
 - `reviewer T10`
-- `reviewer T10 branch codex/review-t10`
+- `reviewer T10 branch codex/T10-package-vault`
 
 ## Chat Naming Rule
 
@@ -70,7 +70,7 @@ Branch names should follow the same task-first idea, for example:
 - `codex/T22-rest-route-handlers`
 - `codex/T30-dashboard`
 
-If the Codex worktree flow creates a different but still task-identifiable
+If the Codex UI creates a different but still task-identifiable
 branch slug, use the actual checked-out branch as the source of truth in task
 handoffs and task files.
 
@@ -86,59 +86,47 @@ That handoff must say:
 
 Examples:
 
-- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", use the Codex worktree button for the T10 branch, then say "do" there.`
-- `What I need from you: return to the coordinator chat and say "prepare review T10".`
-- `What I need from you: open the prepared reviewer worktree and say "reviewer T10".`
+- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", switch that chat to branch "codex/T10-package-vault", then say "do".`
+- `What I need from you: open a reviewer chat on branch "codex/T10-package-vault" and say "reviewer T10".`
+- `What I need from you: switch back to main and say "merge latest reviewed task".`
 - `What I need from you: choose gpt-5.4 / high, then say "start".`
 - `What I need from you: nothing right now.`
 
 Do not finish with an ambiguous status-only message when a human action is
 actually required.
 
-## Worktree Rule
+## Branch Rule
 
 - `main` is the integration branch.
-- Each worker agent should work in its own worktree and its own task branch.
+- Use one active task branch at a time.
+- Workers and reviewers use the same task branch sequentially.
 - Workers do not commit directly to `main`.
-- Reviewer verifies worker branches and hands results back to coordinator.
+- Do not start a new task until the current task branch is merged or
+  intentionally abandoned.
 
-## Fresh Worktree Setup Rule
+## Branch Visibility Rule
 
-Fresh worker worktrees are not assumed to be dependency-ready.
-
-Before verification in a new worktree:
-
-- run a real local dependency install in that worktree, usually `npm install`,
-- do not symlink or junction `node_modules` from another checkout,
-- treat shared `node_modules` links as unsupported because Next.js/Turbopack
-  may reject paths outside the worktree root.
-
-## Active Task Visibility Rule
-
-Worker task-file edits happen inside the worker worktree first.
+Task-file edits happen on the active task branch first.
 
 That means:
 
-- `main` may still show `todo` or `claimed` while the live worker copy already
-  says `in_progress`,
-- coordinator must check `git worktree list` and inspect active worker
-  worktrees before picking more tasks,
-- an active worker worktree is authoritative for that task until merge.
+- `main` may still show `todo` or `claimed` while the live task branch already
+  says `in_progress` or `done`,
+- the active task branch is authoritative for that task until merge,
+- before picking more work, return to `main` and make sure no other task branch
+  is still mid-flight.
 
 ## Reviewer Target Rule
 
-Reviewer must use the prepared review branch/worktree as the source of truth.
+Reviewer must use the finished task branch as the source of truth.
 
 That means:
 
 - `reviewer T10` is only sufficient when the reviewer chat is already attached
-  to the prepared review branch/worktree,
-- coordinator should prepare `codex/review-txx` from the finished worker branch
-  when review needs its own checkout,
-- if the reviewer chat opens on `main`, the next command must name the exact
-  prepared review branch, for example `review branch codex/review-t10`,
+  to the finished task branch,
+- if the reviewer chat opens on `main`, switch to the exact task branch first,
 - reviewer should not treat the `main` copy of the task file as authoritative
-  for a finished worker result.
+  for a finished task result.
 
 ## Command Workflow
 
@@ -147,18 +135,19 @@ That means:
 Do this when asked to pick work.
 
 1. Read the files above.
-2. Check active worktrees and active worker task files first.
+2. Confirm you are on `main` and no older task branch is still awaiting review
+   or merge.
 3. Scan task files.
 4. Select the first task that is:
    - `todo`
    - dependency-complete
-   - not already active in another worktree
+   - not blocked by another unfinished task
    - not overlapping with another claimed write scope
 5. Update that task file to `claimed`.
 6. Reply with:
    - chosen task ID/title,
    - why it is ready,
-   - worker chat first message plus branch/worktree expectation,
+   - worker chat first message plus branch expectation,
    - write scope,
    - required verification,
    - next command: `do`
@@ -173,8 +162,8 @@ Do this when asked to prepare execution.
 2. Change status to `in_progress`.
 3. Reply with:
    - status set to `in_progress`,
-   - note that this live status is in the worker worktree until merge,
-   - worktree/branch reminder,
+   - note that this live status is now on the task branch until merge,
+   - branch reminder,
    - recommended model/effort pair,
    - optional cheaper fallback when it would still be acceptable,
    - short reason,
@@ -188,7 +177,7 @@ Do not implement yet.
 Do this when asked to execute.
 
 1. Re-read the task file.
-2. Work only inside the assigned worktree and branch.
+2. Work only inside the assigned task branch.
 3. Implement only inside the declared write scope.
 4. If the task is the first bootstrap of a new workspace package, root metadata
    needed to make it trackable and installable is allowed, including
@@ -200,27 +189,11 @@ Do this when asked to execute.
    - contracts changed,
    - tests run,
    - status,
-   - next handoff note telling Serhii to return to coordinator for
-     `prepare review Txx`
+   - next handoff note telling Serhii to open or switch to a reviewer chat on
+     the same task branch and say `reviewer Txx`
 7. Commit with the task ID in the subject.
-8. Hand back to coordinator for review prep instead of merging yourself.
-
-### `prepare review Txx`
-
-Do this when a worker task is finished and needs reviewer setup.
-
-1. Read the finished worker task file and exact worker branch.
-2. Create a dedicated review branch/worktree from that worker branch when
-   needed.
-3. Update the task file with:
-   - review branch
-   - next handoff note with the exact reviewer target
-4. Reply with:
-   - prepared review branch/worktree,
-   - why that target should be reviewed instead of `main`,
-   - next command: `reviewer Txx`
-
-Do not review or merge yet.
+8. Hand off directly to reviewer on the same task branch instead of merging
+   yourself.
 
 ## Status Rules
 
@@ -246,7 +219,7 @@ Workers edit:
 
 Reviewer may edit:
 
-- the prepared review branch,
+- the task branch,
 - the worker task file,
 - merge-related metadata after verification
 
@@ -274,23 +247,20 @@ When writing one, keep it short:
 If the issue truly blocks safe progress now, mark the task `blocked` instead of
 leaving only a note.
 
-## Parallel Work
+## Sequential Execution Rule
 
-Parallel work is allowed only when:
-
-- dependencies are already `done`,
-- write scopes are disjoint,
-- shared interfaces are fixed.
-
-If a task must change shared boundaries or shared contracts, stop and mark it
-`blocked`.
+- One task branch at a time.
+- Do not start a new task until the current task branch is reviewed and merged
+  or explicitly abandoned.
+- If a task must change shared boundaries or shared contracts beyond its write
+  scope, stop and mark it `blocked`.
 
 ## Reviewer Flow
 
-1. Read the worker task file and branch/worktree context.
-   - prefer an explicit `review branch ...` target when provided,
+1. Read the worker task file and branch context.
+   - prefer an explicit branch target when provided,
    - otherwise verify that the reviewer chat is already attached to the
-     prepared review branch/worktree before trusting the local task file
+     finished task branch before trusting the local task file
 2. Review the worker result in isolation.
 3. Make small bounded fixes if needed.
 4. Run the required review verification.
@@ -328,7 +298,6 @@ Every task file must keep these fields current:
 - `Dependencies`
 - `Write scope`
 - `Worker branch`
-- `Review branch`
 - `Files changed`
 - `Contracts changed`
 - `Tests run`

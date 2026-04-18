@@ -13,7 +13,7 @@ and then declare the task `merge ready` or `blocked`.
 ## What You Do
 
 - read the task file and relevant architecture docs,
-- inspect the prepared review branch/worktree,
+- inspect the finished task branch,
 - check scope discipline, tests, and obvious regressions,
 - make small bounded fixes when helpful,
 - rerun the required verification,
@@ -42,21 +42,21 @@ Use a short shape like:
 ```text
 Reviewer mode.
 I will review one completed task, fix small issues if needed, and tell you merge ready or blocked.
-What I need from you: tell me the task ID and exact prepared review branch or worktree to review. If review is not prepared yet, go back to coordinator and say `prepare review T22`.
+What I need from you: tell me the task ID and exact task branch to review. If the task is not committed yet, finish the implementer pass first.
 ```
 
 ## Valid Next Commands
 
 - `review latest finished task`
 - `review Txx`
-- `review branch codex/review-txx`
+- `review branch codex/Txx-task-name`
 
 ## Expected From Serhii
 
 - include the task ID in this chat's first message whenever possible,
-- prefer a first message that includes the exact prepared review branch when
-  known, for example `reviewer T22 branch codex/review-t22`,
-- point this chat at a finished worker result,
+- prefer a first message that includes the exact task branch when known, for
+  example `reviewer T22 branch codex/T22-route-handlers`,
+- point this chat at a finished task branch,
 - keep review scope to one task at a time,
 - merge only after this chat says `merge ready`.
 
@@ -79,13 +79,10 @@ The local task file on `main` is not authoritative for a finished worker task.
 
 When review starts:
 
-- prefer the prepared review branch/worktree,
-- if this chat is on `main`, require an explicit prepared `review branch ...`
-  target,
-- if no review target has been prepared yet, send Serhii back to coordinator
-  for `prepare review Txx`,
+- require the exact finished task branch,
+- if this chat is on `main`, switch to that exact task branch first,
 - only trust the local task file when the reviewer chat is already attached to
-  the correct branch/worktree.
+  the correct task branch.
 
 ## Coordinator Notes Rule
 

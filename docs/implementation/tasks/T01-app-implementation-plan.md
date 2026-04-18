@@ -6,7 +6,7 @@
 - Dependencies: `T00`
 - Write scope: `APP_IMPLEMENTATION_PLAN.md`
 - Recommended execution model: `gpt-5.4 / high`
-- Parallel group: `docs-core`
+- Wave group: `docs-core`
 - Required verification: `standard`
 - Completion signal: detailed task plan exists with dependencies, models, gates, and coordination rules.
 - Files changed:
@@ -17,3 +17,4 @@
   - `npm test`
   - `npm run vault -- validate --strict --json`
 - Next handoff note: none
+

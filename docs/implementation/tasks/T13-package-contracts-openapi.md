@@ -6,11 +6,12 @@
 - Dependencies: `T11`
 - Write scope: `packages/contracts/**`, generation config as needed
 - Recommended execution model: `gpt-5.4 / xhigh`
-- Parallel group: `core-b`
+- Wave group: `core-b`
 - Required verification: `strong`
 - Completion signal: shared contracts exist and OpenAPI generation works.
 - Files changed: none yet
 - Contracts changed: none yet
 - Tests run: none yet
 - Next handoff note: keep contracts transport-facing; business logic belongs in application package
+
 

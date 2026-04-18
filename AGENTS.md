@@ -45,7 +45,7 @@ The repo currently has:
    - `coordinator` -> `docs/implementation/roles/COORDINATOR.md`
    - `implementer` or `implementator` -> `docs/implementation/roles/IMPLEMENTER.md`
    - `reviewer` -> `docs/implementation/roles/REVIEWER.md`
-4. Read `docs/implementation/WORKTREE_GUIDE.md` when using parallel agents.
+4. Read `docs/implementation/WORKTREE_GUIDE.md` for the repo's branch workflow.
 5. Read `APP_IMPLEMENTATION_PLAN.md`.
 6. Read the assigned task file under `docs/implementation/tasks/` if doing app
    implementation.
@@ -92,11 +92,10 @@ That handoff should say:
 
 Examples:
 
-- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", use the Codex worktree button for the T10 branch, then say "do" there.`
-- `What I need from you: return to the coordinator chat and say "prepare review T10".`
-- `What I need from you: open the prepared reviewer worktree and say "reviewer T10".`
+- `What I need from you: keep this coordinator chat on main, start a new worker chat with first message "implementator T10 package vault", switch that chat to branch "codex/T10-package-vault", then say "do".`
+- `What I need from you: open a reviewer chat on branch "codex/T10-package-vault" and say "reviewer T10".`
+- `What I need from you: switch back to main and say "merge latest reviewed task".`
 - `What I need from you: set model to gpt-5.4 / high and say "start".`
-- `What I need from you: say "merge latest reviewed task".`
 
 If nothing is needed, say that clearly:
 
@@ -117,11 +116,11 @@ If nothing is needed, say that clearly:
 - Keep Gmail access readonly.
 - For new app work, follow package boundaries and rules from `ARCHITECTURE.md`
   and `APP_IMPLEMENTATION_PLAN.md`.
-- When coordinating from `main`, do not assume a worker task file there is live:
-  active workers update their task files inside their own worktrees first.
-- Coordinator should prepare a dedicated reviewer branch/worktree from the
-  finished worker branch before review when the Codex UI cannot express that
-  base-branch handoff directly.
+- This repo currently uses branches only, not parallel worktrees.
+- When a task is active on its task branch, the task-file copy on that branch
+  is authoritative until it is merged back into `main`.
+- Finish or merge the current task branch before starting another
+  implementation task.
 - Non-blocking design observations from workers should be recorded for the
   coordinator to review later; coordinator decides whether future tasks change.
 

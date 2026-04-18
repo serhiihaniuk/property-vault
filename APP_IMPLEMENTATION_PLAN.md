@@ -13,14 +13,14 @@ for extraction history or ad hoc notes.
 - `ARCHITECTURE.md` is the durable architecture reference.
 - This file is the execution backlog and coordination reference.
 - `main` is the integration branch.
-- Each worker agent should work in its own git worktree on its own branch.
+- Each worker agent should work on one task branch at a time.
 - Only the coordinator edits:
   - `ARCHITECTURE.md`
   - this file
   - shared architectural decisions
 - The reviewer agent may:
   - review worker results,
-  - make bounded fixes in the worker worktree or a dedicated reviewer worktree,
+  - make bounded fixes on the task branch,
   - mark reviewed work `merge ready` or `blocked`.
 - Worker agents edit:
   - owned code files
@@ -29,8 +29,6 @@ for extraction history or ad hoc notes.
   visibility on `main`.
 - Coordinator also records final review decisions and merges reviewed work back
   into `main`.
-- Coordinator may create a dedicated reviewer branch/worktree from a finished
-  worker branch when review should be isolated from the worker checkout.
 - Foundational package tasks may also touch minimal root metadata when needed
   to make the new package trackable and installable, such as `.gitignore`,
   `package-lock.json`, and workspace-level package-manager metadata.
@@ -54,7 +52,7 @@ Meaning:
 - `blocked` = needs dependency or boundary decision
 - `done` = verified and committed
 
-## 3. Spawned-Agent Workflow
+## 3. Branch Workflow
 
 Expected workflow:
 
@@ -71,117 +69,83 @@ Expected workflow:
    - wait for `start`
 
 3. `start`
-   - work in the assigned worktree/branch only
+   - work in the assigned task branch only
    - implement only inside the declared write scope
    - run the required verification
    - update the task file
    - commit with task ID in the subject
 
-4. coordinator review-prep pass
-   - read the finished worker task file and exact worker branch
-   - create a dedicated review branch/worktree from that worker branch when
-     needed
-   - record the review branch and hand off the exact reviewer target
-
-5. reviewer pass
-   - review the prepared review branch/worktree in isolation
+4. reviewer pass
+   - review the finished task branch in isolation
    - make bounded fixes if needed
    - run the required review verification
    - validate coordinator-facing notes
    - declare `merge ready` or `blocked`
 
-6. coordinator final pass
+5. coordinator final pass
    - read reviewer output and coordinator notes
    - decide which follow-up actions are taken or ignored
-   - merge back to `main` when ready
+   - merge the reviewed task branch back to `main` when ready
    - update backlog/docs if future work changes
 
 `start` and `do` are intentionally separate so Serhii can choose model/cost
 before the task actually runs.
 
-## 4. Worktree and Branch Workflow
+## 4. Sequential Branch Workflow
 
-Use this workflow for parallel agent execution:
+Use this workflow for sequential branch execution:
 
 1. `main` is the integration branch and should stay mergeable.
-2. Create one worktree per worker agent.
-3. Give each worktree its own branch, usually named with the task ID.
-4. The worker agent edits and commits only inside its own worktree.
-5. Coordinator may create a dedicated review branch/worktree from the finished
-   worker branch.
-6. The reviewer agent checks the prepared review result, fixes small issues if
+2. Create or switch to one task branch, usually named with the task ID.
+3. The worker agent edits and commits only on that task branch.
+4. The reviewer agent checks that same task branch, fixes small issues if
    needed, and hands a `merge ready` or `blocked` result to coordinator.
-7. The coordinator records final decisions and merges the review branch back into
-   `main`.
+5. The coordinator records final decisions and merges that reviewed task branch
+   back into `main`.
 
 Recommended branch shape:
 
 - `codex/T10-package-vault`
 - `codex/T11-package-db`
 - `codex/T30-dashboard`
-- `codex/review-t10`
 
-If the Codex worktree flow creates a different but still task-identifiable
+If the Codex UI creates a different but still task-identifiable
 branch slug, use the actual checked-out branch as the source of truth in task
 handoffs and task files.
-
-Recommended worktree shape:
-
-- main checkout: coordination only
-- sibling worktrees per active task/agent
 
 Example local commands:
 
 ```powershell
-git worktree add ..\dabrowskiego-T10 -b codex/T10-package-vault
-git worktree add ..\dabrowskiego-T11 -b codex/T11-package-db
-git worktree add ..\dabrowskiego-review-T10 -b codex/review-t10 codex/T10-package-vault
-git worktree list
+git switch -c codex/T10-package-vault
+git switch main
+git merge --ff-only codex/T10-package-vault
 ```
 
 After the task is reviewed and merged:
 
 ```powershell
-git worktree remove ..\dabrowskiego-T10
 git branch -d codex/T10-package-vault
 ```
 
 Important rules:
 
-- never let two worker agents share one worktree,
+- never let two unfinished task branches run at once,
 - never let workers commit directly on `main`,
 - coordinator stays mostly in the main checkout,
-- coordinator prepares reviewer targets when needed,
-- reviewer verifies and hands off,
+- reviewer verifies the same task branch and hands off,
 - coordinator merges after reviewer verification and final decision logging.
 
-### Coordinator-managed review prep
+### Review target rule
 
-The safest review target is a dedicated review branch/worktree created from the
-finished worker branch.
+The default review target is the finished task branch itself.
 
-Use this when:
+Use this unless the protocol is deliberately changed later.
 
-- the worker branch is already checked out elsewhere,
-- the Codex UI cannot create a review worktree from the correct base branch,
-- you want reviewer fixes isolated from the worker checkout.
-
-In that case coordinator should:
+Coordinator should:
 
 - read the worker branch from the task file,
-- create `codex/review-txx` from that worker branch,
-- hand the reviewer the exact review branch/worktree.
-
-### Dependency readiness in fresh worktrees
-
-Fresh worktrees are not assumed to be dependency-ready.
-
-Before verification in a worker worktree:
-
-- run a real local install in that worktree, usually `npm install`,
-- do not symlink or junction `node_modules` from another checkout,
-- treat shared `node_modules` links as unsupported because Next.js/Turbopack
-  may reject paths that point outside the worktree root.
+- hand reviewer that exact task branch,
+- merge that reviewed task branch back into `main`.
 
 ### Queue visibility from `main`
 
@@ -190,13 +154,23 @@ Worker task-file edits are branch-local while the task is in progress.
 That means:
 
 - the copy of `docs/implementation/tasks/Txx-*.md` visible on `main` may lag,
-- the worker worktree copy is the live execution view,
-- coordinator should check `git worktree list` and inspect active worker
-  worktrees before picking more tasks,
+- the task branch copy is the live execution view,
+- coordinator should switch back to `main` before picking more work,
 - this backlog table may be updated by coordinator so the queue stays readable
-  from `main`.
-- once review prep is complete, the prepared review branch/worktree becomes the
-  authoritative review surface.
+  from `main`,
+- do not start another task while one task branch is still awaiting review or
+  merge.
+
+### Dependency note for branch-only flow
+
+Branch switches usually reuse the same local dependency install.
+
+If you ever create a fresh checkout manually:
+
+- run a real local install there, usually `npm install`,
+- do not symlink or junction `node_modules` from another checkout,
+- treat shared `node_modules` links as unsupported because Next.js/Turbopack
+  may reject paths that point outside the checkout root.
 
 ## 5. Model Selection
 
@@ -289,23 +263,22 @@ The app implementation should add and maintain these scripts:
 - `npm run test:e2e`
 - `npm run test:contracts`
 
-## 8. Parallelization Rules
+## 8. Sequential Execution Rules
 
-Parallel work is allowed only when:
+This workflow is intentionally one task at a time.
 
-- dependencies are already `done`,
-- write scopes are disjoint,
-- shared interfaces are already fixed,
-- no other claimed task owns the same area.
-
-If a task must change shared architecture, schema ownership, or auth/session
-contracts, it must stop and report `blocked`.
+- Do not start a new implementation task while another task branch is still
+  active.
+- Only return to `pick task` after the current task branch is merged or
+  intentionally abandoned.
+- If a task must change shared architecture, schema ownership, or auth/session
+  contracts, it must stop and report `blocked`.
 
 ## 9. Task Waves
 
 ### Wave 0 — Docs and protocol
 
-| ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
+| ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T00` | Write `ARCHITECTURE.md` | `done` | none | root docs | `gpt-5.4 / xhigh` | `docs-core` | `standard` | architecture doc exists and matches approved direction |
 | `T01` | Write `APP_IMPLEMENTATION_PLAN.md` | `done` | `T00` | root docs | `gpt-5.4 / high` | `docs-core` | `standard` | detailed task backlog exists with model/gate data |
@@ -315,10 +288,10 @@ contracts, it must stop and report `blocked`.
 
 ### Wave 1 — Core packages
 
-| ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
+| ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T10` | Create `packages/vault` | `done` | `T00`-`T04` | `packages/vault/**`, thin CLI call sites | `gpt-5.4 / xhigh` | `core-a` | `strong` | canonical vault helpers live in package and tools can call them |
-| `T11` | Create `packages/db` with Drizzle and Postgres | `todo` | `T00`-`T04` | `packages/db/**`, root workspace config as needed | `gpt-5.4 / xhigh` | `core-a` | `strong` | Drizzle schema, client, and migrations exist for Postgres |
+| `T11` | Create `packages/db` with Drizzle and Postgres | `done` | `T00`-`T04` | `packages/db/**`, root workspace config as needed | `gpt-5.4 / xhigh` | `core-a` | `strong` | Drizzle schema, client, and migrations exist for Postgres |
 | `T12` | Create `packages/auth` with Better Auth | `todo` | `T11` | `packages/auth/**`, workspace config as needed | `gpt-5.4 / xhigh` | `core-b` | `strong` | Better Auth setup exists behind package helpers |
 | `T13` | Create `packages/contracts` with Zod + OpenAPI generation | `todo` | `T11` | `packages/contracts/**`, workspace config as needed | `gpt-5.4 / xhigh` | `core-b` | `strong` | shared request/response contracts and OpenAPI generation exist |
 | `T14` | Create `packages/application` | `todo` | `T11`, `T13` | `packages/application/**` | `gpt-5.4 / xhigh` | `core-c` | `strong` | use cases exist outside transport and UI |
@@ -327,7 +300,7 @@ contracts, it must stop and report `blocked`.
 
 ### Wave 2 — Web shell
 
-| ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
+| ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T20` | Refactor `apps/web` into minimal FSD | `todo` | `T11`-`T16` | `apps/web/app/**`, `apps/web/src/**` | `gpt-5.4-mini / medium` | `web-shell` | `strong` | web app has stable minimal FSD layout and compiles |
 | `T21` | Add app providers and API client | `todo` | `T12`, `T13`, `T20` | `apps/web/src/shared/**`, provider wiring | `gpt-5.4-mini / medium` | `web-shell` | `standard` | auth/query/theme/API client providers are wired |
@@ -336,7 +309,7 @@ contracts, it must stop and report `blocked`.
 
 ### Wave 3 — First vertical slices
 
-| ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
+| ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T30` | Dashboard summary + month breakdown | `todo` | `T21`-`T23` | dashboard contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-dashboard` | `strong` | dashboard renders real month summary and category breakdown |
 | `T31` | Documents list/detail + provenance | `todo` | `T21`-`T23` | documents contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-documents` | `strong` | document flows show detail plus provenance/source trace |
@@ -345,7 +318,7 @@ contracts, it must stop and report `blocked`.
 
 ### Wave 4 — Hardening
 
-| ID | Title | Status | Dependencies | Write scope | Model | Parallel group | Gate | Completion signal |
+| ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T40` | Import-boundary lint rules | `todo` | `T20` | lint config and slice boundary rules | `gpt-5.4-mini / medium` | `hardening-a` | `standard` | forbidden cross-slice imports fail lint |
 | `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T30`-`T32` | application, contracts, widgets for freshness/status | `gpt-5.4 / high` | `hardening-b` | `strong` | UI exposes last sync/freshness clearly |
@@ -412,7 +385,6 @@ Each worker task file must include:
 - `Dependencies`
 - `Write scope`
 - `Worker branch`
-- `Review branch`
 - `Files changed`
 - `Contracts changed`
 - `Tests run`
@@ -506,6 +478,6 @@ An agent must stop and mark `blocked` if:
 - shared package boundaries must change,
 - a DB schema change affects another claimed task,
 - auth/session behavior changes outside the owned scope,
-- contract changes break parallel work,
+- contract changes spill outside the declared task scope,
 - tests reveal an architectural contradiction rather than a local bug.
 

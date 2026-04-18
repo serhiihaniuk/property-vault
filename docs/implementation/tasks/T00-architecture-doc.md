@@ -6,7 +6,7 @@
 - Dependencies: none
 - Write scope: `ARCHITECTURE.md`
 - Recommended execution model: `gpt-5.4 / xhigh`
-- Parallel group: `docs-core`
+- Wave group: `docs-core`
 - Required verification: `standard`
 - Completion signal: `ARCHITECTURE.md` exists and matches the approved architecture.
 - Files changed:
@@ -17,3 +17,4 @@
   - `npm test`
   - `npm run vault -- validate --strict --json`
 - Next handoff note: none
+

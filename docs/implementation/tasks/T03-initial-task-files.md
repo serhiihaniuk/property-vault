@@ -6,7 +6,7 @@
 - Dependencies: `T01`, `T02`
 - Write scope: `docs/implementation/tasks/**`
 - Recommended execution model: `gpt-5.4-mini / low`
-- Parallel group: `docs-core`
+- Wave group: `docs-core`
 - Required verification: `light`
 - Completion signal: every planned task has a task file with required fields.
 - Files changed:
@@ -17,3 +17,4 @@
   - `npm test`
   - `npm run vault -- validate --strict --json`
 - Next handoff note: none
+

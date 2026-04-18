@@ -1,191 +1,138 @@
-# Worktree Guide
+# Branch Workflow Guide
 
-This repo uses git worktrees to let multiple agents work in parallel without
-sharing the same checkout.
+This repo currently uses plain git branches and one shared checkout.
 
-## Why use worktrees
+We are not using parallel worktrees as the default workflow.
 
-Without worktrees, parallel agents all edit the same working directory and step
-on each other.
+## Why branches only
 
-With worktrees:
+The branch-only flow is simpler in the current Codex UI:
 
-- `main` stays clean as the integration line,
-- each worker gets a separate checkout,
-- each worker gets its own branch,
-- a reviewer can verify completed work before coordinator merges it back into
-  `main`.
+- no duplicate checkouts to keep in sync,
+- no branch-already-used worktree errors,
+- no reviewer handoff confusion across multiple folders,
+- one clear path from implementation to review to merge.
+
+If parallel execution becomes necessary later, update the protocol first
+instead of improvising a worktree setup mid-task.
 
 ## Mental model
 
-Think of a worktree as another folder pointing at the same git repository.
+Think in three phases, not three checkouts:
 
-You still have one repo history, but you can have multiple working folders at
-once:
+1. `main` for coordination and merge
+2. one task branch for implementation
+3. that same task branch for review
 
-- one for coordination on `main`,
-- one for `T10`,
-- one for `T11`,
-- one for `T30`,
-- and so on.
-
-Each worktree should have its own branch.
+Only one task branch should be active at a time.
 
 ## Recommended flow
 
-### 1. Keep the main checkout for coordination
+### 1. Keep `main` for coordination
 
-Use the original repo folder for:
+Use `main` for:
 
 - reading plans,
-- assigning tasks,
-- checking status,
+- picking tasks,
+- recording final coordinator decisions,
 - merging reviewed work.
 
-Avoid doing worker implementation directly on `main`.
+Before asking the coordinator to pick or merge, switch the checkout back to
+`main`.
 
-### 2. Create one worktree per worker task
+### 2. Create or switch to one task branch
 
-If you are using the Codex app button instead of manual git commands:
-
-1. keep the coordinator chat on `main`,
-2. start a fresh worker chat with a first message like
-   `implementator T10 package vault`,
-3. use the Codex worktree button to create or attach the task worktree.
-
-That first message matters because the Codex UI uses it to name the chat.
-
-If you are creating worktrees manually, use commands like:
-
-Example:
+For implementation, create or switch to a task branch such as:
 
 ```powershell
-git worktree add ..\dabrowskiego-T10 -b codex/T10-package-vault
-git worktree add ..\dabrowskiego-T11 -b codex/T11-package-db
-git worktree add ..\dabrowskiego-T30 -b codex/T30-dashboard
+git switch -c codex/T10-package-vault
+git switch -c codex/T11-package-db
+git switch -c codex/T30-dashboard
 ```
 
-This creates sibling folders:
+If the branch already exists, switch to it instead:
 
-- `..\dabrowskiego-T10`
-- `..\dabrowskiego-T11`
-- `..\dabrowskiego-T30`
+```powershell
+git switch codex/T10-package-vault
+```
 
-Each folder is an isolated checkout for one agent.
+Use task IDs in branch names so chats, task files, and commits stay aligned.
 
-Fresh worktrees are not dependency-ready by default.
+### 3. Implement on the task branch
 
-Before verification in a worker worktree:
+The implementer should:
 
-- run a real local install there, usually `npm install`,
-- do not symlink or junction `node_modules` from another checkout,
-- assume shared `node_modules` links are unsupported for Next.js/Turbopack
-  work because they may point outside the worktree root.
+- work only on the task branch,
+- update only the owned task file,
+- commit on that same task branch,
+- never merge directly into `main`.
 
-### 3. Tell the worker agent which worktree it owns
+Because this is the same checkout, branch switches usually reuse the existing
+`node_modules`.
 
-A worker agent should:
+If this checkout is fresh or missing dependencies:
 
-- work only in its assigned worktree,
-- update only its assigned task file,
-- commit only on its assigned branch,
-- never merge to `main` directly.
+- run a real local install here, usually `npm install`,
+- do not symlink or junction `node_modules` from another checkout.
 
-### 3a. Know where live task status lives
-
-Task-file updates made inside a worker worktree do not automatically appear in
-the `main` checkout.
-
-So when coordinating from `main`:
-
-- use `git worktree list` to see active workers,
-- inspect the task file inside the active worker worktree if you need live
-  status,
-- do not assume the copy on `main` is current during execution.
-
-### 4. Use a reviewer agent
+### 4. Review on the same task branch
 
 Recommended flow:
 
-1. worker picks task
-2. worker does task in its worktree
-3. worker commits task branch
-4. coordinator prepares a dedicated review branch/worktree from the finished
-   worker branch when needed
-5. reviewer opens on that prepared review branch/worktree or is given an
-   explicit `review branch ...` target
-6. reviewer makes small fixes if needed
-7. reviewer runs verification
-8. reviewer hands `merge ready` or `blocked` back to coordinator
-9. coordinator records final decisions and merges into `main`
+1. coordinator picks the task on `main`
+2. implementer switches to `codex/Txx-...`
+3. implementer finishes and commits on `codex/Txx-...`
+4. reviewer opens on that same branch
+5. reviewer makes bounded fixes if needed
+6. reviewer reruns verification
+7. reviewer returns `merge ready` or `blocked`
+8. coordinator switches back to `main` and merges the reviewed task branch
 
-This is a good setup because:
-
-- workers move faster,
-- reviewer has stronger model budget,
-- `main` stays cleaner,
-- you get a consistent quality gate while you are away.
-
-### 4a. Pass work to reviewer cleanly
-
-When the worker finishes:
-
-- return to coordinator first,
-- include the exact finished worker branch in the handoff text,
-- let coordinator prepare a dedicated review branch/worktree when needed,
-- then open the reviewer chat on that prepared review target.
-
-Do not rely on the `main` task-file copy for finished worker status.
-
-### 4b. Create a dedicated review worktree when needed
-
-The Codex UI handoff flow creates a new branch from the current checkout. It
-does not reliably express "create a reviewer branch from that finished worker
-branch instead."
-
-When that matters, coordinator should use a manual git worktree command such
-as:
-
-```powershell
-git worktree add ..\dabrowskiego-review-T10 -b codex/review-t10 codex/T10-package-vault
-```
-
-Then point the reviewer chat at that prepared review worktree.
+No dedicated review worktree is required in the default flow.
 
 ### 5. Merge back and clean up
 
-After review and merge:
+After review succeeds:
 
 ```powershell
-git worktree remove ..\dabrowskiego-T10
+git switch main
+git merge --ff-only codex/T10-package-vault
 git branch -d codex/T10-package-vault
 ```
 
+If reviewer made fixes on the task branch, merge that same branch.
+
+## Branch visibility from `main`
+
+Task-file edits made on a task branch do not automatically appear on `main`
+until merge.
+
+So when coordinating from `main`:
+
+- the task branch copy is the live source of truth,
+- `main` may still show stale task status,
+- do not pick another task while one task branch is still active and unmerged.
+
 ## Rules
 
-- one worker agent per worktree
-- one main integration checkout
+- one active task branch at a time
 - no direct worker commits to `main`
-- reviewer verifies and hands off
+- reviewer verifies the same task branch
 - coordinator merges after final review
 - if review reveals architecture drift, stop and report instead of patching
   blindly
 
 ## Good branch names
 
-When naming branches manually, use task IDs in branch names:
+Use task IDs in branch names:
 
 - `codex/T10-package-vault`
 - `codex/T11-package-db`
 - `codex/T20-web-fsd`
 - `codex/T30-dashboard`
-- `codex/review-t10`
 
-This keeps task files, commits, and branches aligned.
-
-If the Codex worktree button creates a slightly different branch slug, that is
-fine as long as the task identity stays clear. Use the actual checked-out
-branch in task-file handoffs.
+If the Codex UI creates a slightly different but still task-identifiable branch
+slug, use the actual checked-out branch in task-file handoffs.
 
 ## Good chat names
 
@@ -197,10 +144,9 @@ Good examples:
 - `Coordinator queue`
 - first message: `implementator T10 package vault`
 - `T10 package vault`
-- first message: `reviewer T10`
-- review branch: `codex/review-t10`
+- first message: `reviewer T10 branch codex/T10-package-vault`
+- `Review T10`
 - `T22 route handlers`
-- `Review T22`
 
 Avoid generic names like:
 
@@ -222,13 +168,13 @@ Good pairings:
 - chat: `Review T22`
 - branch reviewed: `codex/T22-rest-route-handlers`
 
-## When not to parallelize
+## One-task-at-a-time rule
 
-Do not run tasks in parallel when they change:
+Do not start another implementation task while the current task branch is:
 
-- shared schema ownership,
-- shared contracts,
-- auth foundations,
-- package boundaries.
+- still being coded,
+- waiting for review,
+- blocked and not yet resolved,
+- reviewed but not yet merged or abandoned.
 
-Those should stay sequential and coordinated from the main checkout.
+This workflow is intentionally sequential.

@@ -8,7 +8,7 @@
 - Worker branch: `codex/package-vault-for-t10`
 - Review branch: `codex/review-t10`
 - Recommended execution model: `gpt-5.4 / xhigh`
-- Parallel group: `core-a`
+- Wave group: `core-a`
 - Required verification: `strong`
 - Completion signal: canonical vault helpers live in `packages/vault` and existing callers can use them.
 - Files changed:
@@ -60,4 +60,5 @@
 - Actions ignored: none
 - Merge status: `merged codex/review-t10 into main`
 - Next handoff note: none
+
 

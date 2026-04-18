@@ -1,14 +1,14 @@
 # T11 - Create `packages/db` with Drizzle and Postgres
 
 - Status: `done`
-- Owner: `codex/add-db-package-setup`
+- Owner: `coordinator`
 - Goal: Introduce the shared Postgres + Drizzle data layer.
 - Dependencies: `T00`, `T01`, `T02`, `T03`, `T04`
 - Write scope: `packages/db/**`, root workspace config as needed
 - Worker branch: `codex/add-db-package-setup`
-- Review branch: `codex/review-t11`
+- Review target: `codex/review-t11`
 - Recommended execution model: `gpt-5.4 / xhigh`
-- Parallel group: `core-a`
+- Wave group: `core-a`
 - Required verification: `strong`
 - Completion signal: Drizzle schema, client, and migrations exist for the approved Postgres model.
 - Files changed:
@@ -42,10 +42,14 @@
 - Coordinator notes review:
   - Refined: the committed migration already includes explicit `CREATE SCHEMA IF NOT EXISTS` bootstrap statements, so the current branch is safe for blank databases.
   - Confirmed: keeping schema-bootstrap statements explicit in future multi-schema migrations is still a valid guardrail.
-- Coordinator final review: none yet
+- Coordinator final review:
+  - merged the reviewer-approved T11 result into `main`
+  - accepted the reviewer hardening for migration loading in `packages/db/src/migrations.test.ts`
+  - kept the schema-bootstrap observation as future guidance for upcoming schema tasks
 - Actions taken:
-  - prepared review branch `codex/review-t11` from worker branch `codex/add-db-package-setup`
-  - reviewer hardened `packages/db/src/migrations.test.ts` to load all generated SQL migrations with cross-platform path handling
-- Actions ignored: none yet
-- Merge status: `merge ready`
-- Next handoff note: return to coordinator and say `merge latest reviewed task`
+  - merged `codex/review-t11` into `main`
+  - kept reviewer improvements to `packages/db/src/migrations.test.ts`
+  - preserved the migration bootstrap guardrail for future tasks
+- Actions ignored: none
+- Merge status: `merged codex/review-t11 into main`
+- Next handoff note: nothing right now
