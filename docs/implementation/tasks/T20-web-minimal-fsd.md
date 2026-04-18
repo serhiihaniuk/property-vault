@@ -1,6 +1,6 @@
 # T20 — Refactor `apps/web` into minimal FSD
 
-- Status: `done`
+- Status: `blocked`
 - Owner: `coordinator`
 - Goal: Move the web app to the approved minimal FSD structure.
 - Dependencies: `T11`, `T12`, `T13`, `T14`, `T15`, `T16`
@@ -47,18 +47,21 @@
   - Why it matters: the architecture sample's literal `src/pages/**` layer is incompatible with the current root-level App Router setup.
   - Suggested follow-up: coordinator should decide whether to standardize the web page layer on `src/views/**` or move the router shell to `src/app/**` in the docs and future tasks.
   - Urgency: `soon`
-- Review result: `merge ready`
+- Review result: `blocked`
 - Reviewer: `Codex reviewer`
 - Review tests run:
   - `npm run typecheck`
   - `npm run lint`
   - `npm run build`
   - `Invoke-WebRequest http://127.0.0.1:3000` against the already-running `apps/web` dev server to confirm the rendered shell contains `Property Vault` and `Dashboard shell`
-- Merge status: `ready`
+- Merge status: `blocked`
 - Architecture note:
-  - The `src/views/**` page layer is an acceptable local interpretation of the approved minimal FSD shape while the App Router stays rooted in `app/`, and the review fix now aligns the shadcn generator aliases with `src/shared/**` so later web tasks do not drift back into legacy folders.
+  - Import directions are currently aligned: `app/` stays thin, `views/dashboard` composes a widget, `widgets/dashboard-summary` depends only on `shared`, and this tree does not currently show upward imports or same-level cross-slice imports.
+  - FSD ownership is still wrong enough to block: `src/shared/ui/app-shell.tsx` is not a cross-app primitive but app-specific screen composition with product copy, capability chips, operating-principle sections, and sidebar content that belongs in a page/widget-level surface instead of `shared`.
+  - The `src/views/**` page layer remains an acceptable local substitute for `src/pages/**` while the App Router stays rooted in `app/`, but that naming choice should be propagated deliberately in the docs and future tasks instead of leaving `src/pages/**` as the nominal target shape.
+  - The UI refactor is not aligned with the intended low-ceremony Tailwind/shadcn approach. `app-shell.tsx`, `dashboard-page.tsx`, and `dashboard-summary-widget.tsx` scatter arbitrary radii, spacing, tracking, offsets, opacity tweaks, and custom shadow values inline; those choices should be rejected rather than propagated unless a small justified subset is centralized as shared semantic tokens.
 - Coordinator notes review:
-  - Confirmed. Keeping root `app/` while standardizing actual page implementations under `src/views/**` is consistent with the current Next.js constraints, and future docs/tasks should reflect that same interpretation so `src/pages/**` and legacy generator aliases do not reappear.
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+  - Confirmed. The import graph is directionally clean, and `src/views/**` is a reasonable Next.js-specific stand-in for the page layer, but the shared-layer ownership and design-system drift both need fixes before this branch should merge.
+- Next handoff note: send this back to the implementer and ask for fixes on T20.
 
 
