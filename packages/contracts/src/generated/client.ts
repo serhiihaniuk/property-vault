@@ -15,6 +15,12 @@ export interface PropertyVaultContractClient {
   getDashboardMonthBreakdown(
     ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getDashboardMonthBreakdown']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getDashboardMonthBreakdown']>>;
+  getDocumentDetail(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getDocumentDetail']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getDocumentDetail']>>;
+  getDocuments(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getDocuments']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getDocuments']>>;
   getApiIndex(
     ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getApiIndex']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getApiIndex']>>;
@@ -28,6 +34,8 @@ export function createPropertyVaultContractClient(
 ): PropertyVaultContractClient {
   return {
     getDashboardMonthBreakdown: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDashboardMonthBreakdown),
+    getDocumentDetail: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDocumentDetail),
+    getDocuments: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDocuments),
     getApiIndex: buildContractClientMethod(transport, propertyVaultRouteCatalog.getApiIndex),
     getApiHealth: buildContractClientMethod(transport, propertyVaultRouteCatalog.getApiHealth),
   };

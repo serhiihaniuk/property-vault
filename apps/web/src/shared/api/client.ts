@@ -36,6 +36,12 @@ export type PropertyVaultApiClient = PropertyVaultApiTransport & PropertyVaultCo
 export type DashboardMonthBreakdownData = Awaited<
   ReturnType<PropertyVaultContractClient["getDashboardMonthBreakdown"]>
 >;
+export type DocumentsCatalogData = Awaited<
+  ReturnType<PropertyVaultContractClient["getDocuments"]>
+>;
+export type DocumentDetailData = Awaited<
+  ReturnType<PropertyVaultContractClient["getDocumentDetail"]>
+>;
 
 export class PropertyVaultApiError extends Error {
   readonly problem?: PropertyVaultApiProblem;

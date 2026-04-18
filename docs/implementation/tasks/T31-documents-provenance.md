@@ -1,17 +1,60 @@
-# T31 — Documents list/detail + provenance
+# T31 - Documents list/detail + provenance
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `implementer`
 - Goal: Deliver document browsing with provenance/source trace.
 - Dependencies: `T21`, `T22`, `T23`
 - Write scope: documents contracts, application services, routes, widgets
+- Worker branch: `codex/T31-documents`
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `slice-documents`
 - Required verification: `strong`
 - Completion signal: documents list/detail flow renders and exposes provenance.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: raw files remain local-only; surface metadata and provenance cleanly
-
-
+- Files changed:
+  - `apps/web/app/(app)/documents/page.tsx`
+  - `apps/web/app/(app)/documents/[hash]/page.tsx`
+  - `apps/web/app/api/_lib/documents-handlers.ts`
+  - `apps/web/app/api/_lib/documents-handlers.test.ts`
+  - `apps/web/app/api/documents/route.ts`
+  - `apps/web/app/api/documents/[hash]/route.ts`
+  - `apps/web/src/shared/api/client.ts`
+  - `apps/web/src/views/document-detail/ui/document-detail-page.tsx`
+  - `apps/web/src/views/documents/ui/documents-page.tsx`
+  - `apps/web/src/widgets/document-provenance/ui/document-provenance-widget.tsx`
+  - `apps/web/src/widgets/document-record/ui/document-record-widget.tsx`
+  - `apps/web/src/widgets/documents-catalog/ui/documents-catalog-widget.tsx`
+  - `docs/implementation/tasks/T31-documents-provenance.md`
+  - `packages/application/src/application.ts`
+  - `packages/application/src/documents.ts`
+  - `packages/application/src/documents.test.ts`
+  - `packages/application/src/index.ts`
+  - `packages/contracts/src/contracts.test.ts`
+  - `packages/contracts/src/documents.ts`
+  - `packages/contracts/src/generated/client.ts`
+  - `packages/contracts/src/generated/openapi.json`
+  - `packages/contracts/src/index.ts`
+  - `packages/contracts/src/system.ts`
+- Contracts changed:
+  - added `GET /api/documents` with optional `documentType` filtering, typed catalog items, and available type metadata
+  - added `GET /api/documents/{hash}` with typed detail metadata, extracted facts, financial-row provenance, and source observations
+  - regenerated `packages/contracts/src/generated/client.ts` and `packages/contracts/src/generated/openapi.json`
+- Tests run:
+  - `npm run --workspace @dabrowskiego/contracts openapi:generate`
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `npm run --workspace @dabrowskiego/application test`
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/system-handlers.test.ts apps/web/app/api/_lib/dashboard-handlers.test.ts apps/web/app/api/_lib/documents-handlers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - Playwright/browser verification not run: no Playwright config, e2e specs, or `test:e2e` script exist in the repo yet
+- Coordinator notes: none.
+- Review result: `pending`
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: `pending review`
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: start a reviewer chat on branch `codex/T31-documents` and say `reviewer T31`.

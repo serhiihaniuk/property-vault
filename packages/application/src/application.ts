@@ -11,10 +11,15 @@ import {
   createDashboardApplicationService,
   type DashboardApplicationService,
 } from './dashboard.ts';
+import {
+  createDocumentsApplicationService,
+  type DocumentsApplicationService,
+} from './documents.ts';
 
 export interface PropertyVaultApplication {
   context: PropertyVaultApplicationContext;
   dashboard: DashboardApplicationService;
+  documents: DocumentsApplicationService;
   system: SystemApplicationService;
 }
 
@@ -26,6 +31,7 @@ export function createPropertyVaultApplication(
   return {
     context,
     dashboard: createDashboardApplicationService(context),
+    documents: createDocumentsApplicationService(context),
     system: createSystemApplicationService(context),
   };
 }

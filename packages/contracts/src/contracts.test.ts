@@ -43,10 +43,14 @@ test('property vault OpenAPI generation exposes system routes and shared compone
   assert.ok(document.paths['/api']?.get);
   assert.ok(document.paths['/api/health']?.get);
   assert.ok(document.paths['/api/dashboard/month-breakdown']?.get);
+  assert.ok(document.paths['/api/documents']?.get);
+  assert.ok(document.paths['/api/documents/{hash}']?.get);
   assert.deepEqual(document.paths['/api/health']?.get?.tags, ['system']);
   assert.deepEqual(document.paths['/api/dashboard/month-breakdown']?.get?.tags, [
     'dashboard',
   ]);
+  assert.deepEqual(document.paths['/api/documents']?.get?.tags, ['documents']);
+  assert.deepEqual(document.paths['/api/documents/{hash}']?.get?.tags, ['documents']);
   assert.ok(document.components.schemas.ApiProblem);
   assert.ok(document.components.schemas.MoneyAmount);
 
@@ -60,6 +64,10 @@ test('property vault OpenAPI generation exposes system routes and shared compone
   assert.equal(
     document.paths['/api/dashboard/month-breakdown']?.get?.parameters?.[0]?.name,
     'month',
+  );
+  assert.equal(
+    document.paths['/api/documents/{hash}']?.get?.parameters?.[0]?.name,
+    'hash',
   );
 });
 
