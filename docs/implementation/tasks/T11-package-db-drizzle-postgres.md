@@ -1,4 +1,4 @@
-# T11 — Create `packages/db` with Drizzle and Postgres
+# T11 - Create `packages/db` with Drizzle and Postgres
 
 - Status: `done`
 - Owner: `codex/add-db-package-setup`
@@ -6,7 +6,7 @@
 - Dependencies: `T00`, `T01`, `T02`, `T03`, `T04`
 - Write scope: `packages/db/**`, root workspace config as needed
 - Worker branch: `codex/add-db-package-setup`
-- Review branch: `none yet`
+- Review branch: `codex/review-t11`
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Parallel group: `core-a`
 - Required verification: `strong`
@@ -34,8 +34,8 @@
 - Review tests run: none yet
 - Coordinator notes review: none yet
 - Coordinator final review: none yet
-- Actions taken: none yet
+- Actions taken:
+  - prepared review branch `codex/review-t11` from worker branch `codex/add-db-package-setup`
 - Actions ignored: none yet
-- Merge status: not merged
-- Next handoff note: return to the coordinator chat and say `prepare review T11`
-
+- Merge status: review prepared
+- Next handoff note: say `reviewer T11` in this prepared review chat
