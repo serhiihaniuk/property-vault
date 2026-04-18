@@ -21,7 +21,23 @@ not be committed.
 
 - Node.js 22.6 or newer
 - npm
+- Docker Desktop with `docker compose`
 - Windows PowerShell for the initial local workflow
+
+## Local Docker Bootstrap
+
+Use the local Docker bootstrap when you want a blank Postgres instance for the
+app packages and the web shell:
+
+```text
+Copy .env.example to .env
+npm run docker:db:up
+npm run db:migrate
+npm run dev
+```
+
+The detailed step-by-step flow, including reset and shutdown commands, lives in
+`docs/local-docker-bootstrap.md`.
 
 ## Useful Commands
 
@@ -51,4 +67,5 @@ answers.
 - `docs/implementation/roles/` contains the short role guides for coordinator,
   implementer, and reviewer chats.
 - `docs/implementation/WORKTREE_GUIDE.md` explains the worktree + reviewer flow.
+- `docs/local-docker-bootstrap.md` contains the local Docker + Postgres startup flow.
 - `AGENTS.md` is the startup guide for future Codex sessions.
