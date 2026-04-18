@@ -10,9 +10,10 @@ not be committed.
 
 ## Current Status
 
-The design and implementation plan are ready. v1 implementation starts with the
-local vault core, then PDF rendering, record schemas, manual extraction, Gmail
-import, reports, anomalies, and backup verification.
+- the approved app/system architecture is in `ARCHITECTURE.md`,
+- the detailed app backlog is in `APP_IMPLEMENTATION_PLAN.md`,
+- the agent execution protocol is in `docs/implementation/AGENT_PROTOCOL.md`,
+- current app implementation starts from `T10` onward.
 
 ## Requirements
 
@@ -45,8 +46,6 @@ answers.
 
 ## Key Documents
 
-- `DESIGN.md` contains the system design and data model.
 - `ARCHITECTURE.md` contains the approved app/system architecture.
 - `APP_IMPLEMENTATION_PLAN.md` contains the detailed app build backlog.
-- `IMPLEMENTATION_PLAN.md` contains the phased build plan.
 - `AGENTS.md` is the startup guide for future Codex sessions.

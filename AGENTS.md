@@ -26,19 +26,13 @@ The app should answer questions like:
 
 The repo currently has:
 
-- a **legacy vault POC** under `tools/`, `vault/`, and `index/`,
+- local property evidence under `vault/`,
+- local supporting derived data under `index/` and `reports/`,
 - an approved target architecture in `ARCHITECTURE.md`,
 - a detailed app backlog in `APP_IMPLEMENTATION_PLAN.md`,
 - an agent workflow in `docs/implementation/AGENT_PROTOCOL.md`,
 - initial documentation/protocol tasks complete (`T00`-`T04`),
 - real app implementation still starting from `T10` onward.
-
-Important:
-
-- `DESIGN.md` and `IMPLEMENTATION_PLAN.md` are **legacy POC context**, not the
-  source of truth for the app architecture.
-- Use them only when a task explicitly deals with the old vault pipeline or a
-  migration from that pipeline.
 
 ## Startup
 
@@ -47,26 +41,22 @@ Important:
 3. Read `APP_IMPLEMENTATION_PLAN.md`.
 4. Read the assigned task file under `docs/implementation/tasks/` if doing app
    implementation.
-5. Read `DESIGN.md` and `IMPLEMENTATION_PLAN.md` only if the task explicitly
-   touches the legacy vault POC or migration context.
-6. Run `npm run vault -- context` only when legacy vault/runtime context matters.
-7. Use local records, notes, SQLite, or cited source files before answering
+5. Run `npm run vault -- context` when local vault/runtime context matters.
+6. Use local records, notes, SQLite, or cited source files before answering
    factual questions.
 
 ## Operating Rules
 
 - Canonical data lives in `vault/`.
-- Legacy derived data lives in `index/` and `reports/`.
-- Mutate old vault data through `tools/vault.ts` or CLI wrappers only when
-  working on the legacy POC.
+- Supporting derived data lives in `index/` and `reports/`.
 - Cite local sources when answering questions.
 - Never invent financial numbers.
 - Never copy raw passwords into records, notes, reports, logs, commits, or
   answers.
 - Store money as integer grosz in `amount_minor`.
 - Keep Gmail access readonly.
-- Do not extend the legacy SQLite-first POC for new app features unless the
-  task explicitly says to migrate or reuse that logic.
+- For new app work, follow package boundaries and rules from `ARCHITECTURE.md`
+  and `APP_IMPLEMENTATION_PLAN.md`.
 
 ## Useful Commands
 
@@ -82,25 +72,6 @@ npm run gmail -- sync
 npm run vault -- detect-anomalies
 npm run vault -- write-inbox
 ```
-
-These commands are implemented progressively according to
-`IMPLEMENTATION_PLAN.md`.
-
-## App Work
-
-For app work, use this read order:
-
-1. `ARCHITECTURE.md`
-2. `docs/implementation/AGENT_PROTOCOL.md`
-3. `APP_IMPLEMENTATION_PLAN.md`
-4. assigned task file under `docs/implementation/tasks/`
-5. legacy POC docs only if the task says so
-
-Treat `ARCHITECTURE.md` as the durable target architecture and
-`APP_IMPLEMENTATION_PLAN.md` as the app build backlog.
-
-Treat `DESIGN.md` and `IMPLEMENTATION_PLAN.md` as historical/migration context,
-not startup docs for app implementation.
 
 ## Private Data
 
