@@ -1,17 +1,48 @@
 # T13 — Create `packages/contracts` with Zod + OpenAPI generation
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `coordinator`
 - Goal: Define shared DTOs and transport contracts.
 - Dependencies: `T11`
 - Write scope: `packages/contracts/**`, generation config as needed
+- Worker branch: `codex/T13-package-contracts`
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Wave group: `core-b`
 - Required verification: `strong`
 - Completion signal: shared contracts exist and OpenAPI generation works.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: keep contracts transport-facing; business logic belongs in application package
+- Files changed:
+  - `docs/implementation/tasks/T13-package-contracts-openapi.md`
+  - `package.json`
+  - `package-lock.json`
+  - `packages/contracts/package.json`
+  - `packages/contracts/tsconfig.json`
+  - `packages/contracts/src/contracts.test.ts`
+  - `packages/contracts/src/generate-openapi.ts`
+  - `packages/contracts/src/index.ts`
+  - `packages/contracts/src/openapi.ts`
+  - `packages/contracts/src/shared.ts`
+  - `packages/contracts/src/system.ts`
+- Contracts changed:
+  - added shared transport DTO schemas for problem details, money amounts, period references, document references, pagination metadata, and runtime environment
+  - added base REST route contracts for `GET /api` and `GET /api/health`
+  - added reusable OpenAPI generation helpers for path/query params, request bodies, and JSON responses
+- Tests run:
+  - `npm run --workspace @dabrowskiego/contracts typecheck`
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `npm run --workspace @dabrowskiego/contracts build`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `npm run test:contracts`
+- Coordinator notes: none yet
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: not merged
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: start a reviewer chat on `codex/T13-package-contracts` and say `reviewer T13 branch codex/T13-package-contracts`
 
 

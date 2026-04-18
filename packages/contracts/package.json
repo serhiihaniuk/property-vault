@@ -1,0 +1,23 @@
+{
+  "name": "@dabrowskiego/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^3",
+    "zod-to-json-schema": "^3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "npm run typecheck && npm run openapi:generate -- --check",
+    "openapi:generate": "node --experimental-strip-types src/generate-openapi.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --experimental-strip-types src/**/*.test.ts"
+  }
+}
