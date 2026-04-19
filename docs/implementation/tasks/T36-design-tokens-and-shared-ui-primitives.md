@@ -1,6 +1,6 @@
 # T36 - Establish design tokens and shared UI primitives
 
-- Status: `in_progress`
+- Status: `done`
 - Owner: `implementer`
 - Goal: Convert the redesign direction into a real token/primitives layer for the app.
 - Dependencies: `T35`
@@ -41,13 +41,20 @@
   - Existing primitives (`badge`, `card`, `button`, `separator`) intentionally left semantically unchanged so the running widgets keep building. They re-skin automatically via the new dark token palette through the shadcn compatibility layer in `globals.css`. Widget files (T37–T39) should swap to the new `Surface`/`DenseCard`/`Money`/`StatusBadge`/etc. primitives during their respective redesigns rather than monkey-patching the old `Card` look.
   - `next-themes` is now effectively a no-op: both `:root` and `.dark` resolve to the same dark palette. If a later task needs a real light surface, treat that as a token-system extension (new task), not a per-page override.
   - Prototype palette translated to OKLCH (not raw hex) so it composes with the existing token system; status hues sit at restrained chroma to keep the surface calm, per the spec.
-- Review result: none yet
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: none yet
-- Architecture note: none yet
-- Coordinator notes review: none yet
+- Review result: `merge ready`
+- Reviewer: `reviewer`
+- Review tests run:
+  - `cd apps/web && npm run typecheck` → clean
+  - `cd apps/web && npm run lint` → clean
+  - `cd apps/web && npm run build` → succeeds (Next.js production build, all routes generated)
+- Merge status: `merge ready`
+- Architecture note:
+  - Acceptable and aligned. The branch keeps the redesign work inside shared token and primitive surfaces (`globals.css` + `src/shared/ui/**`), which matches the approved UI-system layering for follow-on redesign tasks `T37`-`T39`.
+- Coordinator notes review:
+  - Confirmed. Leaving legacy primitives visually compatible while introducing the new shared surfaces is the right low-risk bridge into `T37`-`T39`.
+  - Confirmed. Treating the app as dark-only in this phase is aligned with the redesign spec; if light mode returns later, it should be a deliberate token-system task.
+  - Confirmed. Translating the palette into OKLCH semantic tokens keeps the redesign centralized instead of leaking raw prototype values into widgets.
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: build the visual system before page polish; do not let widgets invent page-local tokens. Reviewer should run `npm run typecheck`, `npm run lint`, and `npm run build` inside `apps/web` against branch `codex/T36-design-system` and spot-check that no widget regresses visually after the token re-skin.
+- Next handoff note: reviewer verified branch `codex/T36-design-system` as `merge ready`. Return to the coordinator and say `merge latest reviewed task`.

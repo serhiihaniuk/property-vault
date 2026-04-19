@@ -1,46 +1,27 @@
 # T35 - Codify UI redesign handoff in repo docs
 
-- Status: `done`
-- Owner: `planner on master`
+- Status: `todo`
+- Owner: `unassigned`
 - Goal: Bring the external design handoff into repo-native references and a production-ready redesign spec.
 - Dependencies: `T30`, `T31`, `T32`, `T34`
 - Write scope: `docs/design/**`, `docs/implementation/UI_REDESIGN_SPEC.md`, startup/protocol doc references only
-- Worker branch: `master` via planner commit `4b31619`
+- Worker branch: none yet
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `ui-redesign-a`
 - Required verification: `light`
 - Design references: read `docs/implementation/UI_REDESIGN_SPEC.md`, then the screenshot; consult the HTML when layout/detail intent is ambiguous.
 - Completion signal: redesign references/spec are in-repo, startup docs point UI agents at them, and the reference order between spec, screenshot, and HTML is explicit.
-- Files changed:
-  - `AGENTS.md`
-  - `APP_IMPLEMENTATION_PLAN.md`
-  - `docs/design/property-vault-mvp/README.md`
-  - `docs/design/property-vault-mvp/property-vault-reference.png`
-  - `docs/design/property-vault-mvp/Property Vault.html`
-  - `docs/implementation/AGENT_PROTOCOL.md`
-  - `docs/implementation/UI_PLAYBOOK.md`
-  - `docs/implementation/UI_REDESIGN_SPEC.md`
-  - `docs/implementation/roles/COORDINATOR.md`
-  - `docs/implementation/roles/IMPLEMENTER.md`
-  - `docs/implementation/roles/REVIEWER.md`
-  - `docs/implementation/tasks/T35-ui-redesign-spec.md`
-  - redesign-wave task files `T36`-`T39`
-  - dependent planning task files `T33`, `T40`, `T41`, `T42`, `T44`
+- Files changed: none yet
 - Contracts changed: none yet
-- Tests run: not run; docs-only/planning change already landed on `master`
+- Tests run: none yet
 - Coordinator notes: none.
-- Review result: `accepted on master`
-- Reviewer: `none`
-- Review tests run: not run; docs-only/planning change landed directly on `master`
-- Merge status: `already on master`
-- Architecture note: none
-- Coordinator notes review:
-  - Confirmed. The task completion signal is already satisfied on `master`: redesign references are in-repo, startup/protocol guidance points UI agents at them, and the precedence order between spec, screenshot, and HTML is explicit in both the spec and the design-folder README.
-- Coordinator final review:
-  - accepted planner commit `4b31619` as the effective completion of `T35`
-  - confirmed the redesign handoff is now repo-native and properly wired into startup/protocol guidance
-- Actions taken:
-  - recorded `T35` as `done` in `APP_IMPLEMENTATION_PLAN.md`
-  - reconciled the `T35` task file metadata with the already-landed planner changes on `master`
-- Actions ignored: none
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
 - Next handoff note: keep prototype assets read-only and keep production guidance in repo docs, not in the raw HTML.
