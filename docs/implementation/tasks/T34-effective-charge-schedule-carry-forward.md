@@ -1,7 +1,7 @@
 # T34 — Effective charge schedule carry-forward
 
 - Status: `done`
-- Owner: `Codex worker on codex/T34-effective-charge-schedules`
+- Owner: `coordinator`
 - Goal: Model monthly charge schedules as effective until replaced instead of only on document months.
 - Dependencies: `T15`, `T21`, `T22`, `T23`, `T30`
 - Write scope: sync/application/contracts/dashboard surfaces for effective monthly schedules
@@ -69,7 +69,13 @@
   - The whole-schedule replacement model used by this task is acceptable for the current vault records, which consistently encode full monthly charge schedules rather than partial per-category deltas.
 - Coordinator notes review:
   - Confirmed. The existing follow-up note for `T32` remains valid: this task expands schedules through the current sync month, so any future forward-looking reconciliation horizon should be chosen deliberately instead of assumed.
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: start a reviewer chat on branch `codex/T34-effective-charge-schedules` and say `reviewer T34 branch codex/T34-effective-charge-schedules`.
+- Coordinator final review:
+  - merged the reviewer-approved T34 effective charge schedule work into `master`
+  - accepted the carried-forward schedule model as the correct financial baseline for dashboard history and future reconciliation work
+  - accepted the dedicated `vault.effective_charge_rows` rebuild table as the right boundary between raw source-derived financial rows and effective month-by-month schedule rows
+- Actions taken:
+  - merged `codex/T34-effective-charge-schedules` into `master`
+  - recorded T34 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - updated `T32` so reconciliation explicitly depends on the carried-forward effective schedule model and must decide any projection horizon beyond the latest sync month
+- Actions ignored: none
+- Next handoff note: nothing right now.
