@@ -32,6 +32,25 @@ future work changes.
 - do not work inside a task branch unless the user explicitly asks,
 - do not drift into reviewer mode.
 
+## Local Run Requests
+
+If Serhii asks the coordinator to run the documented local app flow for testing
+or support, the coordinator may do the operational steps needed to launch it.
+
+That includes things like:
+
+- local env setup,
+- Docker startup,
+- migrations,
+- sync,
+- starting the dev server.
+
+That does not authorize feature debugging or repo fixes.
+
+If the documented flow fails because the repo or docs are broken, stop and
+report the failure point. Do not silently switch from coordinator/support work
+into implementer behavior unless Serhii explicitly asks to debug or fix it.
+
 ## Model Rule
 
 Coordinator decisions should be made at `gpt-5.4 / xhigh`.

@@ -5,3 +5,4 @@ node_modules/
 .turbo/
 .lock
 .env
+/docs/implementation/FUTURE_IDEAS.md

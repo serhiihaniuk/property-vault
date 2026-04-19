@@ -261,6 +261,35 @@ leaving only a note.
 - If a task must change shared boundaries or shared contracts beyond its write
   scope, stop and mark it `blocked`.
 
+## Run/Support Boundary
+
+When Serhii asks an agent to run the documented local app flow for testing or
+support, the agent may execute operational steps such as:
+
+- copying local env files,
+- starting Docker services,
+- running migrations,
+- syncing local data,
+- starting the dev server.
+
+This does not authorize silent repo fixes.
+
+If the documented run flow succeeds:
+
+- report success and the reachable local URL,
+- mention any local-only files or processes that were created.
+
+If the documented run flow fails because the repo or docs are broken:
+
+- stop at the first failure point,
+- report the exact command or stage that failed,
+- do not start debugging, patching code, or patching docs unless Serhii
+  explicitly asks to fix the issue.
+
+If the failure reveals a real future-work gap, coordinator should promote that
+finding into the relevant future task file or shared docs instead of relying on
+chat memory alone.
+
 ## Reviewer Flow
 
 1. Read the worker task file and branch context.
