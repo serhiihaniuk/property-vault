@@ -65,39 +65,39 @@ function DashboardPageContent() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <DashboardOverviewWidget
         data={dashboardQuery.data}
         errorMessage={dashboardErrorMessage}
         isLoading={dashboardQuery.isPending}
         selectedYearValue={requestedYear}
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <DashboardSummaryWidget
           data={dashboardQuery.data}
           errorMessage={dashboardErrorMessage}
           isLoading={dashboardQuery.isPending}
         />
-        <DashboardFoundationWidget
-          data={dashboardQuery.data}
-          errorMessage={dashboardErrorMessage}
-          isLoading={dashboardQuery.isPending}
-          selectedYearValue={requestedYear}
-        />
+        <div className="flex flex-col gap-5">
+          <AnomalyFeedWidget
+            data={anomalyFeedQuery.data}
+            errorMessage={anomalyFeedErrorMessage}
+            isLoading={anomalyFeedQuery.isPending}
+          />
+          <DashboardFoundationWidget
+            data={dashboardQuery.data}
+            errorMessage={dashboardErrorMessage}
+            isLoading={dashboardQuery.isPending}
+            selectedYearValue={requestedYear}
+          />
+        </div>
       </div>
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <YearlyReconciliationWidget
-          data={yearlyReconciliationQuery.data}
-          errorMessage={yearlyReconciliationErrorMessage}
-          isLoading={yearlyReconciliationQuery.isPending}
-          selectedMonthValue={requestedMonth}
-        />
-        <AnomalyFeedWidget
-          data={anomalyFeedQuery.data}
-          errorMessage={anomalyFeedErrorMessage}
-          isLoading={anomalyFeedQuery.isPending}
-        />
-      </div>
+      <YearlyReconciliationWidget
+        data={yearlyReconciliationQuery.data}
+        errorMessage={yearlyReconciliationErrorMessage}
+        isLoading={yearlyReconciliationQuery.isPending}
+        selectedMonthValue={requestedMonth}
+      />
     </div>
   );
 }
@@ -123,16 +123,16 @@ function getApiErrorMessage(
 
 function DashboardPageFallback() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <DashboardOverviewWidget isLoading />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <DashboardSummaryWidget isLoading />
-        <DashboardFoundationWidget isLoading />
+        <div className="flex flex-col gap-5">
+          <AnomalyFeedWidget isLoading />
+          <DashboardFoundationWidget isLoading />
+        </div>
       </div>
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <YearlyReconciliationWidget isLoading />
-        <AnomalyFeedWidget isLoading />
-      </div>
+      <YearlyReconciliationWidget isLoading />
     </div>
   );
 }

@@ -1,15 +1,29 @@
 import Link from "next/link";
 
 import type { DashboardMonthBreakdownData } from "@/src/shared/api/client";
-import { badgeVariants, Badge } from "@/src/shared/ui/badge";
+import { cn } from "@/src/shared/lib/utils";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/src/shared/ui/card";
-import { Separator } from "@/src/shared/ui/separator";
+  Badge,
+  DocumentChip,
+  EmptyState,
+  ErrorState,
+  HashChip,
+  KeyValueGrid,
+  KeyValueRow,
+  LoadingState,
+  MetricLabel,
+  StatusBadge,
+  Surface,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceDivider,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+} from "@/src/shared/ui";
+
+const LOCALE = "pl-PL";
+const CURRENCY = "PLN";
 
 export interface DashboardFoundationWidgetProps {
   data?: DashboardMonthBreakdownData;
@@ -26,39 +40,48 @@ export function DashboardFoundationWidget({
 }: DashboardFoundationWidgetProps) {
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Evidence and history</CardTitle>
-          <CardDescription>
-            Loading the supporting documents and recent month totals.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface>
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Recent evidence</SurfaceTitle>
+            <SurfaceDescription>
+              Loading supporting documents and month history.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState rows={5} label="Loading evidence…" />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   if (errorMessage) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Evidence and history unavailable</CardTitle>
-          <CardDescription>{errorMessage}</CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface>
+        <SurfaceBody>
+          <ErrorState
+            title="Recent evidence unavailable"
+            description={errorMessage}
+          />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   if (!data?.summary || !data.selectedMonth) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Evidence and history</CardTitle>
-          <CardDescription>
-            Document-backed month history will appear here once monthly charge
-            data is available.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface>
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Recent evidence</SurfaceTitle>
+            <SurfaceDescription>
+              Document-backed month history appears here once monthly charge
+              data is available.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+      </Surface>
     );
   }
 
@@ -70,128 +93,136 @@ export function DashboardFoundationWidget({
     selectedMonthHistory?.sourceDocuments ?? data.supportingDocuments;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Evidence and history</CardTitle>
-        <CardDescription>
-          {selectedMonthHistory?.isCarriedForward
-            ? `Source documents from ${selectedMonthHistory.sourceMonth.label} that remain effective for ${data.selectedMonth.label}.`
-            : `Supporting documents for ${data.selectedMonth.label} plus recent monthly totals.`}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-medium">Supporting documents</h2>
-            <Badge variant="outline">
-              {selectedSupportingDocuments.length}
-              {" "}
-              total
-            </Badge>
-          </div>
+    <Surface>
+      <SurfaceHeader>
+        <SurfaceHeading>
+          <SurfaceTitle>Recent evidence</SurfaceTitle>
+          <SurfaceDescription>
+            {selectedMonthHistory?.isCarriedForward
+              ? `Schedule from ${selectedMonthHistory.sourceMonth.label} still in force for ${data.selectedMonth.label}.`
+              : `Supporting documents backing ${data.selectedMonth.label}.`}
+          </SurfaceDescription>
+        </SurfaceHeading>
+        <Badge variant="neutral" className="font-mono">
+          {selectedSupportingDocuments.length}
+          {" "}
+          {selectedSupportingDocuments.length === 1 ? "doc" : "docs"}
+        </Badge>
+      </SurfaceHeader>
+
+      <SurfaceBody>
+        <section className="flex flex-col gap-2">
+          <MetricLabel>Documents for this month</MetricLabel>
           {selectedSupportingDocuments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No documents are attached to this month yet.
-            </p>
+            <EmptyState
+              title="No supporting documents"
+              description="Nothing is attached to this reporting month yet."
+            />
           ) : (
-            <div className="flex flex-col gap-3">
-              {selectedSupportingDocuments.map((document, index) => (
-                <div key={document.hash} className="flex flex-col gap-3">
-                  {index > 0 ? <Separator /> : null}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="secondary">{document.documentType}</Badge>
-                      {document.documentDate ? (
-                        <Badge variant="outline">{document.documentDate}</Badge>
-                      ) : null}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <h3 className="font-medium">{document.title}</h3>
-                      <p className="break-all font-mono text-xs text-muted-foreground">
-                        {document.hash}
-                      </p>
-                    </div>
+            <ul className="flex flex-col divide-y divide-dashed divide-border-default">
+              {selectedSupportingDocuments.map((document) => (
+                <li
+                  key={document.hash}
+                  className="flex flex-col gap-1.5 py-2.5 first:pt-0 last:pb-0"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <Link
+                      className="flex min-w-0 flex-col gap-0.5 text-left hover:underline"
+                      href={`/documents/${document.hash}`}
+                    >
+                      <span className="truncate text-[13px] font-medium text-fg-primary">
+                        {document.title}
+                      </span>
+                      <span className="font-mono text-[10.5px] uppercase tracking-[0.05em] text-fg-subtle">
+                        {document.documentType}
+                        {document.documentDate ? ` · ${document.documentDate}` : ""}
+                      </span>
+                    </Link>
+                    <HashChip hash={document.hash} />
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-        </div>
-        <Separator />
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-medium">Month history</h2>
-            <Badge variant="outline">
-              {data.months.length}
-              {" "}
-              recorded
-            </Badge>
+        </section>
+
+        <SurfaceDivider />
+
+        <section className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <MetricLabel>Month history</MetricLabel>
+            <span className="text-[11px] font-mono text-fg-subtle">
+              {data.months.length} recorded
+            </span>
           </div>
-          <div className="flex flex-col gap-2">
-            {data.months.map((month) => {
+          <KeyValueGrid columns={1} divider="dashed">
+            {data.months.slice(0, 6).map((month) => {
               const isSelected = month.period.value === data.selectedMonth?.value;
-              const primarySourceDocument = month.sourceDocuments[0];
+              const primaryDoc = month.sourceDocuments[0];
 
               return (
                 <Link
                   key={month.period.value}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border/70 px-3 py-2 text-sm transition-colors hover:bg-muted/50"
-                  href={buildMonthHref(
-                    month.period.value,
+                  data-slot="kv-row"
+                  aria-current={isSelected ? "page" : undefined}
+                  href={buildHref({
+                    monthValue: month.period.value,
                     latestMonthValue,
                     selectedYearValue,
+                  })}
+                  className={cn(
+                    "flex items-start justify-between gap-3 rounded-sm px-1.5 py-1.5 transition-colors hover:bg-surface-elevated/70",
+                    isSelected && "bg-surface-elevated",
                   )}
                 >
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">{month.period.label}</span>
-                      <span
-                        className={badgeVariants({
-                          variant: month.isCarriedForward ? "secondary" : "outline",
-                        })}
-                      >
-                        {month.isCarriedForward ? "Carried forward" : "Source month"}
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <div className="flex items-center gap-2 text-[12px]">
+                      <span className={cn(
+                        "font-mono tabular-nums text-fg-primary",
+                        isSelected && "font-semibold",
+                      )}>
+                        {month.period.label}
                       </span>
+                      {month.isCarriedForward ? (
+                        <StatusBadge status="info" className="h-4 gap-1 px-1.5 text-[9.5px]">
+                          Carried
+                        </StatusBadge>
+                      ) : null}
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {month.period.value}
-                      {month.isCarriedForward
-                        ? ` from ${month.sourceMonth.value}`
-                        : ""}
-                    </span>
-                    {primarySourceDocument ? (
-                      <span className="truncate text-xs text-muted-foreground">
-                        {primarySourceDocument.title}
-                      </span>
-                    ) : null}
+                    {primaryDoc ? (
+                      <DocumentChip
+                        label={primaryDoc.title}
+                        className="max-w-full"
+                      />
+                    ) : (
+                      <span className="text-[11px] text-fg-faint">No source document</span>
+                    )}
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {formatMoney(month.totalCharges.amountMinor)}
-                    </span>
-                    <span
-                      className={badgeVariants({
-                        variant: isSelected ? "secondary" : "outline",
-                      })}
-                    >
-                      {isSelected ? "Selected" : "Open"}
-                    </span>
-                  </div>
+                  <span className="shrink-0 pt-0.5 font-mono text-[12px] tabular-nums text-fg-secondary">
+                    {formatMoneyShort(month.totalCharges.amountMinor)}
+                  </span>
                 </Link>
               );
             })}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+            {data.months.length === 0 ? (
+              <KeyValueRow label="History" value="No recorded months" />
+            ) : null}
+          </KeyValueGrid>
+        </section>
+      </SurfaceBody>
+    </Surface>
   );
 }
 
-function buildMonthHref(
-  monthValue: string | undefined,
-  latestMonthValue: string | undefined,
-  selectedYearValue: string | undefined,
-) {
+function buildHref({
+  monthValue,
+  latestMonthValue,
+  selectedYearValue,
+}: {
+  monthValue: string | undefined;
+  latestMonthValue: string | undefined;
+  selectedYearValue: string | undefined;
+}) {
   const searchParams = new URLSearchParams();
 
   if (monthValue && monthValue !== latestMonthValue) {
@@ -207,9 +238,13 @@ function buildMonthHref(
   return query ? `/?${query}` : "/";
 }
 
-function formatMoney(amountMinor: number) {
-  return new Intl.NumberFormat("pl-PL", {
-    currency: "PLN",
-    style: "currency",
-  }).format(amountMinor / 100);
+function formatMoneyShort(amountMinor: number) {
+  const negative = amountMinor < 0;
+  const abs = Math.abs(amountMinor);
+  const major = new Intl.NumberFormat(LOCALE, {
+    maximumFractionDigits: 0,
+    useGrouping: true,
+  }).format(Math.trunc(abs / 100));
+  const minor = (abs % 100).toString().padStart(2, "0");
+  return `${negative ? "−" : ""}${major}.${minor} ${CURRENCY}`;
 }

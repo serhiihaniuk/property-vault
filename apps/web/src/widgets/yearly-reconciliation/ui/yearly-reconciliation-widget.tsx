@@ -1,15 +1,36 @@
 import Link from "next/link";
 
 import type { YearlyReconciliationData } from "@/src/shared/api/client";
-import { Badge, badgeVariants } from "@/src/shared/ui/badge";
+import { cn } from "@/src/shared/lib/utils";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/src/shared/ui/card";
-import { Separator } from "@/src/shared/ui/separator";
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableRow,
+  DocumentChip,
+  ErrorState,
+  LoadingState,
+  MetricLabel,
+  Money,
+  StatusBadge,
+  Surface,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+  type StatusKind,
+  badgeVariants,
+} from "@/src/shared/ui";
+
+type Line = YearlyReconciliationData["lines"][number];
+type CoverageStatus = YearlyReconciliationData["coverage"]["status"];
+type LineStatus = Line["status"];
+
+const LOCALE = "pl-PL";
+const CURRENCY = "PLN";
 
 export interface YearlyReconciliationWidgetProps {
   data?: YearlyReconciliationData;
@@ -26,246 +47,282 @@ export function YearlyReconciliationWidget({
 }: YearlyReconciliationWidgetProps) {
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Year reconciliation</CardTitle>
-          <CardDescription>
-            Loading carried-forward charge schedules against settlement evidence.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface>
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Year reconciliation</SurfaceTitle>
+            <SurfaceDescription>
+              Loading schedule and settlement totals.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState rows={5} label="Loading reconciliation…" />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   if (errorMessage) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Year reconciliation unavailable</CardTitle>
-          <CardDescription>{errorMessage}</CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface>
+        <SurfaceBody>
+          <ErrorState
+            title="Year reconciliation unavailable"
+            description={errorMessage}
+          />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   if (!data?.selectedYear || !data.summary) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Year reconciliation</CardTitle>
-          <CardDescription>
-            Yearly settlement comparisons will appear here once carried-forward
-            charge schedules and settlement records are available.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface>
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Year reconciliation</SurfaceTitle>
+            <SurfaceDescription>
+              Yearly settlement comparisons appear here once carried-forward
+              schedules and settlement records are available.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+      </Surface>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <CardTitle>{data.selectedYear.label}</CardTitle>
-            <CardDescription>
-              Effective month-by-month schedules reconciled against settlement
-              evidence for the selected reporting year.
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{data.selectedYear.value}</Badge>
-            <Badge variant="outline">
-              {formatCoverageStatus(data.coverage.status, data.coverage.throughMonth?.label)}
-            </Badge>
-            <Badge variant="outline">
-              {data.lines.length}
-              {" "}
-              lines
-            </Badge>
-          </div>
+    <Surface>
+      <SurfaceHeader>
+        <SurfaceHeading>
+          <SurfaceTitle>{data.selectedYear.label}</SurfaceTitle>
+          <SurfaceDescription>
+            Effective month-by-month schedules reconciled against settlement
+            evidence.
+          </SurfaceDescription>
+        </SurfaceHeading>
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status="neutral" className="font-mono">
+            {data.selectedYear.value}
+          </StatusBadge>
+          <StatusBadge status={statusForCoverage(data.coverage.status)} dot>
+            {formatCoverageStatus(
+              data.coverage.status,
+              data.coverage.throughMonth?.label,
+            )}
+          </StatusBadge>
         </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-wrap gap-2">
+      </SurfaceHeader>
+
+      <SurfaceBody>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[10.5px] font-mono uppercase tracking-[0.06em] text-fg-subtle">
+            Years
+          </span>
           {data.availableYears.map((year) => {
             const isSelected = year.value === data.selectedYear?.value;
 
             return (
               <Link
                 key={year.value}
-                className={badgeVariants({
-                  variant: isSelected ? "secondary" : "outline",
-                })}
-                href={buildYearHref(year.value, selectedMonthValue)}
+                className={cn(
+                  badgeVariants({
+                    variant: isSelected ? "neutral" : "outline",
+                  }),
+                  "font-mono text-[11.5px] tabular-nums",
+                  isSelected && "border-border-strong text-fg-primary",
+                )}
+                href={buildHref(year.value, selectedMonthValue)}
+                aria-current={isSelected ? "page" : undefined}
               >
                 {year.label}
               </Link>
             );
           })}
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryMetricCard
-            description="Carried-forward schedule total"
-            title="Scheduled"
-            value={formatMoney(data.summary.scheduledTotal.amountMinor)}
+
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryTile
+            label="Scheduled"
+            value={data.summary.scheduledTotal.amountMinor}
+            hint="Carried-forward total"
           />
-          <SummaryMetricCard
-            description="Settlement advance totals"
-            title="Advances"
-            value={formatNullableMoney(data.summary.settlementAdvanceTotal?.amountMinor)}
+          <SummaryTile
+            label="Advances"
+            value={data.summary.settlementAdvanceTotal?.amountMinor}
+            hint="Settlement advances"
           />
-          <SummaryMetricCard
-            description="Recorded settlement costs"
-            title="Actual cost"
-            value={formatNullableMoney(data.summary.actualCostTotal?.amountMinor)}
+          <SummaryTile
+            label="Actual cost"
+            value={data.summary.actualCostTotal?.amountMinor}
+            hint="Recorded settlement"
           />
-          <SummaryMetricCard
-            description={`${data.summary.openLineCount} line items still need attention`}
-            title="Net result"
-            value={formatNullableSignedMoney(data.summary.netBalance?.amountMinor)}
+          <SummaryTile
+            label="Net result"
+            value={data.summary.netBalance?.amountMinor}
+            hint={`${data.summary.openLineCount} open lines`}
+            signed
           />
         </div>
-        <div className="rounded-lg border border-border/70">
-          <div className="hidden grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-3 px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground lg:grid">
-            <span>Line</span>
-            <span>Scheduled</span>
-            <span>Advances</span>
-            <span>Actual cost</span>
-            <span>Net</span>
-          </div>
-          <div className="flex flex-col">
-            {data.lines.map((line, index) => (
-              <div key={line.category} className="flex flex-col">
-                {index > 0 ? <Separator /> : null}
-                <div className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] lg:items-start">
-                  <div className="flex min-w-0 flex-col gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-medium">{line.categoryLabel}</h2>
-                      <Badge variant={getStatusBadgeVariant(line.status)}>
-                        {line.statusLabel}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {line.coverageMonths}
-                      {" "}
-                      {line.coverageMonths === 1 ? "month" : "months"}
-                      {" "}
-                      of effective schedule coverage
-                      {line.scheduleDelta
-                        ? `; schedule vs advances ${formatSignedMoney(
-                            line.scheduleDelta.amountMinor,
-                          )}`
-                        : ""}
-                    </p>
-                    <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                      <DocumentPreview
-                        documents={line.scheduleDocuments}
-                        hrefPrefix="/documents"
+
+        <div className="overflow-hidden rounded-md border border-border-default">
+          <DataTable>
+            <DataTableHeader>
+              <DataTableRow>
+                <DataTableHead>Line</DataTableHead>
+                <DataTableHead numeric>Scheduled</DataTableHead>
+                <DataTableHead numeric>Advances</DataTableHead>
+                <DataTableHead numeric>Actual cost</DataTableHead>
+                <DataTableHead numeric>Net</DataTableHead>
+              </DataTableRow>
+            </DataTableHeader>
+            <DataTableBody>
+              {data.lines.map((line) => (
+                <DataTableRow key={line.category}>
+                  <DataTableCell>
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[12.5px] font-medium text-fg-primary">
+                          {line.categoryLabel}
+                        </span>
+                        <StatusBadge status={statusForLine(line.status)} dot>
+                          {line.statusLabel}
+                        </StatusBadge>
+                      </div>
+                      <span className="text-[11px] text-fg-subtle">
+                        {line.coverageMonths}
+                        {" "}
+                        {line.coverageMonths === 1 ? "month" : "months"} covered
+                      </span>
+                      <LineDocuments
                         label="Schedule"
+                        documents={line.scheduleDocuments}
                       />
-                      <DocumentPreview
-                        documents={line.settlementDocuments}
-                        hrefPrefix="/documents"
+                      <LineDocuments
                         label="Settlement"
+                        documents={line.settlementDocuments}
                       />
                     </div>
-                  </div>
-                  <MetricColumn
-                    label="Scheduled"
-                    value={formatMoney(line.scheduledAmount.amountMinor)}
-                  />
-                  <MetricColumn
-                    label="Advances"
-                    value={formatNullableMoney(line.settlementAdvanceAmount?.amountMinor)}
-                  />
-                  <MetricColumn
-                    label="Actual cost"
-                    value={formatNullableMoney(line.actualCostAmount?.amountMinor)}
-                  />
-                  <MetricColumn
-                    label="Net result"
-                    value={formatNullableSignedMoney(line.netBalance?.amountMinor)}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+                  </DataTableCell>
+                  <DataTableCell numeric>
+                    {formatMoneyShort(line.scheduledAmount.amountMinor)}
+                  </DataTableCell>
+                  <DataTableCell numeric>
+                    {line.settlementAdvanceAmount
+                      ? formatMoneyShort(
+                          line.settlementAdvanceAmount.amountMinor,
+                        )
+                      : "—"}
+                  </DataTableCell>
+                  <DataTableCell numeric>
+                    {line.actualCostAmount
+                      ? formatMoneyShort(line.actualCostAmount.amountMinor)
+                      : "—"}
+                  </DataTableCell>
+                  <DataTableCell numeric>
+                    {line.netBalance
+                      ? formatSignedMoneyShort(line.netBalance.amountMinor)
+                      : "—"}
+                  </DataTableCell>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTable>
         </div>
-      </CardContent>
-    </Card>
+      </SurfaceBody>
+    </Surface>
   );
 }
 
-function SummaryMetricCard({
-  description,
-  title,
-  value,
-}: {
-  description: string;
-  title: string;
-  value: string;
-}) {
-  return (
-    <Card size="sm">
-      <CardHeader>
-        <CardDescription>{title}</CardDescription>
-        <CardTitle className="text-lg">{value}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function MetricColumn({
+function SummaryTile({
+  hint,
   label,
+  signed = false,
   value,
 }: {
+  hint: string;
   label: string;
-  value: string;
+  signed?: boolean;
+  value: number | undefined;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground lg:hidden">
-        {label}
-      </span>
-      <span className="font-mono text-sm">{value}</span>
+    <div className="flex flex-col gap-1.5 rounded-md border border-border-muted bg-surface-subtle/50 p-3">
+      <MetricLabel>{label}</MetricLabel>
+      {typeof value === "number" ? (
+        <Money
+          amountMinor={value}
+          size="md"
+          currency={CURRENCY}
+          locale={LOCALE}
+          showCurrency={false}
+          showSign={signed}
+        />
+      ) : (
+        <span className="font-mono text-[14px] text-fg-subtle">—</span>
+      )}
+      <span className="text-[11px] text-fg-subtle">{hint}</span>
     </div>
   );
 }
 
-function DocumentPreview({
+function LineDocuments({
   documents,
-  hrefPrefix,
   label,
 }: {
-  documents: YearlyReconciliationData["lines"][number]["scheduleDocuments"];
-  hrefPrefix: string;
+  documents: Line["scheduleDocuments"];
   label: string;
 }) {
-  const primaryDocument = documents[0];
+  const primary = documents[0];
+  const remaining = Math.max(0, documents.length - 1);
 
-  if (!primaryDocument) {
-    return <span>{label}: none</span>;
+  if (!primary) {
+    return (
+      <span className="text-[11px] text-fg-faint">
+        {label}: none
+      </span>
+    );
   }
 
-  const remainingCount = documents.length - 1;
-
   return (
-    <span>
-      {label}
-      {": "}
-      <Link className="hover:text-foreground hover:underline" href={`${hrefPrefix}/${primaryDocument.hash}`}>
-        {primaryDocument.title}
-      </Link>
-      {remainingCount > 0 ? ` (+${remainingCount} more)` : ""}
-    </span>
+    <div className="flex items-center gap-1.5 text-[11px] text-fg-subtle">
+      <span className="font-mono uppercase tracking-[0.05em]">{label}</span>
+      <DocumentChip
+        label={primary.title}
+        href={`/documents/${primary.hash}`}
+      />
+      {remaining > 0 ? (
+        <span className="font-mono text-[10.5px]">+{remaining}</span>
+      ) : null}
+    </div>
   );
 }
 
-function buildYearHref(yearValue: string | undefined, selectedMonthValue: string | undefined) {
+function statusForLine(status: LineStatus): StatusKind {
+  if (status === "due") {
+    return "danger";
+  }
+
+  if (status === "credit") {
+    return "success";
+  }
+
+  return "neutral";
+}
+
+function statusForCoverage(status: CoverageStatus): StatusKind {
+  if (status === "full_year") {
+    return "success";
+  }
+
+  if (status === "year_to_date") {
+    return "info";
+  }
+
+  return "pending";
+}
+
+function buildHref(yearValue: string | undefined, selectedMonthValue: string | undefined) {
   const searchParams = new URLSearchParams();
 
   if (yearValue) {
@@ -282,7 +339,7 @@ function buildYearHref(yearValue: string | undefined, selectedMonthValue: string
 }
 
 function formatCoverageStatus(
-  status: YearlyReconciliationData["coverage"]["status"],
+  status: CoverageStatus,
   throughMonthLabel: string | undefined,
 ) {
   if (status === "full_year") {
@@ -290,57 +347,33 @@ function formatCoverageStatus(
   }
 
   if (status === "year_to_date") {
-    return throughMonthLabel ? `Year to date through ${throughMonthLabel}` : "Year to date";
+    return throughMonthLabel ? `YTD · ${throughMonthLabel}` : "Year to date";
   }
 
-  return throughMonthLabel ? `Partial through ${throughMonthLabel}` : "Partial year";
+  return throughMonthLabel ? `Partial · ${throughMonthLabel}` : "Partial";
 }
 
-function formatMoney(amountMinor: number) {
-  return new Intl.NumberFormat("pl-PL", {
-    currency: "PLN",
-    style: "currency",
-  }).format(amountMinor / 100);
+function formatMoneyShort(amountMinor: number) {
+  const negative = amountMinor < 0;
+  const abs = Math.abs(amountMinor);
+  const major = new Intl.NumberFormat(LOCALE, {
+    maximumFractionDigits: 0,
+    useGrouping: true,
+  }).format(Math.trunc(abs / 100));
+  const minor = (abs % 100).toString().padStart(2, "0");
+  return `${negative ? "−" : ""}${major}.${minor}`;
 }
 
-function formatSignedMoney(amountMinor: number) {
-  const formatted = formatMoney(Math.abs(amountMinor));
+function formatSignedMoneyShort(amountMinor: number) {
+  const formatted = formatMoneyShort(Math.abs(amountMinor));
 
   if (amountMinor > 0) {
     return `+${formatted}`;
   }
 
   if (amountMinor < 0) {
-    return `-${formatted}`;
+    return `−${formatted}`;
   }
 
   return formatted;
-}
-
-function formatNullableMoney(amountMinor: number | undefined) {
-  if (typeof amountMinor !== "number") {
-    return "n/a";
-  }
-
-  return formatMoney(amountMinor);
-}
-
-function formatNullableSignedMoney(amountMinor: number | undefined) {
-  if (typeof amountMinor !== "number") {
-    return "n/a";
-  }
-
-  return formatSignedMoney(amountMinor);
-}
-
-function getStatusBadgeVariant(status: YearlyReconciliationData["lines"][number]["status"]) {
-  if (status === "due") {
-    return "destructive" as const;
-  }
-
-  if (status === "credit") {
-    return "secondary" as const;
-  }
-
-  return "outline" as const;
 }

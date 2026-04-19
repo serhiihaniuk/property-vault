@@ -1,7 +1,7 @@
 # T37 - Redesign dashboard to the finance-first MVP
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `implementer`
 - Goal: Align the dashboard with the final finance-first MVP direction from the handoff.
 - Dependencies: `T30`, `T34`, `T36`
 - Write scope: dashboard view and dashboard widgets only
@@ -11,10 +11,28 @@
 - Required verification: `strong`
 - Design references: use the redesign spec and screenshot first; consult the HTML only when dashboard density/layout details remain ambiguous.
 - Completion signal: dashboard presents snapshot-first current state, balance/ledger context, category cards with visible comparison context, trend, anomalies, and recent evidence within the redesign system.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Coordinator notes: none.
+- Files changed:
+  - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
+  - `apps/web/src/widgets/dashboard-overview/ui/dashboard-overview-widget.tsx`
+  - `apps/web/src/widgets/dashboard-overview/ui/overview-helpers.ts` (new)
+  - `apps/web/src/widgets/dashboard-summary/ui/dashboard-summary-widget.tsx`
+  - `apps/web/src/widgets/dashboard-foundation/ui/dashboard-foundation-widget.tsx`
+  - `apps/web/src/widgets/anomaly-feed/ui/anomaly-feed-widget.tsx`
+  - `apps/web/src/widgets/yearly-reconciliation/ui/yearly-reconciliation-widget.tsx`
+- Contracts changed: none
+- Tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+- Coordinator notes:
+  - Observation: every redesigned dashboard widget re-implements the same `formatSignedMoney` / `deltaIntentForCost` / `formatChangeStatus` / `statusKindForChange` helpers inline because the sibling-slice rule forbids importing `overview-helpers.ts` from another widget and the task scope did not cover `apps/web/src/shared/lib`.
+    - Why it matters: the four helpers are domain-generic and will be reused by documents, reconciliation, and anomaly surfaces in later redesign tasks; leaving duplicates means every change ripples into multiple widgets and risks drift.
+    - Suggested follow-up: in a small shared-layer task, promote the formatters (money, signed money, change status, delta intent, status kind) into `apps/web/src/shared/lib/finance-format.ts` (or similar) and delete the per-widget copies.
+    - Urgency: `soon`
+  - Observation: the in-app snapshot uses `data.months` totals as a proxy for "balance / recent ledger context" because no ledger service exists. The redesign spec language implies a richer payment-history surface once a real ledger contract lands.
+    - Why it matters: reviewers comparing to the screenshot may flag the missing "Paid this month / Planned advances / Last transaction" tiles.
+    - Suggested follow-up: coordinator should sequence a follow-up task for a ledger/payments contract + widget once account-balance data is real; until then the current month context is the best available proxy.
+    - Urgency: `later`
 - Review result: none yet
 - Reviewer: none yet
 - Review tests run: none yet
@@ -24,4 +42,4 @@
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: use the screenshot first and the HTML second; do not hide critical category information behind expansion as the main interaction.
+- Next handoff note: use the screenshot first and the HTML second; do not hide critical category information behind expansion as the main interaction. Start a reviewer chat on `codex/T37-dashboard-redesign` with `reviewer T37`.
