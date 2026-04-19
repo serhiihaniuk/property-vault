@@ -53,6 +53,27 @@
   - Expected outcome: reconciliation uses the carried-forward effective schedule timeline while preserving provenance back to the source schedule document active for each month.
   - Carry-forward from `T34`: decide explicitly whether reconciliation stays year-to-date/current-month or introduces a projection horizon for months beyond the latest sync runtime month.
   - Why it matters: `T34` deliberately expands schedules through the current sync month only, so any forward-looking horizon after that point should be a product decision, not an accidental assumption.
-- Next handoff note: start a reviewer chat on `codex/T32-financials` and say `reviewer T32`; reconciliation now stays year-to-date for incomplete current years and does not project months beyond the latest effective schedule month
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/application test`
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/financials-handlers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - Playwright verification against `http://localhost:3000`: reproduced the stale dev-server 500 state first, restarted the running Next.js dev server, then confirmed the dashboard widgets render and both financial endpoints return `200`
+- Merge status: `merge ready`
+- Architecture note: Acceptable and aligned. Reconciliation and anomaly shaping stay inside `packages/application`, the new REST routes stay thin, and the dashboard composes the slice through dedicated widgets while preserving schedule and settlement document provenance.
+- Coordinator notes review: Confirmed. The carried-forward effective schedule baseline is present in the yearly reconciliation output, and the reviewed implementation keeps the current-year horizon year-to-date without projecting beyond the synced schedule timeline.
+- Coordinator final review:
+  - merged the reviewer-approved T32 reconciliation and anomalies slice into `master`
+  - accepted the current-year/year-to-date horizon as the correct baseline for this slice instead of introducing forward-looking projection months beyond the latest synced effective schedule month
+  - accepted the application-layer reconciliation shaping and thin route/widget composition as aligned with the approved package boundaries
+- Actions taken:
+  - merged `codex/T32-financials` into `master`
+  - recorded T32 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored:
+  - did not create a separate projection-horizon follow-up yet, because the reviewed implementation intentionally stops at the current synced schedule timeline and there is no accepted product requirement yet for forward-looking reconciliation placeholders
+- Next handoff note: nothing right now.
 
 
