@@ -48,13 +48,21 @@
   - `npm run build`
   - Playwright/browser verification not run: no Playwright config, e2e specs, or `test:e2e` script exist in the repo yet
 - Coordinator notes: none.
-- Review result: `pending`
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: `pending review`
-- Architecture note: none yet
-- Coordinator notes review: none yet
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/contracts openapi:generate`
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `npm run --workspace @dabrowskiego/application test`
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/system-handlers.test.ts apps/web/app/api/_lib/dashboard-handlers.test.ts apps/web/app/api/_lib/documents-handlers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - Playwright/browser verification still not run: no Playwright config, e2e specs, or `test:e2e` script exist in the repo yet
+- Merge status: `merge ready`
+- Architecture note: documents logic stays aligned with the approved boundaries: contracts in `packages/contracts`, business logic in `packages/application`, thin API handlers under `apps/web/app/api/**`, and thin route entrypoints delegating to `src/views/**` plus widgets.
+- Coordinator notes review: removed an unrelated `docs/implementation/FUTURE_IDEAS.md` addition from the task branch so the reviewed diff stays inside T31 scope; no further coordinator note needed.
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: start a reviewer chat on branch `codex/T31-documents` and say `reviewer T31`.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
