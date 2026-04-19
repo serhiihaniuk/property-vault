@@ -52,13 +52,23 @@
   - Why it matters: `T32` can safely consume year-to-date effective schedules now, but if a later yearly view needs forward-looking month placeholders beyond the current sync month, that horizon should be chosen deliberately instead of assumed.
   - Suggested follow-up: confirm in `T32` whether reconciliation should stay year-to-date/current-month or introduce an explicit projection horizon for months after the latest sync month.
   - Urgency: `later`
-- Review result: `pending`
-- Reviewer: `unassigned`
-- Review tests run: none yet
-- Merge status: `pending review`
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/application test`
+  - `npm run --workspace @dabrowskiego/sync test`
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/dashboard-handlers.test.ts`
+  - `npm run --workspace @dabrowskiego/db test`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+- Merge status: `merge ready`
 - Architecture note:
   - Added a rebuildable `vault.effective_charge_rows` table so carried-forward month-by-month schedules remain separate from raw document financial rows, preserving clean document detail views while exposing an application-facing effective schedule model.
-- Coordinator notes review: none yet
+  - The whole-schedule replacement model used by this task is acceptable for the current vault records, which consistently encode full monthly charge schedules rather than partial per-category deltas.
+- Coordinator notes review:
+  - Confirmed. The existing follow-up note for `T32` remains valid: this task expands schedules through the current sync month, so any future forward-looking reconciliation horizon should be chosen deliberately instead of assumed.
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
