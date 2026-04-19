@@ -1,11 +1,11 @@
 # T37 - Redesign dashboard to the finance-first MVP
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Align the dashboard with the final finance-first MVP direction from the handoff.
 - Dependencies: `T30`, `T34`, `T36`
 - Write scope: dashboard view and dashboard widgets only
-- Worker branch: none yet
+- Worker branch: `codex/T37-dashboard-redesign`
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `ui-redesign-c`
 - Required verification: `strong`
