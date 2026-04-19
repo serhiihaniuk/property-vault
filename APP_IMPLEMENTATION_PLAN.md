@@ -320,7 +320,7 @@ This workflow is intentionally one task at a time.
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T30` | Dashboard summary + month breakdown | `done` | `T21`-`T23` | dashboard contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-dashboard` | `strong` | dashboard renders real month summary and category breakdown |
-| `T31` | Documents list/detail + provenance | `todo` | `T21`-`T23` | documents contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-documents` | `strong` | document flows show detail plus provenance/source trace |
+| `T31` | Documents list/detail + provenance | `done` | `T21`-`T23` | documents contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-documents` | `strong` | document flows show detail plus provenance/source trace |
 | `T32` | Year reconciliation + anomalies | `todo` | `T21`-`T23` | reconciliation/anomaly contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-financials` | `strong` | yearly review and anomalies flow render from real data |
 | `T33` | Access/invite flows | `todo` | `T12`, `T21`-`T23` | auth/access routes, application, widgets | `gpt-5.4 / xhigh` | `slice-access` | `strong` | invite-only access flow works end to end with real Postgres-backed auth coverage for credential and invite paths |
 

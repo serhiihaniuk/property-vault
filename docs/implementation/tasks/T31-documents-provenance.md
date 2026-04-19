@@ -1,7 +1,7 @@
 # T31 - Documents list/detail + provenance
 
 - Status: `done`
-- Owner: `implementer`
+- Owner: `coordinator`
 - Goal: Deliver document browsing with provenance/source trace.
 - Dependencies: `T21`, `T22`, `T23`
 - Write scope: documents contracts, application services, routes, widgets
@@ -62,7 +62,12 @@
 - Merge status: `merge ready`
 - Architecture note: documents logic stays aligned with the approved boundaries: contracts in `packages/contracts`, business logic in `packages/application`, thin API handlers under `apps/web/app/api/**`, and thin route entrypoints delegating to `src/views/**` plus widgets.
 - Coordinator notes review: removed an unrelated `docs/implementation/FUTURE_IDEAS.md` addition from the task branch so the reviewed diff stays inside T31 scope; no further coordinator note needed.
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - merged the reviewer-approved T31 documents slice into `master`
+  - accepted the documents contract/application/route/view split as aligned with the approved boundaries for the first provenance-focused slice
+  - accepted the reviewer cleanup that removed the unrelated local future-ideas note from the reviewed branch so the task stayed inside scope
+- Actions taken:
+  - merged `codex/T31-documents` into `master`
+  - recorded T31 as `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored: none
+- Next handoff note: nothing right now.
