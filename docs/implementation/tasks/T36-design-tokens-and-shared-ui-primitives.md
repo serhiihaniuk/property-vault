@@ -1,7 +1,7 @@
 # T36 - Establish design tokens and shared UI primitives
 
 - Status: `done`
-- Owner: `implementer`
+- Owner: `coordinator`
 - Goal: Convert the redesign direction into a real token/primitives layer for the app.
 - Dependencies: `T35`
 - Write scope: `apps/web/app/globals.css`, `apps/web/src/shared/ui/**`, shared visual helpers, `apps/web/components.json` only if alias or primitive setup needs adjustment
@@ -54,7 +54,13 @@
   - Confirmed. Leaving legacy primitives visually compatible while introducing the new shared surfaces is the right low-risk bridge into `T37`-`T39`.
   - Confirmed. Treating the app as dark-only in this phase is aligned with the redesign spec; if light mode returns later, it should be a deliberate token-system task.
   - Confirmed. Translating the palette into OKLCH semantic tokens keeps the redesign centralized instead of leaking raw prototype values into widgets.
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: reviewer verified branch `codex/T36-design-system` as `merge ready`. Return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - merged the reviewer-approved T36 design-system work into `master`
+  - accepted the shared-token and shared-primitive layering as the correct foundation for redesign tasks `T37`-`T39` and the moved `T33` access flow
+  - accepted the dark-only semantic token system for this phase, with legacy primitives remaining visually compatible until page-level redesign tasks swap to the new surfaces directly
+- Actions taken:
+  - merged `codex/T36-design-system` into `master`
+  - recorded `T36` as `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - reconciled `T35` as already complete on `master` so redesign-wave dependencies are accurate
+- Actions ignored: none
+- Next handoff note: nothing right now.
