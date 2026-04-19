@@ -33,13 +33,19 @@
     - Why it matters: reviewers comparing to the screenshot may flag the missing "Paid this month / Planned advances / Last transaction" tiles.
     - Suggested follow-up: coordinator should sequence a follow-up task for a ledger/payments contract + widget once account-balance data is real; until then the current month context is the best available proxy.
     - Urgency: `later`
-- Review result: none yet
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: none yet
-- Architecture note: none yet
-- Coordinator notes review: none yet
+- Review result: `merge ready` after reviewer fix for anomaly-group severity labeling; grouped anomaly headers now reflect the highest severity present in each rule group instead of whichever anomaly happened to appear first.
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - Browser verification could not be completed in this thread because the documented `agent-browser` CLI was not available on PATH; an existing local dev server was detected on `http://localhost:3000`.
+- Merge status: `merge ready`
+- Architecture note: acceptable and aligned; the dashboard redesign stays inside the declared widget/view scope, reuses the shared redesign primitives from `T36`, and the reviewer fix remains local to the anomaly widget without changing contracts.
+- Coordinator notes review:
+  - Helper-duplication note is valid and should be carried forward into a shared-layer cleanup task rather than copied again in later redesign tasks.
+  - Ledger-context note is valid and non-blocking; the current snapshot uses the best available data until a dedicated ledger/payments contract exists.
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: use the screenshot first and the HTML second; do not hide critical category information behind expansion as the main interaction. Start a reviewer chat on `codex/T37-dashboard-redesign` with `reviewer T37`.
+- Next handoff note: review complete on `codex/T37-dashboard-redesign`; return to the coordinator and say `merge latest reviewed task`.

@@ -120,9 +120,12 @@ export function AnomalyFeedWidget({
           />
         ) : (
           <div className="flex flex-col gap-4">
-            {groupedAnomalies.map((group) => (
-              <section key={group.ruleId} className="flex flex-col gap-2">
-                <div className="flex items-center justify-between gap-3">
+            {groupedAnomalies.map((group) => {
+              const groupSeverity = getHighestSeverity(group.items);
+
+              return (
+                <section key={group.ruleId} className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <MetricLabel>{group.ruleLabel}</MetricLabel>
                     <span className="text-[11px] text-fg-subtle">
@@ -133,12 +136,10 @@ export function AnomalyFeedWidget({
                       unresolved
                     </span>
                   </div>
-                  <StatusBadge
-                    status={statusForSeverity(group.items[0]?.severity ?? "info")}
-                  >
-                    {group.items[0]?.severityLabel ?? "Info"}
-                  </StatusBadge>
-                </div>
+                    <StatusBadge status={statusForSeverity(groupSeverity)}>
+                      {formatSeverityLabel(groupSeverity)}
+                    </StatusBadge>
+                  </div>
 
                 <ul className="flex flex-col divide-y divide-dashed divide-border-default rounded-md border border-border-muted bg-surface-subtle/40">
                   {group.items.map((anomaly) => (
@@ -186,9 +187,10 @@ export function AnomalyFeedWidget({
                       </div>
                     </li>
                   ))}
-                </ul>
-              </section>
-            ))}
+                  </ul>
+                </section>
+              );
+            })}
           </div>
         )}
       </SurfaceBody>
@@ -247,6 +249,18 @@ function formatSeverityLabel(severity: Severity) {
   }
 }
 
+function getHighestSeverity(anomalies: Anomaly[]): Severity {
+  if (anomalies.some((anomaly) => anomaly.severity === "critical")) {
+    return "critical";
+  }
+
+  if (anomalies.some((anomaly) => anomaly.severity === "warning")) {
+    return "warning";
+  }
+
+  return "info";
+}
+
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
@@ -254,4 +268,3 @@ function formatDateTime(value: string) {
     timeZone: "UTC",
   }).format(new Date(value));
 }
-
