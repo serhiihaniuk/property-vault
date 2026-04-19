@@ -1,4 +1,4 @@
-import type { OpenAnomaliesData } from "@/src/shared/api/client";
+import type { OpenAnomaliesData } from "@/src/shared/api/client"
 import {
   DocumentChip,
   EmptyState,
@@ -14,15 +14,15 @@ import {
   SurfaceHeading,
   SurfaceTitle,
   type StatusKind,
-} from "@/src/shared/ui";
+} from "@/src/shared/ui"
 
-type Severity = OpenAnomaliesData["anomalies"][number]["severity"];
-type Anomaly = OpenAnomaliesData["anomalies"][number];
+type Severity = OpenAnomaliesData["anomalies"][number]["severity"]
+type Anomaly = OpenAnomaliesData["anomalies"][number]
 
 export interface AnomalyFeedWidgetProps {
-  data?: OpenAnomaliesData;
-  errorMessage?: string | null;
-  isLoading: boolean;
+  data?: OpenAnomaliesData
+  errorMessage?: string | null
+  isLoading: boolean
 }
 
 export function AnomalyFeedWidget({
@@ -45,7 +45,7 @@ export function AnomalyFeedWidget({
           <LoadingState rows={4} label="Loading anomalies…" />
         </SurfaceBody>
       </Surface>
-    );
+    )
   }
 
   if (errorMessage) {
@@ -58,7 +58,7 @@ export function AnomalyFeedWidget({
           />
         </SurfaceBody>
       </Surface>
-    );
+    )
   }
 
   if (!data) {
@@ -68,16 +68,16 @@ export function AnomalyFeedWidget({
           <SurfaceHeading>
             <SurfaceTitle>Open anomalies</SurfaceTitle>
             <SurfaceDescription>
-              Unresolved anomalies appear here after sync and detection
-              populate the app database.
+              Unresolved anomalies appear here after sync and detection populate
+              the app database.
             </SurfaceDescription>
           </SurfaceHeading>
         </SurfaceHeader>
       </Surface>
-    );
+    )
   }
 
-  const groupedAnomalies = groupAnomalies(data.anomalies);
+  const groupedAnomalies = groupAnomalies(data.anomalies)
 
   return (
     <Surface>
@@ -90,9 +90,7 @@ export function AnomalyFeedWidget({
           </SurfaceDescription>
         </SurfaceHeading>
         <StatusBadge status={data.openCount > 0 ? "warning" : "success"} dot>
-          {data.openCount}
-          {" "}
-          open
+          {data.openCount} open
         </StatusBadge>
       </SurfaceHeader>
 
@@ -121,144 +119,142 @@ export function AnomalyFeedWidget({
         ) : (
           <div className="flex flex-col gap-4">
             {groupedAnomalies.map((group) => {
-              const groupSeverity = getHighestSeverity(group.items);
+              const groupSeverity = getHighestSeverity(group.items)
 
               return (
                 <section key={group.ruleId} className="flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <MetricLabel>{group.ruleLabel}</MetricLabel>
-                    <span className="text-[11px] text-fg-subtle">
-                      {group.items.length}
-                      {" "}
-                      {group.items.length === 1 ? "item" : "items"}
-                      {" "}
-                      unresolved
-                    </span>
-                  </div>
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <MetricLabel>{group.ruleLabel}</MetricLabel>
+                      <span className="text-[11px] text-fg-subtle">
+                        {group.items.length}{" "}
+                        {group.items.length === 1 ? "item" : "items"} unresolved
+                      </span>
+                    </div>
                     <StatusBadge status={statusForSeverity(groupSeverity)}>
                       {formatSeverityLabel(groupSeverity)}
                     </StatusBadge>
                   </div>
 
-                <ul className="flex flex-col divide-y divide-dashed divide-border-default rounded-md border border-border-muted bg-surface-subtle/40">
-                  {group.items.map((anomaly) => (
-                    <li
-                      key={anomaly.id}
-                      className="flex flex-col gap-1.5 px-3 py-2.5"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-[12.5px] text-fg-primary">
-                          {anomaly.summary}
-                        </p>
-                        <StatusBadge
-                          status={statusForSeverity(anomaly.severity)}
-                          dot
-                          className="shrink-0 text-[10px]"
-                        >
-                          {anomaly.severityLabel}
-                        </StatusBadge>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-fg-subtle">
-                        <span className="font-mono">
-                          {formatDateTime(anomaly.detectedAt)}
-                        </span>
-                        {anomaly.date ? (
-                          <span className="font-mono text-fg-secondary">
-                            · {anomaly.date}
-                          </span>
-                        ) : null}
-                        {anomaly.subjectDocument ? (
-                          <DocumentChip
-                            label={anomaly.subjectDocument.title}
-                            href={`/documents/${anomaly.subjectDocument.hash}`}
-                          />
-                        ) : null}
-                        {anomaly.context.map((field) => (
-                          <span
-                            key={`${anomaly.id}-${field.label}`}
-                            className="rounded border border-border-muted bg-surface-elevated px-1 py-0.5 font-mono text-[10.5px] text-fg-secondary"
+                  <ul className="flex flex-col divide-y divide-dashed divide-border-default rounded-md border border-border-muted bg-surface-subtle/40">
+                    {group.items.map((anomaly) => (
+                      <li
+                        key={anomaly.id}
+                        className="flex flex-col gap-1.5 px-3 py-2.5"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-[12.5px] text-fg-primary">
+                            {anomaly.summary}
+                          </p>
+                          <StatusBadge
+                            status={statusForSeverity(anomaly.severity)}
+                            dot
+                            className="shrink-0 text-[10px]"
                           >
-                            <span className="text-fg-subtle">{field.label}:</span>
-                            {" "}
-                            {field.value}
+                            {anomaly.severityLabel}
+                          </StatusBadge>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-fg-subtle">
+                          <span className="font-mono">
+                            {formatDateTime(anomaly.detectedAt)}
                           </span>
-                        ))}
-                      </div>
-                    </li>
-                  ))}
+                          {anomaly.date ? (
+                            <span className="font-mono text-fg-secondary">
+                              · {anomaly.date}
+                            </span>
+                          ) : null}
+                          {anomaly.subjectDocument ? (
+                            <DocumentChip
+                              label={anomaly.subjectDocument.title}
+                              href={`/documents/${anomaly.subjectDocument.hash}`}
+                            />
+                          ) : null}
+                          {anomaly.context.map((field) => (
+                            <span
+                              key={`${anomaly.id}-${field.label}`}
+                              className="rounded border border-border-muted bg-surface-elevated px-1 py-0.5 font-mono text-[10.5px] text-fg-secondary"
+                            >
+                              <span className="text-fg-subtle">
+                                {field.label}:
+                              </span>{" "}
+                              {field.value}
+                            </span>
+                          ))}
+                        </div>
+                      </li>
+                    ))}
                   </ul>
                 </section>
-              );
+              )
             })}
           </div>
         )}
       </SurfaceBody>
     </Surface>
-  );
+  )
 }
 
 function groupAnomalies(anomalies: OpenAnomaliesData["anomalies"]) {
   const grouped = new Map<
     string,
     {
-      items: Anomaly[];
-      ruleId: string;
-      ruleLabel: string;
+      items: Anomaly[]
+      ruleId: string
+      ruleLabel: string
     }
-  >();
+  >()
 
   for (const anomaly of anomalies) {
-    const existing = grouped.get(anomaly.ruleId);
+    const existing = grouped.get(anomaly.ruleId)
 
     if (existing) {
-      existing.items.push(anomaly);
-      continue;
+      existing.items.push(anomaly)
+      continue
     }
 
     grouped.set(anomaly.ruleId, {
       items: [anomaly],
       ruleId: anomaly.ruleId,
       ruleLabel: anomaly.ruleLabel,
-    });
+    })
   }
 
-  return Array.from(grouped.values());
+  return Array.from(grouped.values())
 }
 
 function statusForSeverity(severity: Severity): StatusKind {
   if (severity === "critical") {
-    return "danger";
+    return "danger"
   }
 
   if (severity === "warning") {
-    return "warning";
+    return "warning"
   }
 
-  return "info";
+  return "info"
 }
 
 function formatSeverityLabel(severity: Severity) {
   switch (severity) {
     case "critical":
-      return "Critical";
+      return "Critical"
     case "warning":
-      return "Warning";
+      return "Warning"
     default:
-      return "Info";
+      return "Info"
   }
 }
 
 function getHighestSeverity(anomalies: Anomaly[]): Severity {
   if (anomalies.some((anomaly) => anomaly.severity === "critical")) {
-    return "critical";
+    return "critical"
   }
 
   if (anomalies.some((anomaly) => anomaly.severity === "warning")) {
-    return "warning";
+    return "warning"
   }
 
-  return "info";
+  return "info"
 }
 
 function formatDateTime(value: string) {
@@ -266,5 +262,5 @@ function formatDateTime(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "UTC",
-  }).format(new Date(value));
+  }).format(new Date(value))
 }
