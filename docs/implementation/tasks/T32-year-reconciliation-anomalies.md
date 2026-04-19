@@ -1,7 +1,7 @@
 # T32 — Year reconciliation + anomalies
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `coordinator`
 - Goal: Deliver yearly review and anomaly surfaces for the first financial slice.
 - Dependencies: `T21`, `T22`, `T23`, `T34`
 - Write scope: reconciliation/anomaly contracts, application services, routes, widgets
@@ -10,15 +10,49 @@
 - Wave group: `slice-financials`
 - Required verification: `strong`
 - Completion signal: yearly reconciliation and anomalies render from real data using the effective carried-forward month-by-month charge schedule model and pass targeted tests.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `apps/web/app/api/_lib/financials-handlers.ts`
+  - `apps/web/app/api/_lib/financials-handlers.test.ts`
+  - `apps/web/app/api/anomalies/route.ts`
+  - `apps/web/app/api/financials/year-reconciliation/route.ts`
+  - `apps/web/src/shared/api/client.ts`
+  - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
+  - `apps/web/src/widgets/anomaly-feed/ui/anomaly-feed-widget.tsx`
+  - `apps/web/src/widgets/dashboard-foundation/ui/dashboard-foundation-widget.tsx`
+  - `apps/web/src/widgets/dashboard-overview/ui/dashboard-overview-widget.tsx`
+  - `apps/web/src/widgets/yearly-reconciliation/ui/yearly-reconciliation-widget.tsx`
+  - `docs/implementation/tasks/T32-year-reconciliation-anomalies.md`
+  - `packages/application/src/application.ts`
+  - `packages/application/src/financials.test.ts`
+  - `packages/application/src/financials.ts`
+  - `packages/application/src/index.ts`
+  - `packages/contracts/src/contracts.test.ts`
+  - `packages/contracts/src/financials.ts`
+  - `packages/contracts/src/generated/client.ts`
+  - `packages/contracts/src/generated/openapi.json`
+  - `packages/contracts/src/index.ts`
+  - `packages/contracts/src/system.ts`
+- Contracts changed:
+  - added `GET /api/financials/year-reconciliation` with optional `year` selection, normalized yearly line items, carried-forward schedule totals, settlement comparisons, coverage metadata, and document provenance for both schedule and settlement evidence
+  - added `GET /api/anomalies` with normalized open-anomaly items, severity buckets, linked document references, summary text, and compact context fields
+  - regenerated `packages/contracts/src/generated/client.ts` and `packages/contracts/src/generated/openapi.json`
+- Tests run:
+  - `npm run --workspace @dabrowskiego/application test`
+  - `npm run --workspace @dabrowskiego/application typecheck`
+  - `npm run --workspace @dabrowskiego/contracts typecheck`
+  - `npm run --workspace @dabrowskiego/contracts openapi:generate`
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/system-handlers.test.ts apps/web/app/api/_lib/dashboard-handlers.test.ts apps/web/app/api/_lib/documents-handlers.test.ts apps/web/app/api/_lib/financials-handlers.test.ts`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - Playwright/browser verification not run: no Playwright config or `test:e2e` flow exists in the repo yet, and this task did not add one
 - Coordinator notes:
   - Carry-forward from `T34`: yearly reconciliation must compare actuals against the effective month-by-month schedule in force for each month, not only against months that had an explicit charge-change document.
   - Why it matters: months between charge updates still have a valid schedule, and the yearly story will be wrong if those inherited months disappear from the comparison baseline.
   - Expected outcome: reconciliation uses the carried-forward effective schedule timeline while preserving provenance back to the source schedule document active for each month.
   - Carry-forward from `T34`: decide explicitly whether reconciliation stays year-to-date/current-month or introduces a projection horizon for months beyond the latest sync runtime month.
   - Why it matters: `T34` deliberately expands schedules through the current sync month only, so any forward-looking horizon after that point should be a product decision, not an accidental assumption.
-- Next handoff note: preserve consistent financial category, effective schedule, and provenance handling
+- Next handoff note: start a reviewer chat on `codex/T32-financials` and say `reviewer T32`; reconciliation now stays year-to-date for incomplete current years and does not project months beyond the latest effective schedule month
 
 

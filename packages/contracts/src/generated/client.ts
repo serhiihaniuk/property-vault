@@ -21,6 +21,12 @@ export interface PropertyVaultContractClient {
   getDocuments(
     ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getDocuments']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getDocuments']>>;
+  getOpenAnomalies(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getOpenAnomalies']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getOpenAnomalies']>>;
+  getYearlyReconciliation(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getYearlyReconciliation']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getYearlyReconciliation']>>;
   getApiIndex(
     ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getApiIndex']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getApiIndex']>>;
@@ -36,6 +42,8 @@ export function createPropertyVaultContractClient(
     getDashboardMonthBreakdown: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDashboardMonthBreakdown),
     getDocumentDetail: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDocumentDetail),
     getDocuments: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDocuments),
+    getOpenAnomalies: buildContractClientMethod(transport, propertyVaultRouteCatalog.getOpenAnomalies),
+    getYearlyReconciliation: buildContractClientMethod(transport, propertyVaultRouteCatalog.getYearlyReconciliation),
     getApiIndex: buildContractClientMethod(transport, propertyVaultRouteCatalog.getApiIndex),
     getApiHealth: buildContractClientMethod(transport, propertyVaultRouteCatalog.getApiHealth),
   };

@@ -1118,6 +1118,516 @@
         "additionalProperties": false,
         "description": "Optional document type filter for the catalog view."
       },
+      "AnomalyFeedResponse": {
+        "type": "object",
+        "properties": {
+          "anomalies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "context": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "value"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Compact anomaly context field for operator review."
+                  }
+                },
+                "date": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "description": "ISO 8601 calendar date.",
+                  "nullable": true
+                },
+                "detectedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "ISO 8601 timestamp with timezone offset."
+                },
+                "id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "ruleId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ruleLabel": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "warning",
+                    "info"
+                  ],
+                  "description": "Normalized anomaly severity."
+                },
+                "severityLabel": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "open",
+                    "resolved"
+                  ],
+                  "description": "Normalized anomaly workflow status."
+                },
+                "subjectDocument": {
+                  "type": "object",
+                  "properties": {
+                    "hash": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Canonical document hash."
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Display title for the document."
+                    },
+                    "documentType": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Normalized document type."
+                    },
+                    "documentDate": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/AnomalyFeedResponse/properties/anomalies/items/properties/date"
+                        }
+                      ],
+                      "nullable": true,
+                      "description": "ISO 8601 calendar date."
+                    }
+                  },
+                  "required": [
+                    "hash",
+                    "title",
+                    "documentType"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Reference to a canonical source document.",
+                  "nullable": true
+                },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "context",
+                "date",
+                "detectedAt",
+                "id",
+                "ruleId",
+                "ruleLabel",
+                "severity",
+                "severityLabel",
+                "status",
+                "subjectDocument",
+                "summary"
+              ],
+              "additionalProperties": false,
+              "description": "Normalized open anomaly item with optional linked document context."
+            }
+          },
+          "countsBySeverity": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "severity": {
+                  "$ref": "#/components/schemas/AnomalyFeedResponse/properties/anomalies/items/properties/severity"
+                }
+              },
+              "required": [
+                "count",
+                "severity"
+              ],
+              "additionalProperties": false,
+              "description": "Open anomaly count for a single severity bucket."
+            }
+          },
+          "generatedAt": {
+            "$ref": "#/components/schemas/AnomalyFeedResponse/properties/anomalies/items/properties/detectedAt"
+          },
+          "openCount": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "anomalies",
+          "countsBySeverity",
+          "generatedAt",
+          "openCount"
+        ],
+        "additionalProperties": false,
+        "description": "Open anomaly counts plus normalized anomaly feed items."
+      },
+      "YearlyReconciliationResponse": {
+        "type": "object",
+        "properties": {
+          "availableYears": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "month",
+                    "quarter",
+                    "year",
+                    "custom"
+                  ],
+                  "description": "Supported aggregation period kinds."
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Human-readable period label."
+                },
+                "startDate": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "description": "ISO 8601 calendar date."
+                },
+                "endDate": {
+                  "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/availableYears/items/properties/startDate",
+                  "description": "ISO 8601 calendar date."
+                },
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "kind",
+                "label"
+              ],
+              "additionalProperties": false,
+              "description": "Normalized reporting period reference."
+            }
+          },
+          "coverage": {
+            "type": "object",
+            "properties": {
+              "monthsCovered": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 12
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "full_year",
+                  "year_to_date",
+                  "partial"
+                ],
+                "description": "Coverage state for the selected reconciliation year."
+              },
+              "throughMonth": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/availableYears/items"
+                  }
+                ],
+                "nullable": true,
+                "description": "Normalized reporting period reference."
+              }
+            },
+            "required": [
+              "monthsCovered",
+              "status",
+              "throughMonth"
+            ],
+            "additionalProperties": false,
+            "description": "Month coverage and horizon for the selected reconciliation year."
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp with timezone offset."
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "actualCostAmount": {
+                  "type": "object",
+                  "properties": {
+                    "amountMinor": {
+                      "type": "integer",
+                      "description": "Integer amount in grosz or other currency minor unit."
+                    },
+                    "currency": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{3}$",
+                      "description": "Three-letter ISO currency code."
+                    }
+                  },
+                  "required": [
+                    "amountMinor",
+                    "currency"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Monetary amount stored as minor units.",
+                  "nullable": true
+                },
+                "category": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "categoryLabel": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "coverageMonths": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 12
+                },
+                "creditsAmount": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                    }
+                  ],
+                  "nullable": true,
+                  "description": "Monetary amount stored as minor units."
+                },
+                "netBalance": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                    }
+                  ],
+                  "nullable": true,
+                  "description": "Monetary amount stored as minor units."
+                },
+                "scheduleDelta": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                    }
+                  ],
+                  "nullable": true,
+                  "description": "Monetary amount stored as minor units."
+                },
+                "scheduleDocuments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "hash": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Canonical document hash."
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Display title for the document."
+                      },
+                      "documentType": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Normalized document type."
+                      },
+                      "documentDate": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/availableYears/items/properties/startDate"
+                          }
+                        ],
+                        "nullable": true,
+                        "description": "ISO 8601 calendar date."
+                      }
+                    },
+                    "required": [
+                      "hash",
+                      "title",
+                      "documentType"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Reference to a canonical source document."
+                  }
+                },
+                "scheduledAmount": {
+                  "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                },
+                "settlementAdvanceAmount": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                    }
+                  ],
+                  "nullable": true,
+                  "description": "Monetary amount stored as minor units."
+                },
+                "settlementDocuments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/scheduleDocuments/items"
+                  }
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "matched",
+                    "due",
+                    "credit",
+                    "schedule_only"
+                  ],
+                  "description": "Operator-facing status for a yearly reconciliation line."
+                },
+                "statusLabel": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "actualCostAmount",
+                "category",
+                "categoryLabel",
+                "coverageMonths",
+                "creditsAmount",
+                "netBalance",
+                "scheduleDelta",
+                "scheduleDocuments",
+                "scheduledAmount",
+                "settlementAdvanceAmount",
+                "settlementDocuments",
+                "status",
+                "statusLabel"
+              ],
+              "additionalProperties": false,
+              "description": "One yearly reconciliation line comparing carried-forward scheduled charges against settlement evidence."
+            }
+          },
+          "selectedYear": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/availableYears/items"
+              }
+            ],
+            "nullable": true,
+            "description": "Normalized reporting period reference."
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "actualCostTotal": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                  }
+                ],
+                "nullable": true,
+                "description": "Monetary amount stored as minor units."
+              },
+              "creditsTotal": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                  }
+                ],
+                "nullable": true,
+                "description": "Monetary amount stored as minor units."
+              },
+              "netBalance": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                  }
+                ],
+                "nullable": true,
+                "description": "Monetary amount stored as minor units."
+              },
+              "openLineCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "scheduledTotal": {
+                "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+              },
+              "settledLineCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "settlementAdvanceTotal": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/YearlyReconciliationResponse/properties/lines/items/properties/actualCostAmount"
+                  }
+                ],
+                "nullable": true,
+                "description": "Monetary amount stored as minor units."
+              }
+            },
+            "required": [
+              "actualCostTotal",
+              "creditsTotal",
+              "netBalance",
+              "openLineCount",
+              "scheduledTotal",
+              "settledLineCount",
+              "settlementAdvanceTotal"
+            ],
+            "additionalProperties": false,
+            "description": "Headline totals for the selected yearly reconciliation view.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "availableYears",
+          "coverage",
+          "generatedAt",
+          "lines",
+          "selectedYear",
+          "summary"
+        ],
+        "additionalProperties": false,
+        "description": "Yearly reconciliation totals, line items, and available reporting years."
+      },
+      "getYearlyReconciliationQuery": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "string",
+            "pattern": "^\\d{4}$",
+            "description": "Reporting year in YYYY format."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Optional selected reconciliation year."
+      },
       "ApiIndexResponse": {
         "type": "object",
         "properties": {
@@ -1336,6 +1846,71 @@
             "schema": {
               "type": "string",
               "minLength": 1
+            }
+          }
+        ]
+      }
+    },
+    "/api/anomalies": {
+      "get": {
+        "operationId": "getOpenAnomalies",
+        "responses": {
+          "200": {
+            "description": "Open anomalies for operator review.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyFeedResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get open anomalies.",
+        "tags": [
+          "anomalies"
+        ]
+      }
+    },
+    "/api/financials/year-reconciliation": {
+      "get": {
+        "operationId": "getYearlyReconciliation",
+        "responses": {
+          "200": {
+            "description": "Yearly reconciliation totals and anomaly-aware financial comparison.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearlyReconciliationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested reconciliation year was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get yearly reconciliation totals and line items.",
+        "tags": [
+          "financials"
+        ],
+        "parameters": [
+          {
+            "description": "Reporting year in YYYY format.",
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}$",
+              "description": "Reporting year in YYYY format."
             }
           }
         ]

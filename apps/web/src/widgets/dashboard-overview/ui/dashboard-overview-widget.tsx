@@ -21,12 +21,14 @@ export interface DashboardOverviewWidgetProps {
   data?: DashboardMonthBreakdownData;
   errorMessage?: string | null;
   isLoading: boolean;
+  selectedYearValue?: string;
 }
 
 export function DashboardOverviewWidget({
   data,
   errorMessage,
   isLoading,
+  selectedYearValue,
 }: DashboardOverviewWidgetProps) {
   if (isLoading) {
     return (
@@ -105,7 +107,11 @@ export function DashboardOverviewWidget({
                 className={badgeVariants({
                   variant: isSelected ? "secondary" : "outline",
                 })}
-                href={buildMonthHref(month.period.value, latestMonthValue)}
+                href={buildMonthHref(
+                  month.period.value,
+                  latestMonthValue,
+                  selectedYearValue,
+                )}
               >
                 {month.period.label}
               </Link>
@@ -199,12 +205,24 @@ function MetricCard({
   );
 }
 
-function buildMonthHref(monthValue: string | undefined, latestMonthValue: string | undefined) {
-  if (!monthValue || monthValue === latestMonthValue) {
-    return "/";
+function buildMonthHref(
+  monthValue: string | undefined,
+  latestMonthValue: string | undefined,
+  selectedYearValue: string | undefined,
+) {
+  const searchParams = new URLSearchParams();
+
+  if (monthValue && monthValue !== latestMonthValue) {
+    searchParams.set("month", monthValue);
   }
 
-  return `/?month=${encodeURIComponent(monthValue)}`;
+  if (selectedYearValue) {
+    searchParams.set("year", selectedYearValue);
+  }
+
+  const query = searchParams.toString();
+
+  return query ? `/?${query}` : "/";
 }
 
 function formatMoney(amountMinor: number) {

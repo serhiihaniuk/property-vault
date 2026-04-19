@@ -15,12 +15,14 @@ export interface DashboardFoundationWidgetProps {
   data?: DashboardMonthBreakdownData;
   errorMessage?: string | null;
   isLoading: boolean;
+  selectedYearValue?: string;
 }
 
 export function DashboardFoundationWidget({
   data,
   errorMessage,
   isLoading,
+  selectedYearValue,
 }: DashboardFoundationWidgetProps) {
   if (isLoading) {
     return (
@@ -134,7 +136,11 @@ export function DashboardFoundationWidget({
                 <Link
                   key={month.period.value}
                   className="flex items-center justify-between gap-3 rounded-lg border border-border/70 px-3 py-2 text-sm transition-colors hover:bg-muted/50"
-                  href={buildMonthHref(month.period.value, latestMonthValue)}
+                  href={buildMonthHref(
+                    month.period.value,
+                    latestMonthValue,
+                    selectedYearValue,
+                  )}
                 >
                   <div className="flex min-w-0 flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -181,12 +187,24 @@ export function DashboardFoundationWidget({
   );
 }
 
-function buildMonthHref(monthValue: string | undefined, latestMonthValue: string | undefined) {
-  if (!monthValue || monthValue === latestMonthValue) {
-    return "/";
+function buildMonthHref(
+  monthValue: string | undefined,
+  latestMonthValue: string | undefined,
+  selectedYearValue: string | undefined,
+) {
+  const searchParams = new URLSearchParams();
+
+  if (monthValue && monthValue !== latestMonthValue) {
+    searchParams.set("month", monthValue);
   }
 
-  return `/?month=${encodeURIComponent(monthValue)}`;
+  if (selectedYearValue) {
+    searchParams.set("year", selectedYearValue);
+  }
+
+  const query = searchParams.toString();
+
+  return query ? `/?${query}` : "/";
 }
 
 function formatMoney(amountMinor: number) {

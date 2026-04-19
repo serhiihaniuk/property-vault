@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { dashboardRouteCatalog } from './dashboard.ts';
 import { documentsRouteCatalog } from './documents.ts';
+import { financialsRouteCatalog } from './financials.ts';
 import {
   apiProblemSchema,
   documentReferenceSchema,
@@ -93,6 +94,7 @@ export const healthCheckRoute = defineRoute({
 export const propertyVaultRouteCatalog = {
   ...dashboardRouteCatalog,
   ...documentsRouteCatalog,
+  ...financialsRouteCatalog,
   getApiIndex: apiIndexRoute,
   getApiHealth: healthCheckRoute,
 } as const;

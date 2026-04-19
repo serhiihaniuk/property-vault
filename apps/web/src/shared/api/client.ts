@@ -42,6 +42,12 @@ export type DocumentsCatalogData = Awaited<
 export type DocumentDetailData = Awaited<
   ReturnType<PropertyVaultContractClient["getDocumentDetail"]>
 >;
+export type OpenAnomaliesData = Awaited<
+  ReturnType<PropertyVaultContractClient["getOpenAnomalies"]>
+>;
+export type YearlyReconciliationData = Awaited<
+  ReturnType<PropertyVaultContractClient["getYearlyReconciliation"]>
+>;
 
 export class PropertyVaultApiError extends Error {
   readonly problem?: PropertyVaultApiProblem;
