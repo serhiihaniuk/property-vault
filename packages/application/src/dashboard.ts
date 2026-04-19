@@ -4,20 +4,17 @@ import {
 } from '@dabrowskiego/contracts';
 import {
   vaultDocuments,
-  vaultFinancialRows,
+  vaultEffectiveChargeRows,
   vaultRecords,
   type PropertyVaultDatabase,
 } from '@dabrowskiego/db';
-import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import type { PropertyVaultApplicationContext } from './context.ts';
 import {
   createDocumentReference,
   createMoneyAmount,
   createPeriodReference,
 } from './shared.ts';
-
-const MONTH_BREAKDOWN_ROW_TYPE = 'charge';
-const MONTH_BREAKDOWN_PERIOD_KIND = 'month';
 
 const CATEGORY_LABELS: Record<string, string> = {
   central_heating_energy: 'Central heating energy',
@@ -47,7 +44,17 @@ type DashboardMonthBreakdownResponse = ReturnType<
 
 type DashboardMonthHistoryRow = {
   periodValue: string;
+  sourceDocuments: DashboardDocumentReference[];
+  sourcePeriodValue: string;
   totalAmountMinor: number;
+};
+
+type DashboardMonthHistoryDocumentRow = {
+  documentDate: string | null;
+  documentType: string;
+  effectivePeriodValue: string;
+  hash: string;
+  title: string;
 };
 
 type DashboardBreakdownRow = {
@@ -121,6 +128,8 @@ export function createDashboardApplicationService(
         });
       }
 
+      const selectedMonthHistory =
+        months.find((month) => month.periodValue === selectedPeriodValue) ?? null;
       const [selectedBreakdownRows, previousBreakdownRows, selectedDocumentRows] =
         await Promise.all([
           dependencies.loadBreakdownRows(db, selectedPeriodValue),
@@ -170,7 +179,10 @@ export function createDashboardApplicationService(
         breakdown,
         generatedAt: context.now().toISOString(),
         months: months.map((row) => ({
+          isCarriedForward: row.periodValue !== row.sourcePeriodValue,
           period: createMonthReference(row.periodValue),
+          sourceDocuments: row.sourceDocuments,
+          sourceMonth: createMonthReference(row.sourcePeriodValue),
           totalCharges: createMoneyAmount({ amountMinor: row.totalAmountMinor }),
         })),
         previousMonth: previousPeriodValue
@@ -178,7 +190,7 @@ export function createDashboardApplicationService(
           : null,
         selectedMonth: createMonthReference(selectedPeriodValue),
         summary,
-        supportingDocuments,
+        supportingDocuments: selectedMonthHistory?.sourceDocuments ?? supportingDocuments,
       });
     },
   };
@@ -187,26 +199,47 @@ export function createDashboardApplicationService(
 async function loadMonthHistory(
   db: PropertyVaultDatabase,
 ): Promise<DashboardMonthHistoryRow[]> {
+  const [totals, documentRows] = await Promise.all([
+    loadMonthHistoryTotals(db),
+    loadMonthHistoryDocumentRows(db),
+  ]);
+  const documentsByPeriod = groupDocumentsByPeriod(documentRows);
+
+  return totals.map((row) => ({
+    ...row,
+    sourceDocuments: documentsByPeriod.get(row.periodValue) ?? [],
+  }));
+}
+
+async function loadMonthHistoryTotals(
+  db: PropertyVaultDatabase,
+): Promise<Array<Omit<DashboardMonthHistoryRow, 'sourceDocuments'>>> {
   const rows = await db
     .select({
-      periodValue: vaultFinancialRows.periodValue,
-      totalAmountMinor: sql<string | number>`sum(${vaultFinancialRows.amountMinor})`,
+      periodValue: vaultEffectiveChargeRows.effectivePeriodValue,
+      sourcePeriodValue:
+        sql<string>`min(${vaultEffectiveChargeRows.sourcePeriodValue})`,
+      totalAmountMinor:
+        sql<string | number>`sum(${vaultEffectiveChargeRows.amountMinor})`,
     })
-    .from(vaultFinancialRows)
-    .where(
-      and(
-        eq(vaultFinancialRows.periodKind, MONTH_BREAKDOWN_PERIOD_KIND),
-        eq(vaultFinancialRows.rowType, MONTH_BREAKDOWN_ROW_TYPE),
-        isNotNull(vaultFinancialRows.periodValue),
-      ),
-    )
-    .groupBy(vaultFinancialRows.periodValue)
-    .orderBy(desc(vaultFinancialRows.periodValue));
+    .from(vaultEffectiveChargeRows)
+    .groupBy(vaultEffectiveChargeRows.effectivePeriodValue)
+    .orderBy(desc(vaultEffectiveChargeRows.effectivePeriodValue));
 
   return rows
-    .filter((row): row is typeof row & { periodValue: string } => typeof row.periodValue === 'string')
+    .filter(
+      (
+        row,
+      ): row is typeof row & {
+        periodValue: string;
+        sourcePeriodValue: string;
+      } =>
+        typeof row.periodValue === 'string' &&
+        typeof row.sourcePeriodValue === 'string',
+    )
     .map((row) => ({
       periodValue: row.periodValue,
+      sourcePeriodValue: row.sourcePeriodValue,
       totalAmountMinor: Number(row.totalAmountMinor ?? 0),
     }));
 }
@@ -217,19 +250,17 @@ async function loadBreakdownRows(
 ): Promise<DashboardBreakdownRow[]> {
   const rows = await db
     .select({
-      category: vaultFinancialRows.category,
-      categoryGroup: vaultFinancialRows.categoryGroup,
-      totalAmountMinor: sql<string | number>`sum(${vaultFinancialRows.amountMinor})`,
+      category: vaultEffectiveChargeRows.category,
+      categoryGroup: vaultEffectiveChargeRows.categoryGroup,
+      totalAmountMinor:
+        sql<string | number>`sum(${vaultEffectiveChargeRows.amountMinor})`,
     })
-    .from(vaultFinancialRows)
-    .where(
-      and(
-        eq(vaultFinancialRows.periodKind, MONTH_BREAKDOWN_PERIOD_KIND),
-        eq(vaultFinancialRows.periodValue, periodValue),
-        eq(vaultFinancialRows.rowType, MONTH_BREAKDOWN_ROW_TYPE),
-      ),
-    )
-    .groupBy(vaultFinancialRows.category, vaultFinancialRows.categoryGroup);
+    .from(vaultEffectiveChargeRows)
+    .where(eq(vaultEffectiveChargeRows.effectivePeriodValue, periodValue))
+    .groupBy(
+      vaultEffectiveChargeRows.category,
+      vaultEffectiveChargeRows.categoryGroup,
+    );
 
   return rows.map((row) => ({
     ...row,
@@ -243,24 +274,41 @@ async function loadDocumentRows(
 ): Promise<DashboardDocumentRow[]> {
   return db
     .select({
-      category: vaultFinancialRows.category,
+      category: vaultEffectiveChargeRows.category,
       documentDate: vaultDocuments.documentDate,
       documentType: vaultRecords.documentType,
       hash: vaultRecords.hash,
       title: vaultRecords.title,
     })
-    .from(vaultFinancialRows)
-    .innerJoin(vaultRecords, eq(vaultRecords.hash, vaultFinancialRows.hash))
+    .from(vaultEffectiveChargeRows)
+    .innerJoin(vaultRecords, eq(vaultRecords.hash, vaultEffectiveChargeRows.hash))
     .innerJoin(vaultDocuments, eq(vaultDocuments.hash, vaultRecords.hash))
-    .where(
-      and(
-        eq(vaultFinancialRows.periodKind, MONTH_BREAKDOWN_PERIOD_KIND),
-        eq(vaultFinancialRows.periodValue, periodValue),
-        eq(vaultFinancialRows.rowType, MONTH_BREAKDOWN_ROW_TYPE),
-      ),
-    )
+    .where(eq(vaultEffectiveChargeRows.effectivePeriodValue, periodValue))
     .groupBy(
-      vaultFinancialRows.category,
+      vaultEffectiveChargeRows.category,
+      vaultDocuments.documentDate,
+      vaultRecords.documentType,
+      vaultRecords.hash,
+      vaultRecords.title,
+    );
+}
+
+async function loadMonthHistoryDocumentRows(
+  db: PropertyVaultDatabase,
+): Promise<DashboardMonthHistoryDocumentRow[]> {
+  return db
+    .select({
+      documentDate: vaultDocuments.documentDate,
+      documentType: vaultRecords.documentType,
+      effectivePeriodValue: vaultEffectiveChargeRows.effectivePeriodValue,
+      hash: vaultRecords.hash,
+      title: vaultRecords.title,
+    })
+    .from(vaultEffectiveChargeRows)
+    .innerJoin(vaultRecords, eq(vaultRecords.hash, vaultEffectiveChargeRows.hash))
+    .innerJoin(vaultDocuments, eq(vaultDocuments.hash, vaultRecords.hash))
+    .groupBy(
+      vaultEffectiveChargeRows.effectivePeriodValue,
       vaultDocuments.documentDate,
       vaultRecords.documentType,
       vaultRecords.hash,
@@ -410,6 +458,36 @@ function groupDocumentsByCategory(
     Array.from(grouped.entries()).map(([category, documents]) => [
       category,
       Array.from(documents.values()),
+    ]),
+  );
+}
+
+function groupDocumentsByPeriod(
+  rows: DashboardMonthHistoryDocumentRow[],
+): Map<string, DashboardDocumentReference[]> {
+  const grouped = new Map<string, Map<string, DashboardDocumentReference>>();
+
+  for (const row of rows) {
+    const documentsForPeriod = grouped.get(row.effectivePeriodValue) ?? new Map();
+
+    documentsForPeriod.set(
+      row.hash,
+      createDocumentReference({
+        documentDate: row.documentDate,
+        documentType: row.documentType,
+        hash: row.hash,
+        title: row.title,
+      }),
+    );
+    grouped.set(row.effectivePeriodValue, documentsForPeriod);
+  }
+
+  return new Map(
+    Array.from(grouped.entries()).map(([periodValue, documents]) => [
+      periodValue,
+      Array.from(documents.values()).sort((left, right) =>
+        left.title.localeCompare(right.title),
+      ),
     ]),
   );
 }

@@ -185,6 +185,41 @@ export const vaultFinancialRows = vault.table(
   ],
 );
 
+export const vaultEffectiveChargeRows = vault.table(
+  'effective_charge_rows',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    hash: text('hash')
+      .notNull()
+      .references(() => vaultRecords.hash, { onDelete: 'cascade' }),
+    sourcePeriodValue: text('source_period_value').notNull(),
+    effectivePeriodValue: text('effective_period_value').notNull(),
+    category: text('category').notNull(),
+    categoryOriginal: text('category_original').notNull(),
+    categoryGroup: text('category_group'),
+    amountMinor: bigint('amount_minor', { mode: 'number' }).notNull(),
+    currency: text('currency').notNull().default('PLN'),
+    quantityValue: doublePrecision('quantity_value'),
+    quantityUnit: text('quantity_unit'),
+    unitPriceMinor: bigint('unit_price_minor', { mode: 'number' }),
+    confidence: doublePrecision('confidence').notNull(),
+    sourcePage: integer('source_page'),
+    note: text('note'),
+    createdAt: timestampColumn('created_at'),
+  },
+  (table) => [
+    index('vault_effective_charge_rows_hash_idx').on(table.hash),
+    index('vault_effective_charge_rows_effective_period_idx').on(
+      table.effectivePeriodValue,
+    ),
+    index('vault_effective_charge_rows_category_period_idx').on(
+      table.category,
+      table.effectivePeriodValue,
+    ),
+    index('vault_effective_charge_rows_source_period_idx').on(table.sourcePeriodValue),
+  ],
+);
+
 export const vaultImportantDates = vault.table(
   'important_dates',
   {

@@ -227,6 +227,124 @@ test('syncVaultToDatabase marks sync state as error when run logging fails befor
   }
 });
 
+test('syncVaultToDatabase materializes effective monthly charge rows until the next schedule replaces them', async () => {
+  const fixture = await createFixture();
+  const memory = newDb({ autoCreateForeignKeyIndices: true });
+  const adapter = memory.adapters.createPg();
+  const pool = new adapter.Pool();
+  patchPgMemPool(pool);
+  const { db } = createDatabase({ pool });
+
+  try {
+    await init(fixture.root);
+    await applyMigrations(pool);
+
+    const octoberDocumentPath = path.join(fixture.root, 'charges-october.txt');
+    const aprilDocumentPath = path.join(fixture.root, 'charges-april.txt');
+    await writeFile(octoberDocumentPath, 'October 2025 charges', 'utf8');
+    await writeFile(aprilDocumentPath, 'April 2026 charges', 'utf8');
+
+    const octoberDocument = await registerDocument({ path: octoberDocumentPath }, fixture.root);
+    const aprilDocument = await registerDocument({ path: aprilDocumentPath }, fixture.root);
+
+    await putRecord(
+      octoberDocument.hash,
+      validMonthlyChargesRecord({
+        documentDate: '2025-09-17',
+        effectiveMonth: '2025-10',
+        sharedPropertyAdvanceAmountMinor: 14427,
+        title: 'October 2025 monthly charges',
+      }),
+      fixture.root,
+    );
+    await putRecord(
+      aprilDocument.hash,
+      validMonthlyChargesRecord({
+        centralHeatingEnergyAmountMinor: 9216,
+        coldWaterAndSewageAmountMinor: 8204,
+        documentDate: '2026-04-16',
+        effectiveMonth: '2026-04',
+        sharedPropertyAdvanceAmountMinor: 14427,
+        title: 'April 2026 monthly charges',
+      }),
+      fixture.root,
+    );
+
+    await syncVaultToDatabase({
+      db,
+      now: () => new Date('2026-04-18T12:00:00.000Z'),
+      root: fixture.root,
+    });
+
+    const rows = await pool.query(`
+      SELECT
+        effective_period_value,
+        source_period_value,
+        hash,
+        category,
+        amount_minor
+      FROM "vault"."effective_charge_rows"
+      WHERE category = 'shared_property_advance'
+      ORDER BY effective_period_value ASC, hash ASC
+    `);
+
+    assert.deepEqual(rows.rows, [
+      {
+        amount_minor: 14427,
+        category: 'shared_property_advance',
+        effective_period_value: '2025-10',
+        hash: octoberDocument.hash,
+        source_period_value: '2025-10',
+      },
+      {
+        amount_minor: 14427,
+        category: 'shared_property_advance',
+        effective_period_value: '2025-11',
+        hash: octoberDocument.hash,
+        source_period_value: '2025-10',
+      },
+      {
+        amount_minor: 14427,
+        category: 'shared_property_advance',
+        effective_period_value: '2025-12',
+        hash: octoberDocument.hash,
+        source_period_value: '2025-10',
+      },
+      {
+        amount_minor: 14427,
+        category: 'shared_property_advance',
+        effective_period_value: '2026-01',
+        hash: octoberDocument.hash,
+        source_period_value: '2025-10',
+      },
+      {
+        amount_minor: 14427,
+        category: 'shared_property_advance',
+        effective_period_value: '2026-02',
+        hash: octoberDocument.hash,
+        source_period_value: '2025-10',
+      },
+      {
+        amount_minor: 14427,
+        category: 'shared_property_advance',
+        effective_period_value: '2026-03',
+        hash: octoberDocument.hash,
+        source_period_value: '2025-10',
+      },
+      {
+        amount_minor: 14427,
+        category: 'shared_property_advance',
+        effective_period_value: '2026-04',
+        hash: aprilDocument.hash,
+        source_period_value: '2026-04',
+      },
+    ]);
+  } finally {
+    await pool.end();
+    await fixture.remove();
+  }
+});
+
 async function applyMigrations(pool: { query: (sql: string) => Promise<unknown> }): Promise<void> {
   const statements = await readMigrationStatements(resolveMigrationsFolder());
 
@@ -386,6 +504,117 @@ function validMeetingNoticeRecord(input: {
     summary_plain: input.summary,
     title: input.title,
     warnings: [],
+  };
+}
+
+function validMonthlyChargesRecord(input: {
+  centralHeatingEnergyAmountMinor?: number;
+  coldWaterAndSewageAmountMinor?: number;
+  documentDate: string;
+  effectiveMonth: string;
+  sharedPropertyAdvanceAmountMinor: number;
+  title: string;
+}): VaultRecord {
+  const centralHeatingEnergyAmountMinor =
+    input.centralHeatingEnergyAmountMinor ?? 5325;
+  const coldWaterAndSewageAmountMinor =
+    input.coldWaterAndSewageAmountMinor ?? 4966;
+  const totalAmountMinor =
+    input.sharedPropertyAdvanceAmountMinor +
+    centralHeatingEnergyAmountMinor +
+    coldWaterAndSewageAmountMinor;
+
+  return {
+    confidence: 0.98,
+    document_date: input.documentDate,
+    document_type: 'monthly_charges',
+    extracted_at: '2026-04-17T12:00:00.000Z',
+    extracted_by: 'codex-test',
+    extractor_version: '2026.04-a',
+    financial_rows: [
+      createMonthlyChargeRow(
+        input.effectiveMonth,
+        'shared_property_advance',
+        'Shared property advance',
+        input.sharedPropertyAdvanceAmountMinor,
+        'shared_property',
+      ),
+      createMonthlyChargeRow(
+        input.effectiveMonth,
+        'central_heating_energy',
+        'Central heating energy',
+        centralHeatingEnergyAmountMinor,
+        'media',
+      ),
+      createMonthlyChargeRow(
+        input.effectiveMonth,
+        'cold_water_and_sewage',
+        'Cold water and sewage',
+        coldWaterAndSewageAmountMinor,
+        'media',
+      ),
+    ],
+    important_dates: [{
+      date: `${input.effectiveMonth}-01`,
+      kind: 'effective_from',
+      label: 'Effective from',
+    }],
+    interest_entries: [],
+    key_facts: [
+      { label: 'Effective from', value: `${input.effectiveMonth}-01` },
+      {
+        label: 'Monthly total',
+        value: `${(totalAmountMinor / 100).toFixed(2)} PLN`,
+      },
+    ],
+    language: 'pl',
+    ledger_entries: [],
+    mentions: {
+      addresses: [],
+      emails: [],
+      people: [],
+      phones: [],
+      reference_numbers: [],
+    },
+    meter_readings: [],
+    period: { kind: 'month', value: input.effectiveMonth },
+    questions_for_user: [],
+    reference_numbers: {
+      bank_account: null,
+      document_ref: null,
+      property_code: null,
+      source_document_numbers: [],
+      unit_code: null,
+    },
+    resolutions: [],
+    schema_version: 1,
+    sensitive_findings: [],
+    status: 'ok',
+    summary_plain: `Monthly charges effective from ${input.effectiveMonth}-01.`,
+    title: input.title,
+    warnings: [],
+  };
+}
+
+function createMonthlyChargeRow(
+  effectiveMonth: string,
+  category: string,
+  categoryOriginal: string,
+  amountMinor: number,
+  categoryGroup: string,
+): VaultRecord['financial_rows'][number] {
+  return {
+    category,
+    category_group: categoryGroup,
+    category_original: categoryOriginal,
+    confidence: 0.98,
+    money: { amount_minor: amountMinor, currency: 'PLN' },
+    note: null,
+    period: { kind: 'month', value: effectiveMonth },
+    quantity: null,
+    row_type: 'charge',
+    source_page: 1,
+    unit_price_minor: null,
   };
 }
 

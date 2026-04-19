@@ -24,7 +24,14 @@ test('dashboard route handler returns the db-backed month breakdown payload', as
       generatedAt: '2026-04-18T12:00:00.000Z',
       months: [
         {
+          isCarriedForward: false,
           period: {
+            kind: 'month',
+            label: 'April 2026',
+            value: '2026-04',
+          },
+          sourceDocuments: [],
+          sourceMonth: {
             kind: 'month',
             label: 'April 2026',
             value: '2026-04',

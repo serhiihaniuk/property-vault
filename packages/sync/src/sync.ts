@@ -7,6 +7,7 @@ import {
   vaultDocuments,
   vaultEmailAttachments,
   vaultEmails,
+  vaultEffectiveChargeRows,
   vaultFinancialRows,
   vaultImportantDates,
   vaultRecords,
@@ -23,6 +24,7 @@ import {
   type CanonicalRecordEntry,
   type CanonicalVaultSnapshot,
 } from './canonical.ts';
+import { buildEffectiveChargeRows } from './effective-charge-schedules.ts';
 
 const DEFAULT_SYNC_STATE_KEY = 'canonical_vault';
 const DEFAULT_SYNC_RUN_KIND = 'canonical_vault';
@@ -124,7 +126,13 @@ async function runVaultSync(
           await clearVaultDerivedTables(tx);
         }
 
-        return applySnapshot(tx, snapshot, mode, anomaliesCleared);
+        return applySnapshot(
+          tx,
+          snapshot,
+          mode,
+          anomaliesCleared,
+          startedAt.slice(0, 7),
+        );
       });
       const finishedAt = (options.now ?? (() => new Date()))().toISOString();
       const result: VaultSyncResult = {
@@ -193,6 +201,7 @@ async function applySnapshot(
   snapshot: CanonicalVaultSnapshot,
   mode: 'rebuild' | 'sync',
   anomaliesCleared: number,
+  effectiveThroughMonth: string,
 ): Promise<VaultSyncSummary> {
   const existingDocumentRows = await db
     .select({ hash: vaultDocuments.hash })
@@ -208,7 +217,7 @@ async function applySnapshot(
 
   await rebuildSourceObservations(db, snapshot);
   await rebuildEmails(db, snapshot);
-  await rebuildRecords(db, snapshot);
+  await rebuildRecords(db, snapshot, effectiveThroughMonth);
   await pruneMissingDocuments(db, snapshot.documents);
 
   return {
@@ -335,8 +344,10 @@ async function rebuildEmails(
 async function rebuildRecords(
   db: SyncDatabase,
   snapshot: CanonicalVaultSnapshot,
+  effectiveThroughMonth: string,
 ): Promise<void> {
   await db.delete(vaultRecordSearch);
+  await db.delete(vaultEffectiveChargeRows);
   await db.delete(vaultFinancialRows);
   await db.delete(vaultImportantDates);
   await db.delete(vaultResolutions);
@@ -349,6 +360,8 @@ async function rebuildRecords(
   for (const entry of snapshot.records) {
     await insertRecordBundle(db, entry, snapshot.notes.get(entry.hash) ?? null);
   }
+
+  await rebuildEffectiveChargeRows(db, snapshot, effectiveThroughMonth);
 }
 
 async function insertRecordBundle(
@@ -461,6 +474,7 @@ async function pruneMissingDocuments(
 
 async function clearVaultDerivedTables(db: SyncDatabase): Promise<void> {
   await db.delete(vaultRecordSearch);
+  await db.delete(vaultEffectiveChargeRows);
   await db.delete(vaultFinancialRows);
   await db.delete(vaultImportantDates);
   await db.delete(vaultResolutions);
@@ -470,6 +484,40 @@ async function clearVaultDerivedTables(db: SyncDatabase): Promise<void> {
   await db.delete(vaultDocumentSources);
   await db.delete(vaultAnomalies);
   await db.delete(vaultDocuments);
+}
+
+async function rebuildEffectiveChargeRows(
+  db: SyncDatabase,
+  snapshot: CanonicalVaultSnapshot,
+  effectiveThroughMonth: string,
+): Promise<void> {
+  const effectiveChargeRows = buildEffectiveChargeRows(
+    snapshot.records,
+    effectiveThroughMonth,
+  );
+
+  if (effectiveChargeRows.length === 0) {
+    return;
+  }
+
+  await db.insert(vaultEffectiveChargeRows).values(
+    effectiveChargeRows.map((row) => ({
+      amountMinor: row.amountMinor,
+      category: row.category,
+      categoryGroup: row.categoryGroup,
+      categoryOriginal: row.categoryOriginal,
+      confidence: row.confidence,
+      currency: row.currency,
+      effectivePeriodValue: row.effectivePeriodValue,
+      hash: row.hash,
+      note: row.note,
+      quantityUnit: row.quantityUnit,
+      quantityValue: row.quantityValue,
+      sourcePage: row.sourcePage,
+      sourcePeriodValue: row.sourcePeriodValue,
+      unitPriceMinor: row.unitPriceMinor,
+    })),
+  );
 }
 
 async function createSyncRun(

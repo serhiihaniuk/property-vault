@@ -1,0 +1,65 @@
+# T34 — Effective charge schedule carry-forward
+
+- Status: `done`
+- Owner: `Codex worker on codex/T34-effective-charge-schedules`
+- Goal: Model monthly charge schedules as effective until replaced instead of only on document months.
+- Dependencies: `T15`, `T21`, `T22`, `T23`, `T30`
+- Write scope: sync/application/contracts/dashboard surfaces for effective monthly schedules
+- Worker branch: `codex/T34-effective-charge-schedules`
+- Recommended execution model: `gpt-5.4 / xhigh`
+- Wave group: `slice-financials`
+- Required verification: `strong`
+- Completion signal: monthly charge schedules remain effective until replaced, dashboard/history expose carried-forward months with source-document provenance, and later reconciliation work can consume an effective month-by-month schedule model instead of only raw document months.
+- Files changed:
+  - `apps/web/app/api/_lib/dashboard-handlers.test.ts`
+  - `apps/web/src/widgets/dashboard-foundation/ui/dashboard-foundation-widget.tsx`
+  - `apps/web/src/widgets/dashboard-overview/ui/dashboard-overview-widget.tsx`
+  - `docs/implementation/tasks/T34-effective-charge-schedule-carry-forward.md`
+  - `packages/application/src/dashboard.test.ts`
+  - `packages/application/src/dashboard.ts`
+  - `packages/contracts/src/dashboard.ts`
+  - `packages/contracts/src/generated/client.ts`
+  - `packages/contracts/src/generated/openapi.json`
+  - `packages/db/migrations/0001_last_diamondback.sql`
+  - `packages/db/migrations/meta/0001_snapshot.json`
+  - `packages/db/migrations/meta/_journal.json`
+  - `packages/db/src/schema/index.ts`
+  - `packages/db/src/schema/vault.ts`
+  - `packages/sync/src/effective-charge-schedules.ts`
+  - `packages/sync/src/sync.test.ts`
+  - `packages/sync/src/sync.ts`
+- Contracts changed:
+  - extended `GET /api/dashboard/month-breakdown` so each month history item now exposes whether the month is carried forward, which source month is in force, and which source documents provide provenance
+  - regenerated `packages/contracts/src/generated/client.ts` and `packages/contracts/src/generated/openapi.json`
+- Tests run:
+  - `npm run --workspace @dabrowskiego/application test`
+  - `npm run --workspace @dabrowskiego/sync test`
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `node --experimental-strip-types --test apps/web/app/api/_lib/dashboard-handlers.test.ts`
+  - `npm run --workspace @dabrowskiego/db test`
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+- Coordinator notes:
+  - Observation: monthly charge notices/emails are usually change notices, not monthly invoices. The currently active dashboard model appears to surface only months that exist explicitly in charge documents.
+  - Why it matters: if a schedule exists for `2025-10` and the next change is `2026-04`, then `2025-11` through `2026-03` should still inherit the `2025-10` schedule instead of disappearing from dashboard history and downstream financial logic.
+  - Expected outcome:
+    - schedule documents define effective ranges, not only isolated document months,
+    - dashboard/history can show carried-forward months that inherit the active schedule,
+    - provenance for each effective month still points back to the source schedule document in force,
+    - `T32` can build yearly reconciliation on top of the effective month-by-month schedule model.
+  - Observation: the latest known schedule is expanded through the sync runtime month, not indefinitely.
+  - Why it matters: `T32` can safely consume year-to-date effective schedules now, but if a later yearly view needs forward-looking month placeholders beyond the current sync month, that horizon should be chosen deliberately instead of assumed.
+  - Suggested follow-up: confirm in `T32` whether reconciliation should stay year-to-date/current-month or introduce an explicit projection horizon for months after the latest sync month.
+  - Urgency: `later`
+- Review result: `pending`
+- Reviewer: `unassigned`
+- Review tests run: none yet
+- Merge status: `pending review`
+- Architecture note:
+  - Added a rebuildable `vault.effective_charge_rows` table so carried-forward month-by-month schedules remain separate from raw document financial rows, preserving clean document detail views while exposing an application-facing effective schedule model.
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: start a reviewer chat on branch `codex/T34-effective-charge-schedules` and say `reviewer T34 branch codex/T34-effective-charge-schedules`.

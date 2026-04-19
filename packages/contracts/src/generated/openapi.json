@@ -313,6 +313,9 @@
             "items": {
               "type": "object",
               "properties": {
+                "isCarriedForward": {
+                  "type": "boolean"
+                },
                 "period": {
                   "type": "object",
                   "properties": {
@@ -351,16 +354,28 @@
                   "additionalProperties": false,
                   "description": "Normalized reporting period reference."
                 },
+                "sourceDocuments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/sourceDocuments/items"
+                  }
+                },
+                "sourceMonth": {
+                  "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/months/items/properties/period"
+                },
                 "totalCharges": {
                   "$ref": "#/components/schemas/DashboardMonthBreakdownResponse/properties/breakdown/items/properties/amount"
                 }
               },
               "required": [
+                "isCarriedForward",
                 "period",
+                "sourceDocuments",
+                "sourceMonth",
                 "totalCharges"
               ],
               "additionalProperties": false,
-              "description": "Monthly dashboard total for a selectable reporting period."
+              "description": "Monthly dashboard total for a selectable reporting period, including the source schedule month and provenance."
             }
           },
           "previousMonth": {

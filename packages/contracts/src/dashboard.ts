@@ -19,11 +19,16 @@ export const dashboardMonthChangeStatusSchema = z
 
 export const dashboardMonthHistoryItemSchema = z
   .object({
+    isCarriedForward: z.boolean(),
     period: periodReferenceSchema,
+    sourceDocuments: z.array(documentReferenceSchema),
+    sourceMonth: periodReferenceSchema,
     totalCharges: moneyAmountSchema,
   })
   .strict()
-  .describe('Monthly dashboard total for a selectable reporting period.');
+  .describe(
+    'Monthly dashboard total for a selectable reporting period, including the source schedule month and provenance.',
+  );
 
 export const dashboardMonthLargestCategorySchema = z
   .object({

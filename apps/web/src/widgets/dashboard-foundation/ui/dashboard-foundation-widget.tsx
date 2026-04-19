@@ -61,17 +61,20 @@ export function DashboardFoundationWidget({
   }
 
   const latestMonthValue = data.months[0]?.period.value;
+  const selectedMonthHistory = data.months.find(
+    (month) => month.period.value === data.selectedMonth?.value,
+  );
+  const selectedSupportingDocuments =
+    selectedMonthHistory?.sourceDocuments ?? data.supportingDocuments;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Evidence and history</CardTitle>
         <CardDescription>
-          Supporting documents for
-          {" "}
-          {data.selectedMonth.label}
-          {" "}
-          plus recent monthly totals.
+          {selectedMonthHistory?.isCarriedForward
+            ? `Source documents from ${selectedMonthHistory.sourceMonth.label} that remain effective for ${data.selectedMonth.label}.`
+            : `Supporting documents for ${data.selectedMonth.label} plus recent monthly totals.`}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -79,18 +82,18 @@ export function DashboardFoundationWidget({
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-medium">Supporting documents</h2>
             <Badge variant="outline">
-              {data.supportingDocuments.length}
+              {selectedSupportingDocuments.length}
               {" "}
               total
             </Badge>
           </div>
-          {data.supportingDocuments.length === 0 ? (
+          {selectedSupportingDocuments.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No documents are attached to this month yet.
             </p>
           ) : (
             <div className="flex flex-col gap-3">
-              {data.supportingDocuments.map((document, index) => (
+              {selectedSupportingDocuments.map((document, index) => (
                 <div key={document.hash} className="flex flex-col gap-3">
                   {index > 0 ? <Separator /> : null}
                   <div className="flex flex-col gap-2">
@@ -125,6 +128,7 @@ export function DashboardFoundationWidget({
           <div className="flex flex-col gap-2">
             {data.months.map((month) => {
               const isSelected = month.period.value === data.selectedMonth?.value;
+              const primarySourceDocument = month.sourceDocuments[0];
 
               return (
                 <Link
@@ -133,10 +137,27 @@ export function DashboardFoundationWidget({
                   href={buildMonthHref(month.period.value, latestMonthValue)}
                 >
                   <div className="flex min-w-0 flex-col gap-1">
-                    <span className="font-medium">{month.period.label}</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium">{month.period.label}</span>
+                      <span
+                        className={badgeVariants({
+                          variant: month.isCarriedForward ? "secondary" : "outline",
+                        })}
+                      >
+                        {month.isCarriedForward ? "Carried forward" : "Source month"}
+                      </span>
+                    </div>
                     <span className="text-xs text-muted-foreground">
                       {month.period.value}
+                      {month.isCarriedForward
+                        ? ` from ${month.sourceMonth.value}`
+                        : ""}
                     </span>
+                    {primarySourceDocument ? (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {primarySourceDocument.title}
+                      </span>
+                    ) : null}
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <span className="font-mono text-xs text-muted-foreground">

@@ -67,6 +67,14 @@ export function DashboardOverviewWidget({
 
   const latestMonthValue = data.months[0]?.period.value;
   const previousMonthLabel = data.previousMonth?.label ?? "No previous available month";
+  const selectedMonthHistory = data.months.find(
+    (month) => month.period.value === data.selectedMonth?.value,
+  );
+  const sourceBadgeLabel = selectedMonthHistory?.isCarriedForward
+    ? `Carried from ${selectedMonthHistory.sourceMonth.value}`
+    : `Source ${selectedMonthHistory?.sourceMonth.value ?? data.selectedMonth.value}`;
+  const supportingDocumentCount =
+    selectedMonthHistory?.sourceDocuments.length ?? data.supportingDocuments.length;
 
   return (
     <Card>
@@ -81,6 +89,7 @@ export function DashboardOverviewWidget({
           </div>
           <CardAction className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{data.selectedMonth.value}</Badge>
+            <Badge variant="outline">{sourceBadgeLabel}</Badge>
             <Badge variant="outline">{previousMonthLabel}</Badge>
           </CardAction>
         </div>
@@ -145,11 +154,13 @@ export function DashboardOverviewWidget({
               : "No category movement is available yet for a month-to-month comparison."}
           </p>
           <p className="text-sm text-muted-foreground">
-            {data.supportingDocuments.length} supporting
+            {supportingDocumentCount} supporting
             {" "}
-            {data.supportingDocuments.length === 1 ? "document" : "documents"}
+            {supportingDocumentCount === 1 ? "document" : "documents"}
             {" "}
-            back this month view.
+            {selectedMonthHistory?.isCarriedForward
+              ? `from ${selectedMonthHistory.sourceMonth.label} remain in force for this month view.`
+              : "back this month view."}
           </p>
         </div>
         {data.summary.topChange ? (
