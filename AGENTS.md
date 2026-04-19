@@ -33,6 +33,8 @@ The repo currently has:
 - an approved target architecture in `ARCHITECTURE.md`,
 - a detailed app backlog in `APP_IMPLEMENTATION_PLAN.md`,
 - an agent workflow in `docs/implementation/AGENT_PROTOCOL.md`,
+- repo-native redesign references under `docs/design/property-vault-mvp/` and
+  a production UI target in `docs/implementation/UI_REDESIGN_SPEC.md`,
 - initial documentation/protocol tasks complete (`T00`-`T04`),
 - real app implementation still starting from `T10` onward.
 
@@ -51,8 +53,14 @@ The repo currently has:
    implementation.
 7. If the task touches `apps/web/**` or web UI review, read
    `docs/implementation/UI_PLAYBOOK.md`.
-8. Run `npm run vault -- context` when local vault/runtime context matters.
-9. Use local records, notes, SQLite, or cited source files before answering
+8. If the task is redesign or visual-system work, also read:
+   - `docs/implementation/UI_REDESIGN_SPEC.md`
+   - `docs/design/property-vault-mvp/README.md`
+   - `docs/design/property-vault-mvp/property-vault-reference.png`
+   - `docs/design/property-vault-mvp/Property Vault.html` only when screenshot
+     or spec detail is ambiguous
+9. Run `npm run vault -- context` when local vault/runtime context matters.
+10. Use local records, notes, SQLite, or cited source files before answering
    factual questions.
 
 ## Role Shortcuts

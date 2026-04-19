@@ -3,12 +3,12 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Deliver private invite-only access flows.
-- Dependencies: `T12`, `T21`, `T22`, `T23`
+- Dependencies: `T12`, `T21`, `T22`, `T23`, `T36`
 - Write scope: auth/access routes, application helpers, widgets
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Wave group: `slice-access`
 - Required verification: `strong`
-- Completion signal: invite flow and access management work end to end with real Postgres-backed auth coverage for credential and invite paths.
+- Completion signal: invite flow and access management work end to end with real Postgres-backed auth coverage for credential and invite paths, use the redesign token/primitives system, and do not invent a parallel visual language.
 - Files changed: none yet
 - Contracts changed: none yet
 - Tests run: none yet

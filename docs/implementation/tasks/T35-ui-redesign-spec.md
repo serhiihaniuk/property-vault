@@ -1,0 +1,27 @@
+# T35 - Codify UI redesign handoff in repo docs
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Bring the external design handoff into repo-native references and a production-ready redesign spec.
+- Dependencies: `T30`, `T31`, `T32`, `T34`
+- Write scope: `docs/design/**`, `docs/implementation/UI_REDESIGN_SPEC.md`, startup/protocol doc references only
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4-mini / medium`
+- Wave group: `ui-redesign-a`
+- Required verification: `light`
+- Design references: read `docs/implementation/UI_REDESIGN_SPEC.md`, then the screenshot; consult the HTML when layout/detail intent is ambiguous.
+- Completion signal: redesign references/spec are in-repo, startup docs point UI agents at them, and the reference order between spec, screenshot, and HTML is explicit.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes: none.
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: keep prototype assets read-only and keep production guidance in repo docs, not in the raw HTML.

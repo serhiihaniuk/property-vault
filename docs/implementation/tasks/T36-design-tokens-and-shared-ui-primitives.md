@@ -1,0 +1,27 @@
+# T36 - Establish design tokens and shared UI primitives
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Convert the redesign direction into a real token/primitives layer for the app.
+- Dependencies: `T35`
+- Write scope: `apps/web/app/globals.css`, `apps/web/src/shared/ui/**`, shared visual helpers, `apps/web/components.json` only if alias or primitive setup needs adjustment
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4 / high`
+- Wave group: `ui-redesign-b`
+- Required verification: `strong`
+- Design references: use the redesign spec and screenshot first; consult the HTML only when a prototype layout/detail decision needs confirmation.
+- Completion signal: semantic tokens, surface system, typography rhythm, badges, metric/value display, dense cards, and shared visual states are centralized and reused through shared UI primitives.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes: none.
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: build the visual system before page polish; do not let widgets invent page-local tokens.

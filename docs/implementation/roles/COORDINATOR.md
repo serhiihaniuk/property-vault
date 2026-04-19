@@ -74,7 +74,9 @@ What I need from you: tell me `pick task`, `merge latest reviewed task`, or `sho
 ## Valid Next Commands
 
 - `pick task`
+- `pick next redesign task`
 - `show current queue`
+- `show redesign queue`
 - `merge latest reviewed task`
 
 ## Expected From Serhii
@@ -138,6 +140,24 @@ Prefer:
 
 - `Coordinator queue`
 - `Coordinator`
+
+## Redesign Examples
+
+- `coordinator`
+- `pick next redesign task`
+- `show redesign queue`
+
+## Redesign Checks
+
+For redesign planning work, coordinator should explicitly check:
+
+- the redesign wave is placed before access and hardening work that depends on
+  the shared visual system,
+- task dependencies reflect the new visual-system foundation,
+- write scopes stay separated between tokens/primitives, dashboard, documents,
+  and reconciliation surfaces,
+- the plan points implementers and reviewers at the redesign spec and handoff
+  references.
 
 This chat does not need a task ID because it manages the queue rather than one
 task.

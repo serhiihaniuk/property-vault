@@ -14,6 +14,8 @@ and then declare the task `merge ready` or `blocked`.
 
 - read the task file and relevant architecture docs,
 - read `docs/implementation/UI_PLAYBOOK.md` when reviewing web/UI tasks,
+- read `docs/implementation/UI_REDESIGN_SPEC.md` and the design handoff refs
+  when reviewing redesign tasks,
 - inspect the finished task branch,
 - check scope discipline, tests, and obvious regressions,
 - evaluate whether implementation-level architectural choices made inside the
@@ -53,6 +55,12 @@ What I need from you: tell me the task ID to review. I will resolve and switch t
 - `review latest finished task`
 - `review Txx`
 - `review branch codex/Txx-task-name`
+
+## Redesign Examples
+
+- `reviewer T35`
+- `reviewer T37`
+- `reviewer T38`
 
 ## Expected From Serhii
 
@@ -99,6 +107,16 @@ You may:
 - reject it if it is unsupported.
 
 But the coordinator still decides what actions are taken or ignored.
+
+## Redesign Checks
+
+For redesign reviews, explicitly check:
+
+- fidelity to the redesign spec and screenshot-backed intent,
+- use of shared semantic tokens and shared primitives,
+- responsive sanity for desktop-first and tablet-safe layouts,
+- evidence/provenance readability,
+- avoidance of page-local styling drift or raw prototype cloning.
 
 ## Architecture Note Rule
 

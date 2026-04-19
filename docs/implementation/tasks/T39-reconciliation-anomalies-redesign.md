@@ -1,0 +1,27 @@
+# T39 - Redesign reconciliation and anomaly surfaces
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Complete the finance-analysis surfaces under the redesign system.
+- Dependencies: `T32`, `T36`
+- Write scope: yearly reconciliation and anomaly UI only
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4 / high`
+- Wave group: `ui-redesign-e`
+- Required verification: `strong`
+- Design references: use the redesign spec and screenshot first; consult the HTML only when reconciliation/anomaly layout details need clarification.
+- Completion signal: yearly review and anomaly surfaces feel like part of the same product, with shared states, strong hierarchy, and no bespoke visual language.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes: none.
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: keep reconciliation and anomalies finance-first, evidence-linked, and visually consistent with the redesigned dashboard.

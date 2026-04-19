@@ -1,0 +1,27 @@
+# T38 - Redesign documents and document detail
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Apply the redesign system to the documents catalog, document detail, and provenance surfaces.
+- Dependencies: `T31`, `T36`
+- Write scope: documents and document-detail views/widgets only
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4 / high`
+- Wave group: `ui-redesign-d`
+- Required verification: `strong`
+- Design references: use the redesign spec and screenshot first; consult the HTML only when catalog/detail layout details need clarification.
+- Completion signal: document surfaces are dense, readable, provenance-forward, and visually aligned with the redesigned dashboard without bespoke styling drift.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes: none.
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: preserve evidence trust and metadata readability; do not over-simplify provenance or financial detail presentation.

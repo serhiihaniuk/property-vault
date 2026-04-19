@@ -1,0 +1,27 @@
+# T37 - Redesign dashboard to the finance-first MVP
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Align the dashboard with the final finance-first MVP direction from the handoff.
+- Dependencies: `T30`, `T34`, `T36`
+- Write scope: dashboard view and dashboard widgets only
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4 / high`
+- Wave group: `ui-redesign-c`
+- Required verification: `strong`
+- Design references: use the redesign spec and screenshot first; consult the HTML only when dashboard density/layout details remain ambiguous.
+- Completion signal: dashboard presents snapshot-first current state, balance/ledger context, category cards with visible comparison context, trend, anomalies, and recent evidence within the redesign system.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes: none.
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: use the screenshot first and the HTML second; do not hide critical category information behind expansion as the main interaction.

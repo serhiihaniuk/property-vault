@@ -2,8 +2,8 @@
 
 **Status:** Active  
 **Last updated:** 2026-04-19  
-**Scope:** App architecture, package foundations, web shell, first vertical
-slices, and supporting test/reporting workflow
+**Scope:** App architecture, package foundations, web shell, redesign system,
+first vertical slices, and supporting test/reporting workflow
 
 This file is the detailed execution backlog for the app. It is not the place
 for extraction history or ad hoc notes.
@@ -284,7 +284,7 @@ This workflow is intentionally one task at a time.
 
 ## 9. Task Waves
 
-### Wave 0 — Docs and protocol
+### Wave 0 - Docs and protocol
 
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -294,7 +294,7 @@ This workflow is intentionally one task at a time.
 | `T03` | Create initial task handoff files | `done` | `T01`, `T02` | `docs/implementation/tasks/**` | `gpt-5.4-mini / low` | `docs-core` | `light` | one task file exists for each planned task |
 | `T04` | Update startup docs and doc links | `done` | `T00`, `T01`, `T02` | `README.md`, `AGENTS.md` | `gpt-5.4-mini / low` | `docs-core` | `standard` | startup docs point to new architecture and protocol docs |
 
-### Wave 1 — Core packages
+### Wave 1 - Core packages
 
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -306,7 +306,7 @@ This workflow is intentionally one task at a time.
 | `T15` | Create `packages/sync` | `done` | `T10`, `T11` | `packages/sync/**`, thin CLI call sites | `gpt-5.4 / xhigh` | `core-c` | `strong` | canonical-to-Postgres sync layer exists and is idempotent |
 | `T16` | Add local Docker bootstrap | `done` | `T11`, `T12` | root dev config, docker files, docs | `gpt-5.4-mini / medium` | `core-d` | `standard` | local Postgres + app boot flow is documented and runnable |
 
-### Wave 2 — Web shell
+### Wave 2 - Web shell
 
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -315,7 +315,7 @@ This workflow is intentionally one task at a time.
 | `T22` | Add thin REST route handler structure | `done` | `T13`, `T14`, `T20` | `apps/web/app/api/**` and transport adapters | `gpt-5.4 / medium` | `web-shell` | `strong` | route handlers validate, delegate, and return contract DTOs |
 | `T23` | Add contract/client generation flow | `done` | `T13`, `T22` | contracts generation config and web client wiring | `gpt-5.4-mini / medium` | `web-shell` | `standard` | OpenAPI generation and typed client flow are working |
 
-### Wave 3 — First vertical slices
+### Wave 3 - First vertical slices
 
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -323,17 +323,37 @@ This workflow is intentionally one task at a time.
 | `T31` | Documents list/detail + provenance | `done` | `T21`-`T23` | documents contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-documents` | `strong` | document flows show detail plus provenance/source trace |
 | `T34` | Effective charge schedule carry-forward | `done` | `T15`, `T21`-`T23`, `T30` | sync/application/contracts/dashboard surfaces for effective monthly schedules | `gpt-5.4 / xhigh` | `slice-financials` | `strong` | monthly charge schedules remain effective until replaced, dashboard/history expose carried-forward months with provenance, and reconciliation can consume an effective month-by-month schedule model |
 | `T32` | Year reconciliation + anomalies | `done` | `T21`-`T23`, `T34` | reconciliation/anomaly contracts, application, routes, widgets | `gpt-5.4 / high` | `slice-financials` | `strong` | yearly review and anomalies render from real data using the effective carried-forward month-by-month charge schedule model |
-| `T33` | Access/invite flows | `todo` | `T12`, `T21`-`T23` | auth/access routes, application, widgets | `gpt-5.4 / xhigh` | `slice-access` | `strong` | invite-only access flow works end to end with real Postgres-backed auth coverage for credential and invite paths |
 
-### Wave 4 — Hardening
+### Wave 3.5 - UI redesign system
+
+For redesign tasks in this wave, use `docs/implementation/UI_REDESIGN_SPEC.md`
+first, then `docs/design/property-vault-mvp/property-vault-reference.png`, and
+consult `docs/design/property-vault-mvp/Property Vault.html` only when layout
+or micro-detail intent remains ambiguous.
 
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `T40` | Import-boundary lint rules | `todo` | `T20` | lint config and slice boundary rules | `gpt-5.4-mini / medium` | `hardening-a` | `standard` | forbidden cross-slice imports fail lint |
-| `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T30`-`T32` | application, contracts, widgets for freshness/status | `gpt-5.4 / high` | `hardening-b` | `strong` | UI exposes last sync/freshness clearly |
-| `T42` | Error, empty, and loading states | `todo` | `T30`-`T33` | slice UI states only | `gpt-5.4-mini / medium` | `hardening-c` | `standard` | primary screens have consistent non-happy-path states |
+| `T35` | Codify the redesign handoff in repo docs | `todo` | `T30`, `T31`, `T32`, `T34` | `docs/design/**`, `docs/implementation/UI_REDESIGN_SPEC.md`, doc references only | `gpt-5.4-mini / medium` | `redesign-a` | `light` | redesign references/spec are in-repo and startup guidance points UI agents at them |
+| `T36` | Establish design tokens and shared UI primitives | `todo` | `T35` | `apps/web/app/globals.css`, `apps/web/src/shared/ui/**`, shared visual helpers, `apps/web/components.json` if needed | `gpt-5.4 / high` | `redesign-b` | `strong` | semantic tokens, surface system, typography rhythm, badges, metric/value display, dense cards, and shared visual states are centralized |
+| `T37` | Redesign dashboard to the finance-first MVP | `todo` | `T30`, `T34`, `T36` | dashboard views and widgets only | `gpt-5.4 / high` | `redesign-c` | `strong` | dashboard presents snapshot-first current state, balance/ledger, category drill-down cards, trend, anomalies, and recent evidence in the new system |
+| `T38` | Redesign documents and document detail | `todo` | `T31`, `T36` | document list/detail views and widgets only | `gpt-5.4 / high` | `redesign-d` | `strong` | document surfaces are dense, readable, provenance-forward, and visually aligned with dashboard |
+| `T39` | Redesign reconciliation and anomaly surfaces | `todo` | `T32`, `T36` | yearly reconciliation and anomaly UI only | `gpt-5.4 / high` | `redesign-e` | `strong` | yearly review and anomalies feel like part of the same product, with shared states and no bespoke styling drift |
+
+### Wave 4 - Access
+
+| ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `T33` | Access/invite flows | `todo` | `T12`, `T21`, `T22`, `T23`, `T36` | auth/access routes, application, widgets | `gpt-5.4 / xhigh` | `slice-access` | `strong` | invite-only access flow works end to end, access/auth screens use the redesign token/primitives system, and auth UI does not invent a parallel visual language |
+
+### Wave 5 - Hardening
+
+| ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `T40` | Import-boundary lint rules | `todo` | `T20`, `T36` | lint config and boundary rules only | `gpt-5.4-mini / medium` | `hardening-a` | `standard` | forbidden imports fail lint with useful messages, including redesign-related UI boundary rules |
+| `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T37`, `T39` | application, contracts, and UI surfaces for sync status only | `gpt-5.4 / high` | `hardening-b` | `strong` | app clearly shows last sync/freshness state inside the redesigned finance surfaces with tested behavior |
+| `T42` | Error, empty, and loading states | `todo` | `T33`, `T37`, `T38`, `T39` | slice UI states only | `gpt-5.4-mini / medium` | `hardening-c` | `standard` | primary redesigned screens handle loading, empty, and error states consistently |
 | `T43` | Dev/bootstrap scripts | `todo` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / low` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
-| `T44` | Final documentation cleanup | `todo` | `T40`-`T43` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, and task docs reflect reality |
+| `T44` | Final documentation cleanup | `todo` | `T33`, `T35`-`T43` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
 
 ## 10. Reviewer Workflow
 
@@ -511,4 +531,3 @@ An agent must stop and mark `blocked` if:
 - auth/session behavior changes outside the owned scope,
 - contract changes spill outside the declared task scope,
 - tests reveal an architectural contradiction rather than a local bug.
-

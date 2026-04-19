@@ -50,6 +50,61 @@ style and the theme already started in `apps/web/app/globals.css`.
 Do not treat the draft as permission to invent a separate bespoke design
 system. Build from the current shadcn/Tailwind foundation first.
 
+## Property Vault MVP Handoff
+
+The redesign handoff now lives in-repo:
+
+- `docs/implementation/UI_REDESIGN_SPEC.md`
+- `docs/design/property-vault-mvp/README.md`
+- `docs/design/property-vault-mvp/property-vault-reference.png`
+- `docs/design/property-vault-mvp/Property Vault.html`
+
+Use them in that order.
+
+For redesign work:
+
+- `UI_REDESIGN_SPEC.md` is the production-facing target,
+- the screenshot is the fastest visual reference and includes the latest
+  annotated intent,
+- the HTML is a supporting reference for layout and micro-detail clarification,
+- the prototype is not implementation code and must not be cloned literally.
+
+The redesign is:
+
+- token-driven,
+- shadcn-faithful,
+- dense and calm,
+- finance-first,
+- evidence/provenance-friendly.
+
+Where they differ, treat these layers differently:
+
+- prototype styling values: visual clues only, not production tokens,
+- production semantic tokens: centralized in the real theme system,
+- shared primitives: reusable shadcn-compatible building blocks in
+  `src/shared/ui`,
+- widget/view composition: screen-level arrangement built from those shared
+  primitives.
+
+### Screenshot vs HTML
+
+Use the screenshot first for:
+
+- overall information hierarchy,
+- quick orientation,
+- review fidelity checks,
+- intent that came from annotated feedback rather than the raw prototype.
+
+Use the HTML only when:
+
+- layout spacing or alignment is ambiguous,
+- a micro-interaction or density choice needs clarification,
+- a reviewer needs to check whether a detail came from the prototype or was a
+  later annotation.
+
+If the screenshot annotations and HTML conflict, follow the screenshot-backed
+intent and the redesign spec.
+
 ## What We Are Building
 
 The first useful UI is a property-operations dashboard and supporting evidence
@@ -107,7 +162,8 @@ Prefer Tailwind scale values and shadcn defaults as much as possible.
 Start from existing shared primitives in `apps/web/src/shared/ui`, not ad hoc
 component-local markup, when a standard UI building block already exists.
 
-The current theme in `apps/web/app/globals.css` is the source of truth for:
+The current theme and token system in `apps/web/app/globals.css` are the source
+of truth for:
 
 - colors,
 - radii,
@@ -115,7 +171,9 @@ The current theme in `apps/web/app/globals.css` is the source of truth for:
 - typography tone,
 - dark/light behavior.
 
-Do not replace or locally fork that theme during ordinary feature work.
+Do not replace or locally fork that theme during ordinary feature work. When
+the redesign wave lands, extend the shared token system there instead of
+spreading page-local values.
 
 Current shared baseline includes:
 
@@ -137,6 +195,8 @@ shadcn-compatible patterns, instead of inventing a page-local one-off version.
 - prefer composition of small shared primitives over large bespoke shells
 - keep the result recognizably close to the existing shadcn-default foundation
   instead of restyling every primitive
+- translate prototype values into shared semantic tokens before page polish
+- keep widget/view composition separate from primitive styling decisions
 
 ### Avoid By Default
 
@@ -185,6 +245,9 @@ But keep the implementation close to shadcn defaults:
 - clear period context
 - anomaly callouts with restrained but noticeable color
 - charts and summaries that support investigation, not decoration
+- category cards that surface meaningful comparison context without hiding the
+  whole story behind expansion
+- dense drill-downs that still keep the latest state visible immediately
 
 ### Bad Patterns
 
@@ -238,6 +301,8 @@ For UI tasks, reviewer should validate all of this explicitly:
 - the result still looks like the current shadcn-based theme, not a parallel
   custom component library
 - arbitrary styling values are not spreading across the codebase
+- prototype intent is translated into tokens and shared primitives instead of
+  copied as raw HTML/CSS
 - the result still matches the serious dark analytical dashboard direction
 - provenance, anomalies, and metrics remain readable and not visually buried
 

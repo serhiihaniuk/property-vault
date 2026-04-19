@@ -15,6 +15,12 @@ your owned task file.
 7. assigned or selected task file under `docs/implementation/tasks/`
 8. `docs/implementation/UI_PLAYBOOK.md` only when the task touches `apps/web/**`
    or reviewer is validating web UI work
+9. for redesign tasks, also read:
+   - `docs/implementation/UI_REDESIGN_SPEC.md`
+   - `docs/design/property-vault-mvp/README.md`
+   - `docs/design/property-vault-mvp/property-vault-reference.png`
+   - `docs/design/property-vault-mvp/Property Vault.html` only when the
+     screenshot or spec leaves layout details ambiguous
 
 ## Role Entry Shortcut
 
@@ -96,6 +102,26 @@ Examples:
 
 Do not finish with an ambiguous status-only message when a human action is
 actually required.
+
+## UI Redesign Rule
+
+For redesign tasks, prototype fidelity means matching product intent,
+information hierarchy, and interaction density, not cloning raw HTML/CSS.
+
+Required read chain for redesign work:
+
+1. `docs/implementation/UI_PLAYBOOK.md`
+2. `docs/implementation/UI_REDESIGN_SPEC.md`
+3. `docs/design/property-vault-mvp/README.md`
+4. screenshot first
+5. HTML only when needed
+
+Reviewer should block redesign work that:
+
+- copies prototype HTML/CSS directly into the app,
+- introduces page-local tokens instead of shared semantic tokens,
+- drifts away from shadcn/shared primitives without a shared reason,
+- loses the latest-state-first information hierarchy.
 
 ## Branch Rule
 

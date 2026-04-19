@@ -14,6 +14,8 @@ run verification, update the task file, and commit.
 
 - read the task docs,
 - read `docs/implementation/UI_PLAYBOOK.md` when the task touches web UI,
+- read `docs/implementation/UI_REDESIGN_SPEC.md` and the design handoff refs
+  when the task is part of the redesign wave,
 - claim one task,
 - tell the user the recommended model/effort,
 - wait for `start`,
@@ -54,6 +56,12 @@ What I need from you: tell me `pick task` or give me the exact task ID. Start wo
 - `do`
 - `start`
 
+## Redesign Examples
+
+- `implementator T35 UI redesign spec`
+- `implementator T37 dashboard redesign`
+- `implementator T38 documents redesign`
+
 ## Expected From Serhii
 
 - include the task ID in this chat's first message whenever possible, for
@@ -63,6 +71,16 @@ What I need from you: tell me `pick task` or give me the exact task ID. Start wo
 - let this chat own only one task,
 - choose the model after the `do` step,
 - send `start` only when ready for execution.
+
+## Redesign Checks
+
+For redesign tasks, check this before page polish:
+
+- shared tokens/primitives come first,
+- prototype values are translated into the design system instead of copied
+  literally,
+- screenshot-backed intent wins over raw prototype HTML when they conflict,
+- page-level styling drift is avoided.
 
 ## Finish Rule
 
