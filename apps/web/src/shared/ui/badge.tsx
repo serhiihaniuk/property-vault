@@ -19,6 +19,19 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+        success:
+          "border-status-success/25 bg-status-success-bg text-status-success",
+        warning:
+          "border-status-warning/25 bg-status-warning-bg text-status-warning",
+        danger:
+          "border-status-danger/25 bg-status-danger-bg text-status-danger",
+        info: "border-status-info/25 bg-status-info-bg text-status-info",
+        pending:
+          "border-status-pending/25 bg-status-pending-bg text-status-pending",
+        missing:
+          "border-border-strong bg-status-missing-bg text-status-missing",
+        neutral:
+          "border-border-strong bg-surface-elevated text-fg-secondary",
       },
     },
     defaultVariants: {

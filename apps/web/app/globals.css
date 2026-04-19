@@ -4,129 +4,229 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Property Vault design tokens.
+ *
+ * Layers (in order of dependency):
+ *   1. foundation — radius, motion, shadow scales
+ *   2. semantic surface / foreground / border tokens
+ *   3. status tokens (success / warning / danger / info / pending / missing)
+ *   4. data-view tokens (positive / negative / neutral / review deltas)
+ *   5. shadcn semantic compatibility layer (background / card / muted / etc.)
+ *
+ * The console is dark-only in this phase. Both `:root` and `.dark` resolve to
+ * the same palette so `next-themes` toggles stay no-ops without breaking the
+ * shared primitives.
+ */
+
 @theme inline {
     --font-heading: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
     --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
+
+    /* shadcn compatibility — re-points to semantic tokens below */
+    --color-background: var(--surface-app);
+    --color-foreground: var(--fg-primary);
+    --color-card: var(--surface-card);
+    --color-card-foreground: var(--fg-primary);
+    --color-popover: var(--surface-elevated);
+    --color-popover-foreground: var(--fg-primary);
+    --color-primary: var(--fg-primary);
+    --color-primary-foreground: var(--surface-app);
+    --color-secondary: var(--surface-elevated);
+    --color-secondary-foreground: var(--fg-primary);
+    --color-muted: var(--surface-subtle);
+    --color-muted-foreground: var(--fg-secondary);
+    --color-accent: var(--surface-elevated);
+    --color-accent-foreground: var(--fg-primary);
+    --color-destructive: var(--status-danger);
+    --color-border: var(--border-default);
+    --color-input: var(--border-default);
+    --color-ring: var(--fg-secondary);
+    --color-sidebar: var(--surface-card);
+    --color-sidebar-foreground: var(--fg-primary);
+    --color-sidebar-primary: var(--fg-primary);
+    --color-sidebar-primary-foreground: var(--surface-app);
+    --color-sidebar-accent: var(--surface-elevated);
+    --color-sidebar-accent-foreground: var(--fg-primary);
+    --color-sidebar-border: var(--border-default);
+    --color-sidebar-ring: var(--fg-secondary);
+
+    /* Surfaces */
+    --color-surface-app: var(--surface-app);
+    --color-surface-card: var(--surface-card);
+    --color-surface-elevated: var(--surface-elevated);
+    --color-surface-subtle: var(--surface-subtle);
+
+    /* Borders */
+    --color-border-default: var(--border-default);
+    --color-border-strong: var(--border-strong);
+    --color-border-muted: var(--border-muted);
+
+    /* Foreground */
+    --color-fg-primary: var(--fg-primary);
+    --color-fg-secondary: var(--fg-secondary);
+    --color-fg-subtle: var(--fg-subtle);
+    --color-fg-faint: var(--fg-faint);
+
+    /* Status */
+    --color-status-success: var(--status-success);
+    --color-status-success-bg: var(--status-success-bg);
+    --color-status-warning: var(--status-warning);
+    --color-status-warning-bg: var(--status-warning-bg);
+    --color-status-danger: var(--status-danger);
+    --color-status-danger-bg: var(--status-danger-bg);
+    --color-status-info: var(--status-info);
+    --color-status-info-bg: var(--status-info-bg);
+    --color-status-pending: var(--status-pending);
+    --color-status-pending-bg: var(--status-pending-bg);
+    --color-status-missing: var(--status-missing);
+    --color-status-missing-bg: var(--status-missing-bg);
+
+    /* Data-view deltas */
+    --color-delta-positive: var(--delta-positive);
+    --color-delta-positive-bg: var(--delta-positive-bg);
+    --color-delta-negative: var(--delta-negative);
+    --color-delta-negative-bg: var(--delta-negative-bg);
+    --color-delta-neutral: var(--delta-neutral);
+    --color-delta-review: var(--delta-review);
+    --color-delta-review-bg: var(--delta-review-bg);
+
+    /* Charts pick up status palette so trend widgets stay in-system */
+    --color-chart-1: var(--status-info);
+    --color-chart-2: var(--status-success);
+    --color-chart-3: var(--status-warning);
+    --color-chart-4: var(--status-pending);
+    --color-chart-5: var(--status-danger);
+
+    /* Radius scale — tight, dense corners */
+    --radius-xs: calc(var(--radius) * 0.5);
+    --radius-sm: calc(var(--radius) * 0.625);
+    --radius-md: calc(var(--radius) * 0.875);
     --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+    --radius-xl: calc(var(--radius) * 1.5);
+    --radius-2xl: calc(var(--radius) * 2);
+    --radius-3xl: calc(var(--radius) * 2.5);
+    --radius-4xl: calc(var(--radius) * 3);
 }
 
 :root {
-    --background: oklch(0.982 0.004 95);
-    --foreground: oklch(0.22 0.02 228);
-    --card: oklch(0.995 0.003 95);
-    --card-foreground: oklch(0.22 0.02 228);
-    --popover: oklch(0.995 0.003 95);
-    --popover-foreground: oklch(0.22 0.02 228);
-    --primary: oklch(0.46 0.08 210);
-    --primary-foreground: oklch(0.985 0.004 95);
-    --secondary: oklch(0.95 0.006 95);
-    --secondary-foreground: oklch(0.28 0.015 228);
-    --muted: oklch(0.958 0.004 95);
-    --muted-foreground: oklch(0.52 0.014 228);
-    --accent: oklch(0.938 0.018 170);
-    --accent-foreground: oklch(0.28 0.024 210);
-    --destructive: oklch(0.58 0.2 28);
-    --border: oklch(0.9 0.008 95);
-    --input: oklch(0.9 0.008 95);
-    --ring: oklch(0.64 0.055 210);
-    --chart-1: oklch(0.74 0.095 210);
-    --chart-2: oklch(0.67 0.08 185);
-    --chart-3: oklch(0.6 0.12 155);
-    --chart-4: oklch(0.54 0.1 235);
-    --chart-5: oklch(0.64 0.11 75);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.99 0.003 95);
-    --sidebar-foreground: oklch(0.22 0.02 228);
-    --sidebar-primary: oklch(0.46 0.08 210);
-    --sidebar-primary-foreground: oklch(0.985 0.004 95);
-    --sidebar-accent: oklch(0.95 0.006 95);
-    --sidebar-accent-foreground: oklch(0.28 0.015 228);
-    --sidebar-border: oklch(0.9 0.008 95);
-    --sidebar-ring: oklch(0.64 0.055 210);
+    /* Foundation */
+    --radius: 0.5rem;
+    --shadow-card: 0 1px 0 0 rgb(0 0 0 / 0.4);
+    --shadow-elevated: 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    --duration-fast: 120ms;
+    --duration-base: 180ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Surfaces (dark, near-black neutrals) */
+    --surface-app: oklch(0.145 0 0);
+    --surface-card: oklch(0.181 0 0);
+    --surface-subtle: oklch(0.193 0 0);
+    --surface-elevated: oklch(0.225 0 0);
+
+    /* Borders */
+    --border-default: oklch(0.273 0 0);
+    --border-strong: oklch(0.328 0 0);
+    --border-muted: oklch(0.221 0 0);
+
+    /* Foreground */
+    --fg-primary: oklch(0.985 0 0);
+    --fg-secondary: oklch(0.708 0 0);
+    --fg-subtle: oklch(0.556 0 0);
+    --fg-faint: oklch(0.439 0 0);
+
+    /* Status — operator console accents (restrained) */
+    --status-success: oklch(0.792 0.171 156);
+    --status-success-bg: oklch(0.792 0.171 156 / 0.12);
+    --status-warning: oklch(0.836 0.171 80);
+    --status-warning-bg: oklch(0.836 0.171 80 / 0.12);
+    --status-danger: oklch(0.704 0.191 22);
+    --status-danger-bg: oklch(0.704 0.191 22 / 0.12);
+    --status-info: oklch(0.708 0.144 250);
+    --status-info-bg: oklch(0.708 0.144 250 / 0.12);
+    --status-pending: oklch(0.711 0.149 295);
+    --status-pending-bg: oklch(0.711 0.149 295 / 0.12);
+    --status-missing: oklch(0.556 0 0);
+    --status-missing-bg: oklch(0.225 0 0 / 0.6);
+
+    /* Data-view deltas
+     *  Property-ops convention: a higher cost is "negative" (worse for owner),
+     *  a lower cost is "positive". Charts and KPIs should follow this mapping
+     *  rather than blindly equating "increase" with green. */
+    --delta-positive: oklch(0.792 0.171 156);
+    --delta-positive-bg: oklch(0.792 0.171 156 / 0.12);
+    --delta-negative: oklch(0.704 0.191 22);
+    --delta-negative-bg: oklch(0.704 0.191 22 / 0.12);
+    --delta-neutral: oklch(0.708 0 0);
+    --delta-review: oklch(0.836 0.171 80);
+    --delta-review-bg: oklch(0.836 0.171 80 / 0.12);
 }
 
+/* Dark mode mirrors :root so theme toggles stay no-ops without breaking
+ * primitives that reach for the `.dark` variant. */
 .dark {
-    --background: oklch(0.17 0.014 228);
-    --foreground: oklch(0.95 0.004 95);
-    --card: oklch(0.22 0.014 228);
-    --card-foreground: oklch(0.95 0.004 95);
-    --popover: oklch(0.22 0.014 228);
-    --popover-foreground: oklch(0.95 0.004 95);
-    --primary: oklch(0.7 0.08 205);
-    --primary-foreground: oklch(0.16 0.014 228);
-    --secondary: oklch(0.26 0.012 228);
-    --secondary-foreground: oklch(0.95 0.004 95);
-    --muted: oklch(0.24 0.01 228);
-    --muted-foreground: oklch(0.72 0.01 95);
-    --accent: oklch(0.28 0.024 185);
-    --accent-foreground: oklch(0.96 0.004 95);
-    --destructive: oklch(0.7 0.18 28);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 14%);
-    --ring: oklch(0.7 0.08 205);
-    --chart-1: oklch(0.73 0.095 210);
-    --chart-2: oklch(0.67 0.08 185);
-    --chart-3: oklch(0.68 0.09 155);
-    --chart-4: oklch(0.72 0.08 245);
-    --chart-5: oklch(0.75 0.09 75);
-    --sidebar: oklch(0.2 0.014 228);
-    --sidebar-foreground: oklch(0.95 0.004 95);
-    --sidebar-primary: oklch(0.7 0.08 205);
-    --sidebar-primary-foreground: oklch(0.16 0.014 228);
-    --sidebar-accent: oklch(0.24 0.01 228);
-    --sidebar-accent-foreground: oklch(0.95 0.004 95);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.7 0.08 205);
+    --surface-app: oklch(0.145 0 0);
+    --surface-card: oklch(0.181 0 0);
+    --surface-subtle: oklch(0.193 0 0);
+    --surface-elevated: oklch(0.225 0 0);
+
+    --border-default: oklch(0.273 0 0);
+    --border-strong: oklch(0.328 0 0);
+    --border-muted: oklch(0.221 0 0);
+
+    --fg-primary: oklch(0.985 0 0);
+    --fg-secondary: oklch(0.708 0 0);
+    --fg-subtle: oklch(0.556 0 0);
+    --fg-faint: oklch(0.439 0 0);
+
+    --status-success: oklch(0.792 0.171 156);
+    --status-success-bg: oklch(0.792 0.171 156 / 0.12);
+    --status-warning: oklch(0.836 0.171 80);
+    --status-warning-bg: oklch(0.836 0.171 80 / 0.12);
+    --status-danger: oklch(0.704 0.191 22);
+    --status-danger-bg: oklch(0.704 0.191 22 / 0.12);
+    --status-info: oklch(0.708 0.144 250);
+    --status-info-bg: oklch(0.708 0.144 250 / 0.12);
+    --status-pending: oklch(0.711 0.149 295);
+    --status-pending-bg: oklch(0.711 0.149 295 / 0.12);
+    --status-missing: oklch(0.556 0 0);
+    --status-missing-bg: oklch(0.225 0 0 / 0.6);
+
+    --delta-positive: oklch(0.792 0.171 156);
+    --delta-positive-bg: oklch(0.792 0.171 156 / 0.12);
+    --delta-negative: oklch(0.704 0.191 22);
+    --delta-negative-bg: oklch(0.704 0.191 22 / 0.12);
+    --delta-neutral: oklch(0.708 0 0);
+    --delta-review: oklch(0.836 0.171 80);
+    --delta-review-bg: oklch(0.836 0.171 80 / 0.12);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/40;
+  }
+
+  html {
+    @apply font-sans antialiased;
+    color-scheme: dark;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01", "ss03";
   }
 
-  html {
-    @apply font-sans;
+  /* Money, hashes, references, meter readings, rates, dates */
+  .font-mono,
+  code,
+  kbd,
+  samp,
+  pre {
+    font-feature-settings: "zero", "ss02";
   }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
 }

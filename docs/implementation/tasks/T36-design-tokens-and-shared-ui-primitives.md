@@ -1,20 +1,46 @@
 # T36 - Establish design tokens and shared UI primitives
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `in_progress`
+- Owner: `implementer`
 - Goal: Convert the redesign direction into a real token/primitives layer for the app.
 - Dependencies: `T35`
 - Write scope: `apps/web/app/globals.css`, `apps/web/src/shared/ui/**`, shared visual helpers, `apps/web/components.json` only if alias or primitive setup needs adjustment
-- Worker branch: none yet
+- Worker branch: `codex/T36-design-system`
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `ui-redesign-b`
 - Required verification: `strong`
 - Design references: use the redesign spec and screenshot first; consult the HTML only when a prototype layout/detail decision needs confirmation.
 - Completion signal: semantic tokens, surface system, typography rhythm, badges, metric/value display, dense cards, and shared visual states are centralized and reused through shared UI primitives.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Coordinator notes: none.
+- Files changed:
+  - `apps/web/app/globals.css` (token rewrite: foundation + surface + status + data-view tokens, dark-only)
+  - `apps/web/src/shared/ui/badge.tsx` (extended `badgeVariants` with status variants)
+  - `apps/web/src/shared/ui/skeleton.tsx` (added missing `React` import on shadcn-CLI scaffold)
+  - `apps/web/src/shared/ui/alert.tsx` (added via `shadcn add alert`)
+  - `apps/web/src/shared/ui/skeleton.tsx` (added via `shadcn add skeleton`)
+  - `apps/web/src/shared/ui/table.tsx` (added via `shadcn add table`)
+  - `apps/web/src/shared/ui/chart.tsx` (added via `shadcn add chart`)
+  - `apps/web/src/shared/ui/app-shell.tsx` (new — shell + sticky top bar + brand + main)
+  - `apps/web/src/shared/ui/page-header.tsx` (new — eyebrow / title / description / actions)
+  - `apps/web/src/shared/ui/surface.tsx` (new — `Surface`, `DenseCard`, header/body/footer slots)
+  - `apps/web/src/shared/ui/metric.tsx` (new — `MetricLabel`, `MetricValue`, `MetricSub`, `Money`)
+  - `apps/web/src/shared/ui/delta.tsx` (new — `DeltaValue` with positive/negative/neutral/review intent)
+  - `apps/web/src/shared/ui/status-badge.tsx` (new — wraps `Badge` with semantic status mapping)
+  - `apps/web/src/shared/ui/key-value.tsx` (new — `KeyValueGrid`, `KeyValueRow`)
+  - `apps/web/src/shared/ui/data-table.tsx` (new — dense wrapper around shadcn `Table`)
+  - `apps/web/src/shared/ui/state-message.tsx` (new — `LoadingState`, `LoadingInline`, `EmptyState`, `ErrorState`)
+  - `apps/web/src/shared/ui/provenance.tsx` (new — `DocumentChip`, `ProvenanceBlock`, `ProvenanceItem`, `HashChip`)
+  - `apps/web/src/shared/ui/sparkline.tsx` (new — composes shadcn `chart` / recharts `AreaChart`)
+  - `apps/web/src/shared/ui/index.ts` (new — barrel re-exports for the design-system primitives)
+  - `apps/web/package.json` + `package-lock.json` (recharts pulled in by `shadcn add chart`)
+- Contracts changed: none
+- Tests run:
+  - `cd apps/web && npm run typecheck` → clean
+  - `cd apps/web && npm run lint` → clean
+  - `cd apps/web && npm run build` → succeeds (Turbopack production build, all routes generated)
+- Coordinator notes:
+  - Existing primitives (`badge`, `card`, `button`, `separator`) intentionally left semantically unchanged so the running widgets keep building. They re-skin automatically via the new dark token palette through the shadcn compatibility layer in `globals.css`. Widget files (T37–T39) should swap to the new `Surface`/`DenseCard`/`Money`/`StatusBadge`/etc. primitives during their respective redesigns rather than monkey-patching the old `Card` look.
+  - `next-themes` is now effectively a no-op: both `:root` and `.dark` resolve to the same dark palette. If a later task needs a real light surface, treat that as a token-system extension (new task), not a per-page override.
+  - Prototype palette translated to OKLCH (not raw hex) so it composes with the existing token system; status hues sit at restrained chroma to keep the surface calm, per the spec.
 - Review result: none yet
 - Reviewer: none yet
 - Review tests run: none yet
@@ -24,4 +50,4 @@
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: build the visual system before page polish; do not let widgets invent page-local tokens.
+- Next handoff note: build the visual system before page polish; do not let widgets invent page-local tokens. Reviewer should run `npm run typecheck`, `npm run lint`, and `npm run build` inside `apps/web` against branch `codex/T36-design-system` and spot-check that no widget regresses visually after the token re-skin.
