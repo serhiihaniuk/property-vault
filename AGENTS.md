@@ -35,6 +35,8 @@ The repo currently has:
 - an agent workflow in `docs/implementation/AGENT_PROTOCOL.md`,
 - repo-native redesign references under `docs/design/property-vault-mvp/` and
   a production UI target in `docs/implementation/UI_REDESIGN_SPEC.md`,
+  both kept as durable background references rather than universal default
+  authorities for every redesign task,
 - initial documentation/protocol tasks complete (`T00`-`T04`),
 - real app implementation still starting from `T10` onward.
 
@@ -47,20 +49,19 @@ The repo currently has:
    - `coordinator` -> `docs/implementation/roles/COORDINATOR.md`
    - `implementer` or `implementator` -> `docs/implementation/roles/IMPLEMENTER.md`
    - `reviewer` -> `docs/implementation/roles/REVIEWER.md`
-4. Read `docs/implementation/WORKTREE_GUIDE.md` for the repo's branch workflow.
-5. Read `APP_IMPLEMENTATION_PLAN.md`.
-6. Read the assigned task file under `docs/implementation/tasks/` if doing app
-   implementation.
-7. If the task touches `apps/web/**` or web UI review, read
-   `docs/implementation/UI_PLAYBOOK.md`.
-8. If the task is redesign or visual-system work, also read:
-   - `docs/implementation/UI_REDESIGN_SPEC.md`
-   - `docs/design/property-vault-mvp/README.md`
-   - `docs/design/property-vault-mvp/property-vault-reference.png`
-   - `docs/design/property-vault-mvp/Property Vault.html` only when screenshot
-     or spec detail is ambiguous
-9. Run `npm run vault -- context` when local vault/runtime context matters.
-10. Use local records, notes, SQLite, or cited source files before answering
+4. If doing coordination or queue planning, read:
+   - `APP_IMPLEMENTATION_PLAN.md`
+   - `docs/implementation/WORKTREE_GUIDE.md`
+5. If implementing or reviewing one task, read the assigned task file under
+   `docs/implementation/tasks/` next.
+6. Treat the assigned task file as the execution contract.
+   - task-local instructions beat generic redesign defaults
+   - the task file should name its own `Primary authorities`,
+     `Secondary context`, and `Not authoritative` references
+7. Read only the exact linked docs listed under the task file's
+   `Primary authorities` and `Secondary context`.
+8. Run `npm run vault -- context` when local vault/runtime context matters.
+9. Use local records, notes, SQLite, or cited source files before answering
    factual questions.
 
 ## Role Shortcuts
@@ -126,6 +127,9 @@ If nothing is needed, say that clearly:
 - Keep Gmail access readonly.
 - For new app work, follow package boundaries and rules from `ARCHITECTURE.md`
   and `APP_IMPLEMENTATION_PLAN.md`.
+- For task execution, the assigned task file is the first source of truth.
+  Generic redesign or UI docs are durable background references only unless the
+  task file explicitly makes them authoritative.
 - This repo currently uses branches only, not parallel worktrees.
 - Agents manage branch creation and checkout themselves; Serhii should not need
   to manually switch branches during normal task flow.

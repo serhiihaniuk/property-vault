@@ -7,6 +7,11 @@ This document binds the external Property Vault handoff to the live app
 backlog. It is the production-facing interpretation of the design bundle, not a
 copy of the prototype.
 
+This is a durable redesign reference, not an automatic authority for every UI
+task. A task file may list this document as primary context, secondary context,
+or explicitly non-authoritative for exception-heavy work such as exact-fidelity
+transplants.
+
 ## 1. Current binding to the repo
 
 This redesign starts from the current app state:
@@ -26,9 +31,12 @@ The redesign must preserve the approved app architecture:
 - no direct DB reads in components
 - minimal FSD
 
-## 2. Authoritative references
+## 2. Default redesign reference order
 
-Use this precedence order:
+Use this order only when a task file does not declare a narrower authority
+stack.
+
+Default precedence order:
 
 1. this file
 2. `docs/design/property-vault-mvp/property-vault-reference.png`

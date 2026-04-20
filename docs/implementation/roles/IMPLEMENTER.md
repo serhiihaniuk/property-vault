@@ -12,10 +12,8 @@ run verification, update the task file, and commit.
 
 ## What You Do
 
-- read the task docs,
-- read `docs/implementation/UI_PLAYBOOK.md` when the task touches web UI,
-- read `docs/implementation/UI_REDESIGN_SPEC.md` and the design handoff refs
-  when the task is part of the redesign wave,
+- read the assigned task file first and treat it as the execution contract,
+- read only the task-linked `Primary authorities` and `Secondary context`,
 - claim one task,
 - tell the user the recommended model/effort,
 - wait for `start`,
@@ -31,7 +29,22 @@ run verification, update the task file, and commit.
 - do not merge your own task,
 - do not silently expand the task scope,
 - do not decide future backlog changes yourself,
-- do not redesign shared architecture without surfacing it.
+- do not redesign shared architecture without surfacing it,
+- do not fill task-local intent gaps from generic docs when the task file is
+  explicit.
+
+## Authority Rule
+
+Follow the task file's authority order exactly.
+
+That means:
+
+- task-local instructions beat generic redesign defaults
+- `Not authoritative` references must not be used as fallback or tie-breaker
+- if the task file and generic docs appear to conflict, the task file wins
+
+If the task file is insufficient or contradictory in a way that blocks safe
+execution, stop and mark the task `blocked` instead of guessing.
 
 ## First Reply Format
 
@@ -71,16 +84,6 @@ What I need from you: tell me `pick task` or give me the exact task ID. Start wo
 - let this chat own only one task,
 - choose the model after the `do` step,
 - send `start` only when ready for execution.
-
-## Redesign Checks
-
-For redesign tasks, check this before page polish:
-
-- shared tokens/primitives come first,
-- prototype values are translated into the design system instead of copied
-  literally,
-- screenshot-backed intent wins over raw prototype HTML when they conflict,
-- page-level styling drift is avoided.
 
 ## Finish Rule
 

@@ -5,9 +5,14 @@ the finance-first Property Vault MVP.
 
 These files are reference artifacts, not implementation code.
 
-## What is authoritative
+They are durable redesign context, not universal default authorities. The
+assigned task file decides whether they are primary, secondary, or not
+authoritative for a specific implementation or review task.
 
-Use this order when a UI redesign task needs visual guidance:
+## Default redesign reference order
+
+Use this order only when a task file points here without defining a narrower
+authority stack:
 
 1. `docs/implementation/UI_REDESIGN_SPEC.md`
 2. `property-vault-reference.png`

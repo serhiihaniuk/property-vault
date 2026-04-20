@@ -3,13 +3,63 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Complete the finance-analysis surfaces under the redesign system.
+- Task type: `redesign`
 - Dependencies: `T32`, `T36`, `T46`
 - Write scope: yearly reconciliation and anomaly UI only
 - Worker branch: none yet
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `ui-redesign-e`
 - Required verification: `strong`
-- Design references: use the redesign spec and screenshot first; consult the HTML only when reconciliation/anomaly layout details need clarification.
+- Success criteria: reconciliation and anomaly surfaces feel like the same finance-analysis product as the v0-integrated dashboard, with strong hierarchy, shared states, and evidence-linked clarity.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - the completed `T46` dashboard render and its repo-native ownership patterns
+  - `docs/implementation/UI_REDESIGN_SPEC.md`
+- Secondary context:
+  - `docs/design/property-vault-mvp/README.md`
+  - `docs/design/property-vault-mvp/property-vault-reference.png`
+  - `docs/design/property-vault-mvp/Property Vault.html` only when reconciliation/anomaly layout detail is still ambiguous after checking the spec and screenshot
+- Not authoritative:
+  - the older `T37` dashboard composition
+  - raw prototype HTML/CSS as implementation code
+  - ad hoc anomaly-specific visual language that diverges from the v0-integrated dashboard shell
+- Must do:
+  - carry forward the shell rhythm, density, and finance-first hierarchy established by the v0-integrated dashboard
+  - keep deltas, anomalies, evidence links, and status states immediately scannable
+  - reuse or extend shared tokens/primitives and shared finance-format helpers when possible
+  - keep reconciliation and anomaly UI aligned with the same product language instead of treating them as leftovers
+- Must not do:
+  - do not copy raw prototype HTML/CSS into the app
+  - do not invent a bespoke anomalies-only style system
+  - do not bury evidence linkage behind decorative polish
+  - do not copy formatter or badge logic sideways between widgets
+- Expected ownership shape:
+  - `src/views/**` owns route-level screen composition
+  - `src/widgets/**` owns reconciliation and anomaly screen sections
+  - `src/shared/**` owns shared visual primitives and finance-format helpers
+  - any cross-surface status or formatting helpers move downward instead of sideways between widgets
+- Non-goals:
+  - no dashboard shell redesign
+  - no documents/detail redesign work
+  - no public contract redesign unless a separate blocker is surfaced
+- Known traps:
+  - reusing pre-v0 dashboard composition patterns instead of the `T46` precedent
+  - creating anomaly-specific styling that feels disconnected from the main product
+  - letting evidence and provenance context become secondary to chart or badge polish
+- Review focus:
+  - visual continuity with the v0-integrated dashboard shell and density
+  - anomaly/reconciliation readability and evidence linkage
+  - correct FSD ownership and shared-helper extraction
+  - no bespoke styling drift
+- Implementation outline:
+  - map the current reconciliation and anomaly screens to the intended redesign hierarchy before changing styling
+  - identify which shared status, delta, and finance-format primitives already exist after `T36` and `T46`
+  - redesign the reconciliation and anomaly sections using the same shell rhythm and hierarchy as the v0-integrated dashboard
+  - keep evidence links, deltas, and status states prominent without cloning raw prototype markup
+  - move reusable finance or status helpers downward into `src/shared/**` instead of duplicating them inside widgets
+  - run the strong verification gate and compare the result against the v0-integrated dashboard precedent
 - Completion signal: yearly review and anomaly surfaces feel like part of the same product, with shared states, strong hierarchy, and no bespoke visual language.
 - Files changed: none yet
 - Contracts changed: none yet

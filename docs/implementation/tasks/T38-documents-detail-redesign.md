@@ -3,13 +3,63 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Apply the redesign system to the documents catalog, document detail, and provenance surfaces.
+- Task type: `redesign`
 - Dependencies: `T31`, `T36`, `T46`
 - Write scope: documents and document-detail views/widgets only
 - Worker branch: none yet
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `ui-redesign-d`
 - Required verification: `strong`
-- Design references: use the redesign spec and screenshot first; consult the HTML only when catalog/detail layout details need clarification.
+- Success criteria: documents catalog and document-detail surfaces feel like part of the v0-integrated product, with dense evidence-first presentation, strong metadata readability, and no bespoke styling drift.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - the completed `T46` dashboard render and its repo-native ownership patterns
+  - `docs/implementation/UI_REDESIGN_SPEC.md`
+- Secondary context:
+  - `docs/design/property-vault-mvp/README.md`
+  - `docs/design/property-vault-mvp/property-vault-reference.png`
+  - `docs/design/property-vault-mvp/Property Vault.html` only when document layout detail is still ambiguous after checking the spec and screenshot
+- Not authoritative:
+  - the older `T37` dashboard composition
+  - raw prototype HTML/CSS as implementation code
+  - page-local styling values that bypass shared tokens without a task-specific reason
+- Must do:
+  - follow the density, shell rhythm, and finance/evidence tone established by the v0-integrated dashboard path
+  - keep provenance and extracted facts visually first-class
+  - reuse or extend shared tokens/primitives when that preserves the intended documents surface
+  - extract shared finance-format helpers downward when reuse is needed across surfaces
+- Must not do:
+  - do not copy raw prototype HTML/CSS into the app
+  - do not fork a documents-only design system or page-local token set
+  - do not drift back toward the older pre-v0 dashboard styling language
+  - do not simplify evidence/provenance presentation into generic admin-table chrome
+- Expected ownership shape:
+  - `src/views/**` owns route-level screen composition
+  - `src/widgets/**` owns documents and detail screen sections
+  - `src/shared/**` owns shared visual primitives and shared finance/evidence helpers
+  - provenance-specific composition stays below views and above raw shared primitives
+- Non-goals:
+  - no dashboard redesign work
+  - no access/auth restyling
+  - no public contract changes unless a separate blocker is surfaced
+- Known traps:
+  - treating the screenshot as page-by-page literal wireframe instead of applying the v0-integrated dashboard precedent
+  - burying provenance beneath visual polish
+  - duplicating finance-format helpers inside document widgets instead of moving them downward
+- Review focus:
+  - visual alignment with the v0-integrated dashboard shell and density
+  - evidence/provenance readability
+  - correct FSD ownership across views, widgets, and shared
+  - no bespoke local styling drift
+- Implementation outline:
+  - map the current documents and document-detail surfaces to the intended redesign hierarchy before changing styling
+  - identify which shared tokens/primitives and finance-format helpers already exist after `T36` and `T46`
+  - redesign the documents catalog and detail views using the same shell rhythm and density rules as the v0-integrated dashboard
+  - keep provenance blocks and extracted facts prominent while avoiding raw prototype cloning
+  - move any reusable finance/evidence helpers downward into `src/shared/**` instead of copying logic across widgets
+  - run the strong verification gate and check the result against the v0-integrated dashboard precedent
 - Completion signal: document surfaces are dense, readable, provenance-forward, and visually aligned with the redesigned dashboard without bespoke styling drift.
 - Files changed: none yet
 - Contracts changed: none yet

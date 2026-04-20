@@ -61,6 +61,9 @@ The redesign handoff now lives in-repo:
 
 Use them in that order.
 
+This order is the default redesign background order only. If an assigned task
+file declares a narrower authority stack, the task file wins.
+
 For redesign work:
 
 - `UI_REDESIGN_SPEC.md` is the production-facing target,

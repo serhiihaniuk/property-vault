@@ -3,13 +3,69 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Replace mocked dashboard data with real REST/contract data while preserving the repo-native v0 dashboard render from `T45`.
+- Task type: `transplant/integration`
 - Dependencies: `T30`, `T32`, `T34`, `T45`
 - Write scope: dashboard query wiring, dashboard view-model adapters, minimal dashboard-only compatibility helpers
 - Worker branch: none yet
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Wave group: `ui-redesign-v0-b`
 - Required verification: `strong`
-- Design references: use the `T45` repo-native dashboard render as the first visual truth, then the generated v0 source, then `docs/implementation/UI_REDESIGN_SPEC.md`, then the screenshot; consult the HTML only when the repo-native render and source still leave detail intent ambiguous.
+- Success criteria: the dashboard keeps the exact `T45` page shell, panel order, density, and visual hierarchy while switching from mocked data to real API-backed data with correct carried-forward months, provenance, anomalies, and reconciliation content.
+- Primary authorities:
+  - this task file
+  - `docs/implementation/tasks/T45-v0-dashboard-architecture-refactor.md`
+  - the completed `T45` repo-native dashboard render in `apps/web/src/views/dashboard/ui/dashboard-page.tsx` and its current widget composition
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+- Secondary context:
+  - generated v0 dashboard source under `apps/v0/**`
+  - `docs/implementation/UI_REDESIGN_SPEC.md`
+  - `docs/design/property-vault-mvp/README.md`
+  - `docs/design/property-vault-mvp/property-vault-reference.png`
+  - `docs/design/property-vault-mvp/Property Vault.html` only when the completed `T45` render and the v0 source still leave a detail ambiguous
+- Not authoritative:
+  - `T37` dashboard redesign output
+  - older dashboard widget compositions that predate `T45`
+  - generic redesign references as tie-breakers against the completed `T45` render
+- Must do:
+  - preserve the `T45` render exactly while replacing mocked data with real contract data
+  - add a dashboard adapter layer between live responses and the widget prop shapes consumed by the `T45` presentational layer
+  - keep carried-forward months and provenance correct in the rendered dashboard state
+  - use current REST/OpenAPI-backed dashboard, reconciliation, and anomaly data by default
+  - keep unavailable states honest when live data is thinner than the v0 shell expects
+- Must not do:
+  - do not redesign, restyle, reorder, or simplify the `T45` shell
+  - do not collapse or remove panels just because live data is awkward
+  - do not push v0-shaped view-model assumptions into shared API contracts
+  - do not add direct DB reads, Server Actions, or unrelated shell extraction
+  - do not treat screenshot/spec/HTML as permission to reinterpret the live dashboard
+- Expected ownership shape:
+  - `app/` remains thin
+  - `src/views/dashboard/**` owns route-level query orchestration and adapter assembly
+  - `src/widgets/**` remains the presentational home for the dashboard sections established in `T45`
+  - dashboard-specific view-model adapters stay above widgets and below shared contract/client surfaces
+  - `src/shared/**` only hosts truly shared helpers, not dashboard-specific render contracts
+- Non-goals:
+  - no new public REST/OpenAPI design unless a real blocker forces follow-up work
+  - no redesign follow-up for `T38` or `T39`
+  - no extraction of a broader shared shell beyond what already exists
+- Known traps:
+  - treating generic redesign docs as more important than the completed `T45` render
+  - leaking widget prop shapes into shared contracts or API clients
+  - importing sideways across widget slices instead of composing in the view layer
+  - letting missing live data shrink or reinterpret the v0 shell instead of showing honest unavailable states
+- Review focus:
+  - exact visual preservation of the `T45` dashboard render
+  - correct adapter boundaries between live data and the widget layer
+  - carried-forward month correctness and provenance discoverability
+  - no contract drift or shell reinterpretation
+- Implementation outline:
+  - inspect the completed `T45` dashboard composition and identify every mocked-data entrypoint
+  - wire existing live dashboard, reconciliation, and anomaly fetches into the route/view layer without changing widget-owned markup
+  - introduce dashboard-only view-model adapters that map live responses into the prop shapes expected by the current widgets
+  - replace mocked data progressively while preserving the same shell, panel order, and density
+  - add honest unavailable or placeholder states where live data cannot yet fill a v0-shaped panel
+  - rerun the full strong verification gate, including browser checks that compare the live result against the preserved `T45` shell
 - Completion signal: the `T45` dashboard render is preserved while the page is powered by real contracts, carried-forward months, provenance, anomalies, and reconciliation data.
 - Files changed: none yet
 - Contracts changed: none yet

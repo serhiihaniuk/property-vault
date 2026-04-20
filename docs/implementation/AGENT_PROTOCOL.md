@@ -10,17 +10,50 @@ your owned task file.
 3. `docs/implementation/AGENT_PROTOCOL.md`
 4. matching role file under `docs/implementation/roles/` when the chat starts
    as `coordinator`, `implementer`/`implementator`, or `reviewer`
-5. `APP_IMPLEMENTATION_PLAN.md`
-6. `docs/implementation/WORKTREE_GUIDE.md`
-7. assigned or selected task file under `docs/implementation/tasks/`
-8. `docs/implementation/UI_PLAYBOOK.md` only when the task touches `apps/web/**`
-   or reviewer is validating web UI work
-9. for redesign tasks, also read:
-   - `docs/implementation/UI_REDESIGN_SPEC.md`
-   - `docs/design/property-vault-mvp/README.md`
-   - `docs/design/property-vault-mvp/property-vault-reference.png`
-   - `docs/design/property-vault-mvp/Property Vault.html` only when the
-     screenshot or spec leaves layout details ambiguous
+5. if coordinating or planning the queue:
+   - `APP_IMPLEMENTATION_PLAN.md`
+   - `docs/implementation/WORKTREE_GUIDE.md`
+6. if implementing or reviewing a task:
+   - assigned task file under `docs/implementation/tasks/`
+   - only the exact docs listed under that task file's `Primary authorities`
+     and `Secondary context`
+
+## Authority Hierarchy
+
+For execution and review, use this authority order:
+
+1. assigned task file
+2. task-linked `Primary authorities`
+3. task-linked `Secondary context`
+4. matching role file
+5. `docs/implementation/AGENT_PROTOCOL.md`
+6. general repo docs
+
+Hard rules:
+
+- task-specific overrides beat generic redesign defaults
+- if a task file declares `Not authoritative`, those references must not be
+  used as fallback, tie-breaker, or reinterpretation guidance
+- generic docs must never force a worker or reviewer to reinterpret a
+  task-local exception
+
+## Task Execution Contract Rule
+
+The assigned task file is the execution contract.
+
+That means a fresh implementer or reviewer should be able to execute the task
+from:
+
+- the task file
+- the task-linked authorities it names
+- the role file for workflow behavior
+
+Workers and reviewers should not need coordinator chat memory to reconstruct
+intent.
+
+If the task file is missing critical execution context or its authority stack
+is contradictory, stop and mark the task `blocked` instead of guessing from
+generic docs.
 
 ## Role Entry Shortcut
 
@@ -103,25 +136,30 @@ Examples:
 Do not finish with an ambiguous status-only message when a human action is
 actually required.
 
-## UI Redesign Rule
+## UI Redesign Baseline
 
-For redesign tasks, prototype fidelity means matching product intent,
-information hierarchy, and interaction density, not cloning raw HTML/CSS.
+Generic redesign guidance is durable background context, not an automatic
+override.
 
-Required read chain for redesign work:
+Default meaning:
 
-1. `docs/implementation/UI_PLAYBOOK.md`
-2. `docs/implementation/UI_REDESIGN_SPEC.md`
-3. `docs/design/property-vault-mvp/README.md`
-4. screenshot first
-5. HTML only when needed
+- `docs/implementation/UI_PLAYBOOK.md` = structural UI/FSD/shared-ui rules
+- `docs/implementation/UI_REDESIGN_SPEC.md` = general redesign direction
+- `docs/design/property-vault-mvp/*` = supporting redesign references
+
+For redesign or transplant tasks, the task file must explicitly declare which
+of those are:
+
+- `Primary authorities`
+- `Secondary context`
+- `Not authoritative`
 
 Reviewer should block redesign work that:
 
 - copies prototype HTML/CSS directly into the app,
 - introduces page-local tokens instead of shared semantic tokens,
-- drifts away from shadcn/shared primitives without a shared reason,
-- loses the latest-state-first information hierarchy.
+- drifts away from declared task authorities,
+- loses the task's stated information hierarchy or fidelity goal.
 
 ## Branch Rule
 
@@ -189,9 +227,19 @@ Do not implement yet.
 Do this when asked to prepare execution.
 
 1. Re-read the selected task file.
-2. Ensure the expected task branch exists and switch the checkout to it.
-3. Change status to `in_progress`.
-4. Reply with:
+2. Confirm the task passes the readiness checklist:
+   - a fresh implementer can execute from the task file alone
+   - authority order is explicit
+   - non-goals are explicit
+   - known traps are explicit
+   - review focus is task-specific
+   - expected ownership/FSD shape is explicit where relevant
+   - generic docs do not contradict the task-local brief
+3. If any readiness item is missing, fix the task file before handoff instead
+   of sending the worker into execution.
+4. Ensure the expected task branch exists and switch the checkout to it.
+5. Change status to `in_progress`.
+6. Reply with:
    - status set to `in_progress`,
    - note that the branch is now active and this live status stays there until
      merge,
@@ -211,11 +259,14 @@ Do this when asked to execute.
 1. Re-read the task file.
 2. Work only inside the assigned task branch.
 3. Implement only inside the declared write scope.
-4. If the task is the first bootstrap of a new workspace package, root metadata
+4. Follow the task file's authority order exactly. Do not fill intent gaps from
+   generic redesign docs when the task file already defines the source of
+   truth.
+5. If the task is the first bootstrap of a new workspace package, root metadata
    needed to make it trackable and installable is allowed, including
    `.gitignore`, `package-lock.json`, and package-manager metadata.
-5. Run the required verification gate.
-6. Update the task file with:
+6. Run the required verification gate.
+7. Update the task file with:
    - worker branch,
    - files changed,
    - contracts changed,
@@ -223,8 +274,8 @@ Do this when asked to execute.
    - status,
    - next handoff note telling Serhii to start a reviewer chat and say
      `reviewer Txx`
-7. Commit with the task ID in the subject.
-8. Hand off directly to reviewer on the same task branch instead of merging
+8. Commit with the task ID in the subject.
+9. Hand off directly to reviewer on the same task branch instead of merging
    yourself.
 
 ## Status Rules
@@ -322,10 +373,13 @@ chat memory alone.
    - prefer an explicit branch target when provided,
    - otherwise verify that the reviewer chat is already attached to the
      finished task branch before trusting the local task file
+   - review against the task file first, then the task-linked authorities
 2. Review the worker result in isolation.
    - check whether any meaningful implementation-level architectural choices
      stay consistent with `ARCHITECTURE.md`, package boundaries, and task
      intent
+   - check whether the implementer actually followed the declared authority
+     stack and did not substitute generic docs for task-local instructions
 3. Make small bounded fixes if needed.
 4. Run the required review verification.
 5. Update the task file with:
@@ -339,6 +393,21 @@ chat memory alone.
 
 If review exposes an architectural conflict, mark the task `blocked` and report
 it to the coordinator instead of redesigning it during review.
+
+## Coordinator Readiness Gate
+
+Before sending a worker into `do`, coordinator owns task readiness.
+
+Coordinator must make sure the task file is decision-complete enough that:
+
+- a fresh implementer can execute from artifacts alone
+- the authority stack is explicit
+- non-goals and known traps are explicit
+- expected ownership boundaries are explicit where they matter
+- review focus is explicit enough for a fresh reviewer
+
+If the task is missing that information, coordinator must patch the task file
+before execution starts.
 
 ## Coordinator Finalization Flow
 
@@ -376,9 +445,21 @@ Every task file must keep these fields current:
 
 - `Status`
 - `Owner`
+- `Task type`
 - `Recommended execution model`
 - `Dependencies`
 - `Write scope`
+- `Success criteria`
+- `Primary authorities`
+- `Secondary context`
+- `Not authoritative`
+- `Must do`
+- `Must not do`
+- `Expected ownership shape`
+- `Non-goals`
+- `Known traps`
+- `Review focus`
+- `Implementation outline`
 - `Worker branch`
 - `Files changed`
 - `Contracts changed`
@@ -394,6 +475,27 @@ Every task file must keep these fields current:
 - `Actions taken`
 - `Actions ignored`
 - `Next handoff note`
+
+## Suggested Task Header Shape
+
+For non-trivial tasks, the top of the task file should read like a compact
+execution brief, not only a status ledger.
+
+Preferred order near the top:
+
+1. goal and task type
+2. dependencies, scope, model, and gate
+3. success criteria
+4. `Primary authorities`
+5. `Secondary context`
+6. `Not authoritative`
+7. `Must do`
+8. `Must not do`
+9. `Expected ownership shape`
+10. `Non-goals`
+11. `Known traps`
+12. `Review focus`
+13. `Implementation outline`
 
 ## Commit Format
 

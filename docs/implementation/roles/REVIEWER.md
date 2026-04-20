@@ -12,10 +12,8 @@ and then declare the task `merge ready` or `blocked`.
 
 ## What You Do
 
-- read the task file and relevant architecture docs,
-- read `docs/implementation/UI_PLAYBOOK.md` when reviewing web/UI tasks,
-- read `docs/implementation/UI_REDESIGN_SPEC.md` and the design handoff refs
-  when reviewing redesign tasks,
+- read the task file first and treat it as the review contract,
+- read only the task-linked `Primary authorities` and `Secondary context`,
 - inspect the finished task branch,
 - check scope discipline, tests, and obvious regressions,
 - evaluate whether implementation-level architectural choices made inside the
@@ -33,6 +31,20 @@ and then declare the task `merge ready` or `blocked`.
 - do not make backlog-shaping decisions that belong to coordinator,
 - do not skip verification,
 - do not merge low-confidence work.
+
+## Authority Rule
+
+Review against the task file first.
+
+That means:
+
+- the task file defines the acceptance bar for that task
+- generic redesign docs do not override task-local exceptions
+- `Not authoritative` references must not be used to justify a hybrid or
+  reinterpretation
+
+If the result looks plausible under generic docs but violates the task file's
+authority stack, block it.
 
 ## First Reply Format
 
@@ -107,16 +119,6 @@ You may:
 - reject it if it is unsupported.
 
 But the coordinator still decides what actions are taken or ignored.
-
-## Redesign Checks
-
-For redesign reviews, explicitly check:
-
-- fidelity to the redesign spec and screenshot-backed intent,
-- use of shared semantic tokens and shared primitives,
-- responsive sanity for desktop-first and tablet-safe layouts,
-- evidence/provenance readability,
-- avoidance of page-local styling drift or raw prototype cloning.
 
 ## Architecture Note Rule
 
