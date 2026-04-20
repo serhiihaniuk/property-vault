@@ -1,7 +1,7 @@
 # T39 - Redesign reconciliation and anomaly surfaces
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Complete the finance-analysis surfaces under the redesign system.
 - Task type: `redesign`
 - Dependencies: `T32`, `T36`, `T46`
