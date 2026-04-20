@@ -30,6 +30,7 @@ interface DashboardMonthlyTrendWidgetProps {
 
 type ChartDataPoint = {
   month: string
+  monthKey: string
   monthShort: string
   total: number
   carriedForward: boolean
@@ -214,6 +215,7 @@ export function DashboardMonthlyTrendWidget({
         hasAnomaly: monthData.hasAnomaly,
         momChange: monthIndex > 0 ? monthOverMonthChange : 0,
         month: monthData.month,
+        monthKey: `${monthIndex}-${monthData.month}`,
         monthShort: monthData.month.substring(0, 3),
         total: monthData.total,
         vsAvg:
@@ -278,8 +280,11 @@ export function DashboardMonthlyTrendWidget({
               >
                 <XAxis
                   axisLine={false}
-                  dataKey="monthShort"
+                  dataKey="monthKey"
                   dy={8}
+                  tickFormatter={(_value, index) =>
+                    chartData[index]?.monthShort ?? ""
+                  }
                   tick={{ fill: "oklch(0.55 0 0)", fontSize: 11 }}
                   tickLine={false}
                 />
@@ -320,12 +325,11 @@ export function DashboardMonthlyTrendWidget({
                           fillOpacity={
                             entry.carriedForward
                               ? 0.5
-                              : hoveredMonth &&
-                                  entry.monthShort !== hoveredMonth
+                              : hoveredMonth && entry.monthKey !== hoveredMonth
                                 ? 0.6
                                 : 1
                           }
-                          key={`${category.category}-${entry.monthShort}`}
+                          key={`${category.category}-${entry.monthKey}`}
                           stroke={
                             entry.carriedForward
                               ? "oklch(0.75 0.15 85)"
@@ -345,11 +349,11 @@ export function DashboardMonthlyTrendWidget({
                   entry.hasAnomaly ? (
                     <ReferenceDot
                       fill="oklch(0.65 0.20 25)"
-                      key={`anomaly-${entry.monthShort}`}
+                      key={`anomaly-${entry.monthKey}`}
                       r={4}
                       stroke="oklch(0.75 0.18 25)"
                       strokeWidth={1.5}
-                      x={entry.monthShort}
+                      x={entry.monthKey}
                       y={entry.total + maxTotal * 0.04}
                     />
                   ) : null
