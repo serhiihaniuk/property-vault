@@ -8,7 +8,7 @@ interface TopBarProps {
   title: string
   subtitle: string
   property: string
-  syncFreshness: string
+  syncFreshness: string | null
   timeRange: "6m" | "12m" | "24m" | "all"
   onTimeRangeChange: (range: "6m" | "12m" | "24m" | "all") => void
 }
@@ -27,6 +27,9 @@ export function TopBar({
     "24m",
     "all",
   ]
+  const freshnessLabel = syncFreshness
+    ? `synced · ${extractTime(syncFreshness)}`
+    : "sync pending"
 
   return (
     <header className="flex items-center justify-between py-6">
@@ -41,7 +44,7 @@ export function TopBar({
       <div className="flex items-center gap-3">
         <Badge className="px-2 py-1 font-mono text-xs" variant="outline">
           <span className="text-emerald-400">●</span>
-          <span className="ml-1.5">synced · {extractTime(syncFreshness)}</span>
+          <span className="ml-1.5">{freshnessLabel}</span>
         </Badge>
         <div className="flex items-center rounded-md border border-border bg-secondary/30">
           {ranges.map((range) => (

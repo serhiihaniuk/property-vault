@@ -12,16 +12,18 @@ import { Badge } from "@/src/shared/ui/badge"
 
 interface DashboardAccountStatusWidgetProps {
   anomalies: Anomaly[]
-  reconciliationCoverage: ReconciliationCoverage
-  reconciliationSummary: ReconciliationSummary
-  generatedAt: string
+  generatedAt: string | null
+  reconciliationCoverage: ReconciliationCoverage | null
+  reconciliationSummary: ReconciliationSummary | null
+  unavailableReason?: string | null
 }
 
 export function DashboardAccountStatusWidget({
   anomalies,
+  generatedAt,
   reconciliationCoverage,
   reconciliationSummary,
-  generatedAt,
+  unavailableReason,
 }: DashboardAccountStatusWidgetProps) {
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const criticalCount = openAnomalies.filter(
@@ -33,9 +35,10 @@ export function DashboardAccountStatusWidget({
   const infoCount = openAnomalies.filter(
     (anomaly) => anomaly.severity === "info"
   ).length
-
-  const netBalance = formatAmountShort(reconciliationSummary.netBalance)
-  const isPositive = netBalance >= 0
+  const netBalance = reconciliationSummary?.netBalance
+    ? formatAmountShort(reconciliationSummary.netBalance)
+    : null
+  const isPositive = netBalance === null ? null : netBalance >= 0
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
@@ -96,7 +99,7 @@ export function DashboardAccountStatusWidget({
       <div className="border-t border-border pt-4">
         <h4 className="mb-3 text-xs tracking-wider text-muted-foreground uppercase">
           Year Reconciliation ·{" "}
-          {reconciliationCoverage.throughMonth.value.split("-")[0]}
+          {reconciliationCoverage?.throughMonth?.value.split("-")[0] ?? "—"}
         </h4>
 
         <div className="mb-3 grid grid-cols-2 gap-4">
@@ -106,22 +109,31 @@ export function DashboardAccountStatusWidget({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold tabular-nums">
-                {reconciliationCoverage.monthsCovered}
+                {reconciliationCoverage?.monthsCovered ?? "—"}
               </span>
               <span className="text-sm text-muted-foreground">months</span>
-              <Badge
-                className={cn(
-                  "ml-auto px-1.5 py-0 text-[10px]",
-                  reconciliationCoverage.status === "complete"
-                    ? "border-emerald-400/30 text-emerald-400"
-                    : reconciliationCoverage.status === "year_to_date"
-                      ? "border-blue-400/30 text-blue-400"
-                      : "border-amber-400/30 text-amber-400"
-                )}
-                variant="outline"
-              >
-                {reconciliationCoverage.status.replace("_", " ")}
-              </Badge>
+              {reconciliationCoverage ? (
+                <Badge
+                  className={cn(
+                    "ml-auto px-1.5 py-0 text-[10px]",
+                    reconciliationCoverage.status === "complete"
+                      ? "border-emerald-400/30 text-emerald-400"
+                      : reconciliationCoverage.status === "year_to_date"
+                        ? "border-blue-400/30 text-blue-400"
+                        : "border-amber-400/30 text-amber-400"
+                  )}
+                  variant="outline"
+                >
+                  {reconciliationCoverage.status.replace("_", " ")}
+                </Badge>
+              ) : (
+                <Badge
+                  className="ml-auto px-1.5 py-0 text-[10px]"
+                  variant="outline"
+                >
+                  unavailable
+                </Badge>
+              )}
             </div>
           </div>
           <div>
@@ -131,56 +143,86 @@ export function DashboardAccountStatusWidget({
             <div
               className={cn(
                 "font-mono text-lg font-semibold tabular-nums",
-                isPositive ? "text-emerald-400" : "text-rose-400"
+                isPositive === null
+                  ? "text-muted-foreground"
+                  : isPositive
+                    ? "text-emerald-400"
+                    : "text-rose-400"
               )}
             >
-              {isPositive ? "+" : ""}
-              {netBalance.toLocaleString("pl-PL", {
-                minimumFractionDigits: 2,
-              })}{" "}
-              zł
+              {netBalance === null
+                ? "—"
+                : `${isPositive ? "+" : ""}${netBalance.toLocaleString(
+                    "pl-PL",
+                    {
+                      minimumFractionDigits: 2,
+                    }
+                  )} zl`}
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 text-xs">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Scheduled</span>
-            <span className="font-mono tabular-nums">
-              {formatAmountShort(
-                reconciliationSummary.scheduledTotal
-              ).toLocaleString("pl-PL")}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Actual</span>
-            <span className="font-mono tabular-nums">
-              {formatAmountShort(
-                reconciliationSummary.actualCostTotal
-              ).toLocaleString("pl-PL")}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Credits</span>
-            <span className="font-mono text-emerald-400 tabular-nums">
-              +
-              {formatAmountShort(
-                reconciliationSummary.creditsTotal
-              ).toLocaleString("pl-PL")}
-            </span>
-          </div>
+          <SummaryValue
+            label="Scheduled"
+            value={reconciliationSummary?.scheduledTotal ?? null}
+          />
+          <SummaryValue
+            label="Actual"
+            value={reconciliationSummary?.actualCostTotal ?? null}
+          />
+          <SummaryValue
+            label="Credits"
+            positive
+            value={reconciliationSummary?.creditsTotal ?? null}
+          />
         </div>
 
         <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-3 text-xs">
           <span className="text-muted-foreground">
-            {reconciliationSummary.settledLineCount} settled ·{" "}
-            {reconciliationSummary.openLineCount} open lines
+            {reconciliationSummary
+              ? `${reconciliationSummary.settledLineCount} settled · ${reconciliationSummary.openLineCount} open lines`
+              : "Reconciliation unavailable"}
           </span>
           <span className="font-mono text-muted-foreground">
-            through {reconciliationCoverage.throughMonth.label}
+            {reconciliationCoverage?.throughMonth
+              ? `through ${reconciliationCoverage.throughMonth.label}`
+              : "through —"}
           </span>
         </div>
+
+        {unavailableReason ? (
+          <div className="mt-3 text-xs text-muted-foreground">
+            {unavailableReason}
+          </div>
+        ) : null}
       </div>
+    </div>
+  )
+}
+
+function SummaryValue({
+  label,
+  positive = false,
+  value,
+}: {
+  label: string
+  positive?: boolean
+  value: ReconciliationSummary["scheduledTotal"] | null
+}) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-muted-foreground">{label}</span>
+      <span
+        className={cn(
+          "font-mono tabular-nums",
+          positive && value ? "text-emerald-400" : undefined
+        )}
+      >
+        {value
+          ? `${positive ? "+" : ""}${formatAmountShort(value).toLocaleString("pl-PL")}`
+          : "—"}
+      </span>
     </div>
   )
 }

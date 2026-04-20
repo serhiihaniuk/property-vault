@@ -10,40 +10,47 @@ import { cn } from "@/src/shared/lib/utils"
 import { Badge } from "@/src/shared/ui/badge"
 
 interface DashboardPrimarySummaryWidgetProps {
-  selectedMonth: Period
-  previousMonth: Period
-  summary: DashboardSummary
-  currentMonthData: MonthData
+  currentMonthData: MonthData | null
+  previousMonth: Period | null
+  selectedMonth: Period | null
+  summary: DashboardSummary | null
+  unavailableReason?: string | null
 }
 
 export function DashboardPrimarySummaryWidget({
-  selectedMonth,
-  previousMonth,
-  summary,
   currentMonthData,
+  previousMonth,
+  selectedMonth,
+  summary,
+  unavailableReason,
 }: DashboardPrimarySummaryWidgetProps) {
-  const totalCharge = formatAmountShort(summary.totalCharges)
-  const previousTotal = formatAmountShort(summary.previousTotalCharges)
-  const delta = formatAmountShort(summary.totalDelta)
+  const totalCharge = summary ? formatAmountShort(summary.totalCharges) : null
+  const previousTotal = summary?.previousTotalCharges
+    ? formatAmountShort(summary.previousTotalCharges)
+    : null
+  const delta = summary?.totalDelta
+    ? formatAmountShort(summary.totalDelta)
+    : null
   const deltaPercent =
-    previousTotal > 0
+    totalCharge !== null && previousTotal && previousTotal > 0
       ? ((totalCharge - previousTotal) / previousTotal) * 100
-      : 0
-
-  const isPositiveDelta = delta > 0
+      : null
   const deltaColor =
-    delta === 0
+    delta === null || delta === 0
       ? "text-muted-foreground"
-      : isPositiveDelta
+      : delta > 0
         ? "text-rose-400"
         : "text-emerald-400"
-  const deltaSymbol = delta > 0 ? "▲" : delta < 0 ? "▼" : ""
-
-  const totalFormatted = totalCharge.toLocaleString("pl-PL", {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-  })
-  const [wholePart, decimalPart] = totalFormatted.split(",")
+  const deltaSymbol =
+    delta === null ? "" : delta > 0 ? "▲" : delta < 0 ? "▼" : ""
+  const totalFormatted =
+    totalCharge === null
+      ? null
+      : totalCharge.toLocaleString("pl-PL", {
+          maximumFractionDigits: 2,
+          minimumFractionDigits: 2,
+        })
+  const [wholePart = "—", decimalPart = "—"] = totalFormatted?.split(",") ?? []
 
   return (
     <div className="rounded-lg border border-border bg-card p-5">
@@ -51,10 +58,12 @@ export function DashboardPrimarySummaryWidget({
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">This month ·</span>
-          <span className="text-sm font-medium">{selectedMonth.label}</span>
+          <span className="text-sm font-medium">
+            {selectedMonth?.label ?? "No charge month"}
+          </span>
         </div>
         <div className="flex items-center gap-2">
-          {currentMonthData.isCarriedForward ? (
+          {currentMonthData?.isCarriedForward ? (
             <Badge
               className="border-amber-400/30 px-2 py-0.5 font-mono text-xs text-amber-400"
               variant="outline"
@@ -66,7 +75,7 @@ export function DashboardPrimarySummaryWidget({
             className="border-emerald-400/30 px-2 py-0.5 font-mono text-xs text-emerald-400"
             variant="outline"
           >
-            {summary.categoryCount} categories
+            {summary?.categoryCount ?? 0} categories
           </Badge>
         </div>
       </div>
@@ -77,20 +86,28 @@ export function DashboardPrimarySummaryWidget({
             {wholePart}
           </span>
           <span className="font-mono text-2xl text-muted-foreground">
-            ,{decimalPart} zł
+            {totalCharge === null ? "" : `,${decimalPart} zl`}
           </span>
         </div>
         <div className="mt-2 flex items-center gap-2 text-sm">
-          <span className={cn("font-mono tabular-nums", deltaColor)}>
-            {deltaSymbol} {Math.abs(deltaPercent).toFixed(1)}%
-          </span>
-          <span className="text-muted-foreground">
-            vs {previousMonth.label} (
-            {previousTotal.toLocaleString("pl-PL", {
-              minimumFractionDigits: 2,
-            })}{" "}
-            zł)
-          </span>
+          {deltaPercent === null ? (
+            <span className="text-muted-foreground">
+              {unavailableReason ?? "No previous month comparison available."}
+            </span>
+          ) : (
+            <>
+              <span className={cn("font-mono tabular-nums", deltaColor)}>
+                {deltaSymbol} {Math.abs(deltaPercent).toFixed(1)}%
+              </span>
+              <span className="text-muted-foreground">
+                vs {previousMonth?.label ?? "previous month"} (
+                {previousTotal?.toLocaleString("pl-PL", {
+                  minimumFractionDigits: 2,
+                }) ?? "—"}{" "}
+                zl)
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -102,15 +119,15 @@ export function DashboardPrimarySummaryWidget({
           <div className="flex items-center gap-1.5">
             <Layers className="h-3.5 w-3.5 text-chart-1" />
             <span className="truncate text-sm font-medium">
-              {summary.largestCategory.categoryLabel}
+              {summary?.largestCategory?.categoryLabel ?? "No category"}
             </span>
           </div>
           <div className="mt-0.5 font-mono text-xs text-muted-foreground">
-            {formatAmountShort(summary.largestCategory.amount).toLocaleString(
-              "pl-PL",
-              { minimumFractionDigits: 2 }
-            )}{" "}
-            zł
+            {summary?.largestCategory
+              ? `${formatAmountShort(
+                  summary.largestCategory.amount
+                ).toLocaleString("pl-PL", { minimumFractionDigits: 2 })} zl`
+              : "—"}
           </div>
         </div>
         <div>
@@ -121,31 +138,30 @@ export function DashboardPrimarySummaryWidget({
             <TrendingUp
               className={cn(
                 "h-3.5 w-3.5",
-                summary.topChange.changeStatus === "up"
+                summary?.topChange?.changeStatus === "up"
                   ? "text-rose-400"
                   : "text-emerald-400"
               )}
             />
             <span className="truncate text-sm font-medium">
-              {summary.topChange.categoryLabel}
+              {summary?.topChange?.categoryLabel ?? "No movement"}
             </span>
           </div>
           <div
             className={cn(
               "mt-0.5 font-mono text-xs",
-              summary.topChange.changeStatus === "up"
+              summary?.topChange?.changeStatus === "up"
                 ? "text-rose-400"
                 : "text-emerald-400"
             )}
           >
-            {summary.topChange.changeStatus === "up" ? "+" : ""}
-            {formatAmountShort(summary.topChange.delta).toLocaleString(
-              "pl-PL",
-              {
-                minimumFractionDigits: 2,
-              }
-            )}{" "}
-            zł
+            {summary?.topChange
+              ? `${summary.topChange.changeStatus === "up" ? "+" : ""}${formatAmountShort(
+                  summary.topChange.delta
+                ).toLocaleString("pl-PL", {
+                  minimumFractionDigits: 2,
+                })} zl`
+              : "—"}
           </div>
         </div>
         <div>
@@ -154,11 +170,14 @@ export function DashboardPrimarySummaryWidget({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-sm font-medium">
-              {summary.changedCategoryCount} of {summary.categoryCount}
+              {summary?.changedCategoryCount ?? 0} of{" "}
+              {summary?.categoryCount ?? 0}
             </span>
           </div>
           <div className="mt-0.5 text-xs text-muted-foreground">
-            {summary.categoryCount - summary.changedCategoryCount} unchanged
+            {summary
+              ? `${summary.categoryCount - summary.changedCategoryCount} unchanged`
+              : "No comparison yet"}
           </div>
         </div>
       </div>
@@ -169,7 +188,7 @@ export function DashboardPrimarySummaryWidget({
             SOURCE MONTH
           </div>
           <div className="font-mono text-sm">
-            {currentMonthData.sourceMonth.label}
+            {currentMonthData?.sourceMonth.label ?? "—"}
           </div>
         </div>
         <div>
@@ -179,7 +198,7 @@ export function DashboardPrimarySummaryWidget({
           <div className="flex items-center gap-1.5">
             <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="font-mono text-sm">
-              {currentMonthData.sourceDocuments.length} document(s)
+              {currentMonthData?.sourceDocuments.length ?? 0} document(s)
             </span>
           </div>
         </div>
@@ -187,9 +206,15 @@ export function DashboardPrimarySummaryWidget({
           <div className="mb-1 text-[10px] tracking-wider text-muted-foreground uppercase">
             PERIOD
           </div>
-          <div className="font-mono text-sm">{selectedMonth.value}</div>
+          <div className="font-mono text-sm">{selectedMonth?.value ?? "—"}</div>
         </div>
       </div>
+
+      {unavailableReason ? (
+        <div className="mt-4 border-t border-border pt-4 text-xs text-muted-foreground">
+          {unavailableReason}
+        </div>
+      ) : null}
     </div>
   )
 }

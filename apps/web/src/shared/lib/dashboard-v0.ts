@@ -15,7 +15,7 @@ export interface SourceDocument {
   hash: string
   title: string
   documentType: "monthly_charge" | "settlement" | "resolution"
-  documentDate: string
+  documentDate: string | null
 }
 
 export interface CategoryHistoryPoint {
@@ -29,8 +29,8 @@ export interface CategoryBreakdown {
   categoryGroup: string
   categoryGroupLabel: string
   amount: Amount
-  previousAmount: Amount
-  delta: Amount
+  previousAmount: Amount | null
+  delta: Amount | null
   changeStatus: "up" | "down" | "flat" | "new" | "no_previous"
   sharePercent: number
   sourceDocuments: SourceDocument[]
@@ -49,19 +49,19 @@ export interface DashboardSummary {
   categoryCount: number
   changedCategoryCount: number
   totalCharges: Amount
-  previousTotalCharges: Amount
-  totalDelta: Amount
+  previousTotalCharges: Amount | null
+  totalDelta: Amount | null
   largestCategory: {
     category: string
     categoryLabel: string
     amount: Amount
-  }
+  } | null
   topChange: {
     category: string
     categoryLabel: string
     changeStatus: "up" | "down" | "flat"
     delta: Amount
-  }
+  } | null
 }
 
 export interface Anomaly {
@@ -72,24 +72,24 @@ export interface Anomaly {
   severityLabel: string
   status: "open" | "resolved" | "dismissed"
   detectedAt: string
-  date: string
+  date: string | null
   summary: string
   context: { label: string; value: string }[]
-  subjectDocument?: SourceDocument
+  subjectDocument?: SourceDocument | null
 }
 
 export interface ReconciliationCoverage {
   monthsCovered: number
   status: "year_to_date" | "complete" | "partial"
-  throughMonth: Period
+  throughMonth: Period | null
 }
 
 export interface ReconciliationSummary {
   scheduledTotal: Amount
-  settlementAdvanceTotal: Amount
-  actualCostTotal: Amount
-  creditsTotal: Amount
-  netBalance: Amount
+  settlementAdvanceTotal: Amount | null
+  actualCostTotal: Amount | null
+  creditsTotal: Amount | null
+  netBalance: Amount | null
   openLineCount: number
   settledLineCount: number
 }
@@ -106,11 +106,11 @@ export interface DocumentListItem {
   title: string
   documentType: "monthly_charge" | "settlement" | "resolution"
   documentTypeLabel: string
-  documentDate: string
+  documentDate: string | null
   extractedAt: string
   confidence: number
   financialRowCount: number
-  pageCount: number
+  pageCount: number | null
   sourceCount: number
   status: "ok" | "needs_review" | "pending" | "failed"
   summaryPlain: string
@@ -121,7 +121,11 @@ export function formatAmountShort(amount: Amount): number {
   return amount.amountMinor / 100
 }
 
-export function extractTime(value: string): string {
+export function extractTime(value: string | null): string {
+  if (!value) {
+    return "unknown"
+  }
+
   if (!value.includes("T")) {
     return value
   }

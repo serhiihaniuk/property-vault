@@ -9,7 +9,8 @@ import { Badge } from "@/src/shared/ui/badge"
 
 interface DashboardOpenItemsWidgetProps {
   anomalies: Anomaly[]
-  reconciliationSummary: ReconciliationSummary
+  reconciliationSummary: ReconciliationSummary | null
+  unavailableReason?: string | null
 }
 
 const severityColors = {
@@ -51,12 +52,15 @@ function SeverityIcon({ severity }: { severity: Anomaly["severity"] }) {
 export function DashboardOpenItemsWidget({
   anomalies,
   reconciliationSummary,
+  unavailableReason,
 }: DashboardOpenItemsWidgetProps) {
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const withDates = openAnomalies.filter((anomaly) => anomaly.date)
   const withoutDates = openAnomalies.filter((anomaly) => !anomaly.date)
   const isAllClear =
-    openAnomalies.length === 0 && reconciliationSummary.openLineCount === 0
+    openAnomalies.length === 0 &&
+    (reconciliationSummary?.openLineCount ?? 0) === 0 &&
+    !unavailableReason
 
   return (
     <div className="rounded-lg border border-border bg-card">
@@ -70,7 +74,7 @@ export function DashboardOpenItemsWidget({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {reconciliationSummary.openLineCount > 0 ? (
+          {reconciliationSummary && reconciliationSummary.openLineCount > 0 ? (
             <Badge className="border-amber-400/30 text-xs" variant="outline">
               <span className="mr-1 text-amber-400">
                 {reconciliationSummary.openLineCount}
@@ -86,6 +90,12 @@ export function DashboardOpenItemsWidget({
           </Badge>
         </div>
       </div>
+
+      {unavailableReason ? (
+        <div className="px-5 pt-3 text-xs text-muted-foreground">
+          {unavailableReason}
+        </div>
+      ) : null}
 
       {isAllClear ? (
         <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -127,7 +137,7 @@ export function DashboardOpenItemsWidget({
                 </div>
               ) : (
                 withDates.map((anomaly) => {
-                  const [day, month] = new Date(anomaly.date)
+                  const [day, month] = new Date(anomaly.date ?? "")
                     .toLocaleDateString("en-GB", {
                       day: "2-digit",
                       month: "short",

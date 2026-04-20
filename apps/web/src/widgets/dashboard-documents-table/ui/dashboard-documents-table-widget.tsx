@@ -14,6 +14,7 @@ import {
 
 interface DashboardDocumentsTableWidgetProps {
   documents: DocumentListItem[]
+  unavailableReason?: string | null
 }
 
 function DocumentTypeBadge({
@@ -29,7 +30,7 @@ function DocumentTypeBadge({
 
   const labels: Record<DocumentListItem["documentType"], string> = {
     monthly_charge: "zawiadomienie",
-    resolution: "uchwała",
+    resolution: "uchwala",
     settlement: "rozliczenie",
   }
 
@@ -77,11 +78,17 @@ function ExtractionStatusBadge({
 
 export function DashboardDocumentsTableWidget({
   documents,
+  unavailableReason,
 }: DashboardDocumentsTableWidgetProps) {
   return (
     <div className="rounded-lg border border-border bg-card">
       <div className="border-b border-border px-4 py-3">
         <h3 className="text-sm font-medium">Recent source documents</h3>
+        {unavailableReason ? (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {unavailableReason}
+          </p>
+        ) : null}
       </div>
       <Table>
         <TableHeader>
@@ -108,37 +115,50 @@ export function DashboardDocumentsTableWidget({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {documents.map((document) => (
-            <TableRow className="group cursor-pointer" key={document.hash}>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">{document.title}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <DocumentTypeBadge type={document.documentType} />
-              </TableCell>
-              <TableCell className="font-mono text-xs text-muted-foreground">
-                {document.documentDate}
-              </TableCell>
-              <TableCell className="font-mono text-xs text-muted-foreground">
-                {document.hash}
-              </TableCell>
-              <TableCell>
-                <ExtractionStatusBadge
-                  confidence={document.confidence}
-                  status={document.status}
-                />
-              </TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {document.period?.label ?? "—"}
-              </TableCell>
-              <TableCell>
-                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          {documents.length > 0 ? (
+            documents.map((document) => (
+              <TableRow className="group cursor-pointer" key={document.hash}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">
+                      {document.title}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <DocumentTypeBadge type={document.documentType} />
+                </TableCell>
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  {document.documentDate ?? "—"}
+                </TableCell>
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  {document.hash}
+                </TableCell>
+                <TableCell>
+                  <ExtractionStatusBadge
+                    confidence={document.confidence}
+                    status={document.status}
+                  />
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {document.period?.label ?? "—"}
+                </TableCell>
+                <TableCell>
+                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                className="py-6 text-center text-sm text-muted-foreground"
+                colSpan={7}
+              >
+                No source documents available yet.
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>

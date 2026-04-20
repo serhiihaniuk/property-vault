@@ -23,15 +23,14 @@ interface CategoryCardProps {
 export function CategoryCard({ category }: CategoryCardProps) {
   const clientReady = useClientReady()
   const categoryColor = getCategoryColor(category.category)
-
-  const currentAmountMinor = category.amount?.amountMinor ?? 0
+  const currentAmountMinor = category.amount.amountMinor
   const previousAmountMinor = category.previousAmount?.amountMinor ?? 0
   const deltaPercent =
-    previousAmountMinor > 0
+    category.previousAmount && previousAmountMinor > 0
       ? ((currentAmountMinor - previousAmountMinor) / previousAmountMinor) * 100
-      : 0
-
-  const isSignificantChange = Math.abs(deltaPercent) > 10
+      : null
+  const isSignificantChange =
+    deltaPercent !== null && Math.abs(deltaPercent) > 10
   const deltaColor =
     category.changeStatus === "up"
       ? "text-rose-400"
@@ -44,7 +43,6 @@ export function CategoryCard({ category }: CategoryCardProps) {
       : category.changeStatus === "down"
         ? "▼"
         : ""
-
   const currentAmount = currentAmountMinor / 100
   const previousAmount = previousAmountMinor / 100
 
@@ -59,6 +57,10 @@ export function CategoryCard({ category }: CategoryCardProps) {
       values.length
     const minValue = Math.min(...values)
     const maxValue = Math.max(...values)
+
+    if (values.length < 2) {
+      return { avgValue, maxValue, minValue, trend: "flat" as const }
+    }
 
     const splitIndex = Math.floor(values.length / 2)
     const firstHalf = values.slice(0, splitIndex)
@@ -93,7 +95,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
             </h3>
             {isSignificantChange && category.changeStatus === "up" ? (
               <span
-                title={`Significant increase: ${deltaPercent.toFixed(1)}% MoM`}
+                title={`Significant increase: ${deltaPercent?.toFixed(1)}% MoM`}
               >
                 <AlertCircle className="h-3.5 w-3.5 text-amber-400/80" />
               </span>
@@ -130,7 +132,8 @@ export function CategoryCard({ category }: CategoryCardProps) {
         </span>
         <span className="text-sm text-muted-foreground">zł</span>
         {category.changeStatus !== "flat" &&
-        category.changeStatus !== "no_previous" ? (
+        category.changeStatus !== "no_previous" &&
+        deltaPercent !== null ? (
           <span
             className={cn(
               "ml-auto text-xs font-medium tabular-nums",
@@ -228,20 +231,23 @@ export function CategoryCard({ category }: CategoryCardProps) {
         <div className="flex items-center justify-between gap-2 text-xs">
           <span className="text-muted-foreground">Previous</span>
           <span className="font-mono text-foreground/80 tabular-nums">
-            {previousAmount.toLocaleString("pl-PL", {
-              minimumFractionDigits: 0,
-            })}{" "}
-            zł
+            {category.previousAmount
+              ? `${previousAmount.toLocaleString("pl-PL", {
+                  minimumFractionDigits: 0,
+                })} zł`
+              : "—"}
           </span>
         </div>
         <div className="flex items-center justify-between gap-2 text-xs">
           <span className="text-muted-foreground">Delta</span>
           <span className={cn("font-mono tabular-nums", deltaColor)}>
-            {category.delta.amountMinor >= 0 ? "+" : ""}
-            {(category.delta.amountMinor / 100).toLocaleString("pl-PL", {
-              minimumFractionDigits: 0,
-            })}{" "}
-            zł
+            {category.delta
+              ? `${category.delta.amountMinor >= 0 ? "+" : ""}${(
+                  category.delta.amountMinor / 100
+                ).toLocaleString("pl-PL", {
+                  minimumFractionDigits: 0,
+                })} zł`
+              : "—"}
           </span>
         </div>
         <div className="flex items-center justify-between gap-2 text-xs">
@@ -254,10 +260,10 @@ export function CategoryCard({ category }: CategoryCardProps) {
 
       <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-2">
         <span className="max-w-[60%] truncate font-mono text-[10px] text-muted-foreground/60">
-          {category.sourceDocuments?.[0]?.title ?? "No source"}
+          {category.sourceDocuments[0]?.title ?? "No source"}
         </span>
         <Badge className="h-4 shrink-0 px-1 py-0 text-[9px]" variant="outline">
-          {category.sourceDocuments?.length ?? 0} doc(s)
+          {category.sourceDocuments.length} doc(s)
         </Badge>
       </div>
     </div>

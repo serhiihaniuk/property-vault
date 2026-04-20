@@ -1,12 +1,12 @@
 # T46 - Wire live dashboard data into v0 dashboard
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T46-live-dashboard-adapter-integration`
 - Goal: Replace mocked dashboard data with real REST/contract data while preserving the repo-native v0 dashboard render from `T45`.
 - Task type: `transplant/integration`
 - Dependencies: `T30`, `T32`, `T34`, `T45`
 - Write scope: dashboard query wiring, dashboard view-model adapters, minimal dashboard-only compatibility helpers
-- Worker branch: none yet
+- Worker branch: `codex/T46-live-dashboard-adapter-integration`
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Wave group: `ui-redesign-v0-b`
 - Required verification: `strong`
@@ -67,9 +67,35 @@
   - add honest unavailable or placeholder states where live data cannot yet fill a v0-shaped panel
   - rerun the full strong verification gate, including browser checks that compare the live result against the preserved `T45` shell
 - Completion signal: the `T45` dashboard render is preserved while the page is powered by real contracts, carried-forward months, provenance, anomalies, and reconciliation data.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `apps/web/src/shared/lib/dashboard-v0.ts`
+  - `apps/web/src/views/dashboard/lib/dashboard-v0-adapter.ts`
+  - `apps/web/src/views/dashboard/lib/use-dashboard-v0-view-model.ts`
+  - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
+  - `apps/web/src/views/dashboard/ui/top-bar.tsx`
+  - `apps/web/src/widgets/dashboard-primary-summary/ui/dashboard-primary-summary-widget.tsx`
+  - `apps/web/src/widgets/dashboard-account-status/ui/dashboard-account-status-widget.tsx`
+  - `apps/web/src/widgets/dashboard-category-breakdown/ui/dashboard-category-breakdown-widget.tsx`
+  - `apps/web/src/widgets/dashboard-category-breakdown/ui/category-card.tsx`
+  - `apps/web/src/widgets/dashboard-monthly-trend/ui/dashboard-monthly-trend-widget.tsx`
+  - `apps/web/src/widgets/dashboard-open-items/ui/dashboard-open-items-widget.tsx`
+  - `apps/web/src/widgets/dashboard-documents-table/ui/dashboard-documents-table-widget.tsx`
+  - `docs/implementation/tasks/T46-live-dashboard-adapter-integration.md`
+- Contracts changed: none
+- Tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `curl.exe -I http://127.0.0.1:3000`
+  - `curl.exe http://127.0.0.1:3000`
+  - `curl.exe http://127.0.0.1:3000/api/dashboard/month-breakdown`
+  - `curl.exe http://127.0.0.1:3000/api/financials/year-reconciliation`
+  - `curl.exe http://127.0.0.1:3000/api/anomalies`
+  - `curl.exe http://127.0.0.1:3000/api/documents`
+  - `curl.exe http://127.0.0.1:3000/api/health`
+  - `npx playwright screenshot --browser chromium --viewport-size "1440,2200" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000 apps/web/.t46-dashboard-desktop.png`
+  - `npx playwright screenshot --browser chromium --viewport-size "834,1194" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000 apps/web/.t46-dashboard-tablet.png`
+  - `npm run docker:db:up` (failed: Docker Desktop / local Postgres was not available, so live API-backed browser verification could not be completed against real DB data)
 - Coordinator notes:
   - Keep the `T45` presentational layer intact and add a dashboard adapter layer between our live API responses and the exact v0 component props.
   - Do not redesign or simplify panels to fit live data. Adapt the data to the design, not the design to the data.
@@ -77,6 +103,10 @@
   - Introduce internal dashboard-only mapping types such as `DashboardV0ViewModel`, `PrimarySummaryVM`, `AccountStatusVM`, `MonthlyTrendVM`, `CategoryCardVM`, `OpenItemsVM`, and `DocumentsTableVM` rather than pushing v0 assumptions into shared contracts.
   - If a v0 panel expects richer data than current live contracts provide, preserve the exact layout and use honest unavailable or placeholder states instead of trimming the shell.
   - Carried-forward months and provenance must remain correct in the final integrated dashboard. Source schedule documents still need to be discoverable from the rendered month state.
+  - Observation: the `T46` adapter wiring now hits the live REST endpoints and renders honest fallback states when data is unavailable, but full reviewer/browser proof still depends on local Postgres being up.
+    - Why it matters: on a machine without Docker Desktop or another local Postgres listener on the configured `DATABASE_URL`, every live dashboard endpoint returns `500`, which masks the real-data render during verification even though the frontend wiring is correct.
+    - Suggested follow-up: rerun the documented local bootstrap (`npm run docker:db:up`, `npm run db:migrate`, then `npm run dev`) before reviewer or coordinator sign-off so the preserved `T45` shell can be checked against real data instead of fallback states.
+    - Urgency: `soon`
 - Review result: none yet
 - Reviewer: none yet
 - Review tests run: none yet
@@ -86,4 +116,4 @@
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: preserve the `T45` render exactly; wire real data through adapters instead of reinterpreting the design.
+- Next handoff note: start a reviewer chat on branch `codex/T46-live-dashboard-adapter-integration` and say `reviewer T46`. Mention that typecheck/lint/build passed and that live browser verification hit a local environment blocker because Docker Desktop/Postgres was not available.

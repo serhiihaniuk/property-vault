@@ -9,79 +9,82 @@ import { DashboardMonthlyTrendWidget } from "@/src/widgets/dashboard-monthly-tre
 import { DashboardOpenItemsWidget } from "@/src/widgets/dashboard-open-items/ui/dashboard-open-items-widget"
 import { DashboardPrimarySummaryWidget } from "@/src/widgets/dashboard-primary-summary/ui/dashboard-primary-summary-widget"
 
-import {
-  anomalies,
-  categories,
-  currentMonthData,
-  dashboardSummary,
-  generatedAt,
-  monthlyTrend,
-  previousMonth,
-  reconciliationCoverage,
-  reconciliationSummary,
-  selectedMonth,
-  sourceDocuments,
-} from "./dashboard-v0-mock"
+import { type DashboardTimeRange } from "../lib/dashboard-v0-adapter"
+import { useDashboardV0ViewModel } from "../lib/use-dashboard-v0-view-model"
 import { TopBar } from "./top-bar"
 
 export function DashboardPage() {
-  const [timeRange, setTimeRange] = useState<"6m" | "12m" | "24m" | "all">(
-    "12m"
-  )
+  const [timeRange, setTimeRange] = useState<DashboardTimeRange>("12m")
+  const viewModel = useDashboardV0ViewModel(timeRange)
 
   return (
     <div className="relative left-1/2 -my-6 min-h-svh w-screen -translate-x-1/2 overflow-x-clip bg-background">
       <div className="mx-auto max-w-[1600px] px-6 pb-12">
         <TopBar
           title="Finances"
-          subtitle={`Latest state · ${selectedMonth.label}`}
+          subtitle={viewModel.subtitle}
           property="63713"
-          syncFreshness={generatedAt}
+          syncFreshness={viewModel.generatedAt}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
         />
 
         <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <DashboardPrimarySummaryWidget
-            currentMonthData={currentMonthData}
-            previousMonth={previousMonth}
-            selectedMonth={selectedMonth}
-            summary={dashboardSummary}
+            currentMonthData={viewModel.primarySummary.currentMonthData}
+            previousMonth={viewModel.primarySummary.previousMonth}
+            selectedMonth={viewModel.primarySummary.selectedMonth}
+            summary={viewModel.primarySummary.summary}
+            unavailableReason={viewModel.primarySummary.unavailableReason}
           />
           <DashboardAccountStatusWidget
-            anomalies={anomalies}
-            generatedAt={generatedAt}
-            reconciliationCoverage={reconciliationCoverage}
-            reconciliationSummary={reconciliationSummary}
+            anomalies={viewModel.accountStatus.anomalies}
+            generatedAt={viewModel.accountStatus.generatedAt}
+            reconciliationCoverage={
+              viewModel.accountStatus.reconciliationCoverage
+            }
+            reconciliationSummary={
+              viewModel.accountStatus.reconciliationSummary
+            }
+            unavailableReason={viewModel.accountStatus.unavailableReason}
           />
         </section>
 
         <section className="mb-6">
           <DashboardMonthlyTrendWidget
-            categories={categories}
-            data={monthlyTrend}
+            categories={viewModel.monthlyTrend.categories}
+            data={viewModel.monthlyTrend.data}
+            rangeLabel={viewModel.monthlyTrend.rangeLabel}
+            unavailableReason={viewModel.monthlyTrend.unavailableReason}
           />
         </section>
 
         <section className="mb-6">
           <DashboardCategoryBreakdownWidget
-            categories={categories}
-            categoryCount={dashboardSummary.categoryCount}
-            changedCategoryCount={dashboardSummary.changedCategoryCount}
-            previousMonthValue={previousMonth.value}
-            selectedMonthValue={selectedMonth.value}
+            categories={viewModel.categoryBreakdown.categories}
+            categoryCount={viewModel.categoryBreakdown.categoryCount}
+            changedCategoryCount={
+              viewModel.categoryBreakdown.changedCategoryCount
+            }
+            previousMonthValue={viewModel.categoryBreakdown.previousMonthValue}
+            selectedMonthValue={viewModel.categoryBreakdown.selectedMonthValue}
+            unavailableReason={viewModel.categoryBreakdown.unavailableReason}
           />
         </section>
 
         <section className="mb-6">
           <DashboardOpenItemsWidget
-            anomalies={anomalies}
-            reconciliationSummary={reconciliationSummary}
+            anomalies={viewModel.openItems.anomalies}
+            reconciliationSummary={viewModel.openItems.reconciliationSummary}
+            unavailableReason={viewModel.openItems.unavailableReason}
           />
         </section>
 
         <section>
-          <DashboardDocumentsTableWidget documents={sourceDocuments} />
+          <DashboardDocumentsTableWidget
+            documents={viewModel.documentsTable.documents}
+            unavailableReason={viewModel.documentsTable.unavailableReason}
+          />
         </section>
       </div>
     </div>
