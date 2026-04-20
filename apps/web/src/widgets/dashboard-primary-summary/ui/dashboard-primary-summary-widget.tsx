@@ -1,28 +1,27 @@
 import { FileText, FolderOpen, Layers, TrendingUp } from "lucide-react"
 
-import { cn } from "@/src/shared/lib/utils"
-import { Badge } from "@/src/shared/ui/badge"
-
 import {
   formatAmountShort,
   type DashboardSummary,
   type MonthData,
   type Period,
-} from "./dashboard-v0-mock"
+} from "@/src/shared/lib/dashboard-v0"
+import { cn } from "@/src/shared/lib/utils"
+import { Badge } from "@/src/shared/ui/badge"
 
-interface PrimarySummaryCardProps {
+interface DashboardPrimarySummaryWidgetProps {
   selectedMonth: Period
   previousMonth: Period
   summary: DashboardSummary
   currentMonthData: MonthData
 }
 
-export function PrimarySummaryCard({
+export function DashboardPrimarySummaryWidget({
   selectedMonth,
   previousMonth,
   summary,
   currentMonthData,
-}: PrimarySummaryCardProps) {
+}: DashboardPrimarySummaryWidgetProps) {
   const totalCharge = formatAmountShort(summary.totalCharges)
   const previousTotal = formatAmountShort(summary.previousTotalCharges)
   const delta = formatAmountShort(summary.totalDelta)

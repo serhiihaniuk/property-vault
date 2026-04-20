@@ -1,17 +1,16 @@
 "use client"
 
+import { extractTime } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
 import { Badge } from "@/src/shared/ui/badge"
-
-import { extractTime, type TimeRange } from "./dashboard-v0-helpers"
 
 interface TopBarProps {
   title: string
   subtitle: string
   property: string
   syncFreshness: string
-  timeRange: TimeRange
-  onTimeRangeChange: (range: TimeRange) => void
+  timeRange: "6m" | "12m" | "24m" | "all"
+  onTimeRangeChange: (range: "6m" | "12m" | "24m" | "all") => void
 }
 
 export function TopBar({
@@ -22,7 +21,12 @@ export function TopBar({
   timeRange,
   onTimeRangeChange,
 }: TopBarProps) {
-  const ranges: TimeRange[] = ["6m", "12m", "24m", "all"]
+  const ranges: Array<"6m" | "12m" | "24m" | "all"> = [
+    "6m",
+    "12m",
+    "24m",
+    "all",
+  ]
 
   return (
     <header className="flex items-center justify-between py-6">

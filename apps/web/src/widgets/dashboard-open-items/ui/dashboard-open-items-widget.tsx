@@ -1,11 +1,13 @@
 import { AlertCircle, AlertTriangle, Bell, FileText, Info } from "lucide-react"
 
+import {
+  type Anomaly,
+  type ReconciliationSummary,
+} from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
 import { Badge } from "@/src/shared/ui/badge"
 
-import { type Anomaly, type ReconciliationSummary } from "./dashboard-v0-mock"
-
-interface OpenItemsPanelProps {
+interface DashboardOpenItemsWidgetProps {
   anomalies: Anomaly[]
   reconciliationSummary: ReconciliationSummary
 }
@@ -46,10 +48,10 @@ function SeverityIcon({ severity }: { severity: Anomaly["severity"] }) {
   }
 }
 
-export function OpenItemsPanel({
+export function DashboardOpenItemsWidget({
   anomalies,
   reconciliationSummary,
-}: OpenItemsPanelProps) {
+}: DashboardOpenItemsWidgetProps) {
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const withDates = openAnomalies.filter((anomaly) => anomaly.date)
   const withoutDates = openAnomalies.filter((anomaly) => !anomaly.date)

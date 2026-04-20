@@ -10,12 +10,11 @@ import {
   YAxis,
 } from "recharts"
 
+import { useClientReady } from "@/src/shared/hooks/use-client-ready"
+import { getCategoryColor } from "@/src/shared/lib/dashboard-category-colors"
+import { type CategoryBreakdown } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
 import { Badge } from "@/src/shared/ui/badge"
-
-import { getCategoryColor } from "./dashboard-category-colors"
-import { useClientReady } from "./dashboard-v0-helpers"
-import { type CategoryBreakdown } from "./dashboard-v0-mock"
 
 interface CategoryCardProps {
   category: CategoryBreakdown

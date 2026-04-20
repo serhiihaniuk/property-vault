@@ -14,26 +14,39 @@
 - Files changed:
   - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
   - `apps/web/src/views/dashboard/ui/top-bar.tsx`
-  - `apps/web/src/views/dashboard/ui/primary-summary-card.tsx`
-  - `apps/web/src/views/dashboard/ui/account-status-card.tsx`
-  - `apps/web/src/views/dashboard/ui/category-card.tsx`
-  - `apps/web/src/views/dashboard/ui/monthly-trend-chart.tsx`
-  - `apps/web/src/views/dashboard/ui/open-items-panel.tsx`
-  - `apps/web/src/views/dashboard/ui/documents-table.tsx`
-  - `apps/web/src/views/dashboard/ui/dashboard-category-colors.ts`
-  - `apps/web/src/views/dashboard/ui/dashboard-v0-helpers.ts`
+  - `apps/web/src/views/dashboard/ui/dashboard-v0-mock.ts`
+  - `apps/web/src/shared/hooks/use-client-ready.ts`
+  - `apps/web/src/shared/lib/dashboard-category-colors.ts`
+  - `apps/web/src/shared/lib/dashboard-v0.ts`
+  - `apps/web/src/widgets/dashboard-primary-summary/ui/dashboard-primary-summary-widget.tsx`
+  - `apps/web/src/widgets/dashboard-account-status/ui/dashboard-account-status-widget.tsx`
+  - `apps/web/src/widgets/dashboard-category-breakdown/ui/dashboard-category-breakdown-widget.tsx`
+  - `apps/web/src/widgets/dashboard-category-breakdown/ui/category-card.tsx`
+  - `apps/web/src/widgets/dashboard-monthly-trend/ui/dashboard-monthly-trend-widget.tsx`
+  - `apps/web/src/widgets/dashboard-open-items/ui/dashboard-open-items-widget.tsx`
+  - `apps/web/src/widgets/dashboard-documents-table/ui/dashboard-documents-table-widget.tsx`
+  - `apps/web/src/views/dashboard/ui/primary-summary-card.tsx` (removed)
+  - `apps/web/src/views/dashboard/ui/account-status-card.tsx` (removed)
+  - `apps/web/src/views/dashboard/ui/category-card.tsx` (removed)
+  - `apps/web/src/views/dashboard/ui/monthly-trend-chart.tsx` (removed)
+  - `apps/web/src/views/dashboard/ui/open-items-panel.tsx` (removed)
+  - `apps/web/src/views/dashboard/ui/documents-table.tsx` (removed)
+  - `apps/web/src/views/dashboard/ui/dashboard-category-colors.ts` (removed)
+  - `apps/web/src/views/dashboard/ui/dashboard-v0-helpers.ts` (removed)
   - `docs/implementation/tasks/T45-v0-dashboard-architecture-refactor.md`
 - Contracts changed: none
 - Tests run:
   - `npm run --workspace @dabrowskiego/web typecheck`
   - `npm run --workspace @dabrowskiego/web lint`
   - `npm run --workspace @dabrowskiego/web build`
-  - `Invoke-WebRequest http://127.0.0.1:3000`
-  - headless browser verification at `http://127.0.0.1:3000` with fresh Chromium desktop and tablet screenshots after the component split
+  - `curl.exe -I http://127.0.0.1:3000`
+  - `curl.exe http://127.0.0.1:3000`
+  - `npx playwright screenshot --browser chromium --viewport-size "1440,2200" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000 apps/web/.t45-dashboard-desktop.png`
+  - `npx playwright screenshot --browser chromium --viewport-size "834,1194" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000 apps/web/.t45-dashboard-tablet.png`
 - Coordinator notes:
   - The generated v0 dashboard source is the only visual authority for `T45`, including the page shell, top bar, panel order, and card hierarchy.
   - Structural authority for this salvage pass is limited to `ARCHITECTURE.md`, `docs/implementation/UI_PLAYBOOK.md`, `docs/implementation/tasks/T20-web-minimal-fsd.md`, and `apps/web/README.md`.
-  - Use a view-local-first refactor under `src/views/dashboard/ui/**` and preserve the original generated v0 component seams where practical instead of collapsing the dashboard into one giant page file.
+  - Keep `src/views/dashboard/**` limited to route-level composition and page-local glue, while moving the major dashboard sections into `src/widgets/**` without changing the rendered page.
   - Keep mocked data local to the dashboard view layer for `T45`; do not start `T46` live-data wiring.
   - Preserve the rendered result exactly while changing only imports, aliases, folder ownership, route hookup, local helpers/types, mock-data location, and minimal compatibility shims needed inside `apps/web`.
   - Do not hybridize this task with `T37` or reinterpret the dashboard using redesign docs, screenshot annotations, or the prototype HTML.
@@ -45,12 +58,13 @@
 - Reviewer: none yet
 - Review tests run: none yet
 - Merge status: none yet
-- Architecture note: the dashboard route now stays thin, the generated v0 page is split back into view-local components under one dashboard view slice, and same-slice reuse is limited to small local helper files rather than cross-layer or same-level sideways coupling.
+- Architecture note: `dashboard-page.tsx` now stays in `src/views/dashboard/ui/**` as route composition plus page-local glue, while the primary summary, account status, monthly trend, category breakdown, open items, and recent documents surfaces are re-homed into dedicated widget slices. Shared dashboard-only types, color helpers, and client-ready helpers moved downward into `src/shared/**`, mocked data remains view-local, `app/` stays thin, and the full-bleed compatibility wrapper remains localized to the dashboard view so the v0 shell can render without redesign drift.
 - Coordinator notes review: none yet
 - Coordinator final review: none yet
 - Actions taken:
   - restored the generated v0 page composition, shell hierarchy, and panel order from the stash-backed `apps/v0` source instead of preserving the monolithic drifted transplant
-  - extracted the dashboard back into view-local component files that mirror the original generated v0 seams while keeping mocked data local and leaving `app/` thin
+  - re-homed the major dashboard sections from the dashboard view slice into dedicated widget slices while keeping the route-level page shell and mocked data wiring in `src/views/dashboard/ui/**`
+  - moved shared dashboard-only helpers and types downward into `src/shared/**` so widgets do not depend sideways on the view layer
 - Actions ignored:
   - did not use `UI_REDESIGN_SPEC.md`, the redesign screenshot, or `Property Vault.html` as fallback or tie-breaker
   - did not hybridize with `T37` and did not start `T46` live-data work

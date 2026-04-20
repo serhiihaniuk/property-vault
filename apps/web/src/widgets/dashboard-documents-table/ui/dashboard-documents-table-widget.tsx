@@ -1,5 +1,6 @@
 import { ExternalLink, FileText } from "lucide-react"
 
+import { type DocumentListItem } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
 import { Badge } from "@/src/shared/ui/badge"
 import {
@@ -11,9 +12,7 @@ import {
   TableRow,
 } from "@/src/shared/ui/table"
 
-import { type DocumentListItem } from "./dashboard-v0-mock"
-
-interface DocumentsTableProps {
+interface DashboardDocumentsTableWidgetProps {
   documents: DocumentListItem[]
 }
 
@@ -76,7 +75,9 @@ function ExtractionStatusBadge({
   )
 }
 
-export function DocumentsTable({ documents }: DocumentsTableProps) {
+export function DashboardDocumentsTableWidget({
+  documents,
+}: DashboardDocumentsTableWidgetProps) {
   return (
     <div className="rounded-lg border border-border bg-card">
       <div className="border-b border-border px-4 py-3">

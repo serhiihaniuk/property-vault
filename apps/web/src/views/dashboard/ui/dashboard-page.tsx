@@ -2,10 +2,13 @@
 
 import { useState } from "react"
 
-import { AccountStatusCard } from "./account-status-card"
-import { CategoryCard } from "./category-card"
-import { DocumentsTable } from "./documents-table"
-import { type TimeRange } from "./dashboard-v0-helpers"
+import { DashboardAccountStatusWidget } from "@/src/widgets/dashboard-account-status/ui/dashboard-account-status-widget"
+import { DashboardCategoryBreakdownWidget } from "@/src/widgets/dashboard-category-breakdown/ui/dashboard-category-breakdown-widget"
+import { DashboardDocumentsTableWidget } from "@/src/widgets/dashboard-documents-table/ui/dashboard-documents-table-widget"
+import { DashboardMonthlyTrendWidget } from "@/src/widgets/dashboard-monthly-trend/ui/dashboard-monthly-trend-widget"
+import { DashboardOpenItemsWidget } from "@/src/widgets/dashboard-open-items/ui/dashboard-open-items-widget"
+import { DashboardPrimarySummaryWidget } from "@/src/widgets/dashboard-primary-summary/ui/dashboard-primary-summary-widget"
+
 import {
   anomalies,
   categories,
@@ -19,13 +22,12 @@ import {
   selectedMonth,
   sourceDocuments,
 } from "./dashboard-v0-mock"
-import { MonthlyTrendChart } from "./monthly-trend-chart"
-import { OpenItemsPanel } from "./open-items-panel"
-import { PrimarySummaryCard } from "./primary-summary-card"
 import { TopBar } from "./top-bar"
 
 export function DashboardPage() {
-  const [timeRange, setTimeRange] = useState<TimeRange>("12m")
+  const [timeRange, setTimeRange] = useState<"6m" | "12m" | "24m" | "all">(
+    "12m"
+  )
 
   return (
     <div className="relative left-1/2 -my-6 min-h-svh w-screen -translate-x-1/2 overflow-x-clip bg-background">
@@ -40,13 +42,13 @@ export function DashboardPage() {
         />
 
         <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <PrimarySummaryCard
+          <DashboardPrimarySummaryWidget
             currentMonthData={currentMonthData}
             previousMonth={previousMonth}
             selectedMonth={selectedMonth}
             summary={dashboardSummary}
           />
-          <AccountStatusCard
+          <DashboardAccountStatusWidget
             anomalies={anomalies}
             generatedAt={generatedAt}
             reconciliationCoverage={reconciliationCoverage}
@@ -55,40 +57,31 @@ export function DashboardPage() {
         </section>
 
         <section className="mb-6">
-          <MonthlyTrendChart data={monthlyTrend} categories={categories} />
+          <DashboardMonthlyTrendWidget
+            categories={categories}
+            data={monthlyTrend}
+          />
         </section>
 
         <section className="mb-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-medium text-foreground">
-                Breakdown by category
-              </h2>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                This month vs last · {dashboardSummary.categoryCount} categories
-                · {dashboardSummary.changedCategoryCount} changed
-              </p>
-            </div>
-            <div className="rounded bg-secondary/50 px-2 py-1 font-mono text-xs text-muted-foreground">
-              period {previousMonth.value} → {selectedMonth.value}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
-            {categories.slice(0, 8).map((category) => (
-              <CategoryCard key={category.category} category={category} />
-            ))}
-          </div>
+          <DashboardCategoryBreakdownWidget
+            categories={categories}
+            categoryCount={dashboardSummary.categoryCount}
+            changedCategoryCount={dashboardSummary.changedCategoryCount}
+            previousMonthValue={previousMonth.value}
+            selectedMonthValue={selectedMonth.value}
+          />
         </section>
 
         <section className="mb-6">
-          <OpenItemsPanel
+          <DashboardOpenItemsWidget
             anomalies={anomalies}
             reconciliationSummary={reconciliationSummary}
           />
         </section>
 
         <section>
-          <DocumentsTable documents={sourceDocuments} />
+          <DashboardDocumentsTableWidget documents={sourceDocuments} />
         </section>
       </div>
     </div>

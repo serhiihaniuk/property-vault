@@ -1,29 +1,28 @@
 import { AlertCircle, AlertTriangle, CheckCircle2, Info } from "lucide-react"
 
-import { cn } from "@/src/shared/lib/utils"
-import { Badge } from "@/src/shared/ui/badge"
-
-import { extractTime } from "./dashboard-v0-helpers"
 import {
+  extractTime,
   formatAmountShort,
   type Anomaly,
   type ReconciliationCoverage,
   type ReconciliationSummary,
-} from "./dashboard-v0-mock"
+} from "@/src/shared/lib/dashboard-v0"
+import { cn } from "@/src/shared/lib/utils"
+import { Badge } from "@/src/shared/ui/badge"
 
-interface AccountStatusCardProps {
+interface DashboardAccountStatusWidgetProps {
   anomalies: Anomaly[]
   reconciliationCoverage: ReconciliationCoverage
   reconciliationSummary: ReconciliationSummary
   generatedAt: string
 }
 
-export function AccountStatusCard({
+export function DashboardAccountStatusWidget({
   anomalies,
   reconciliationCoverage,
   reconciliationSummary,
   generatedAt,
-}: AccountStatusCardProps) {
+}: DashboardAccountStatusWidgetProps) {
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const criticalCount = openAnomalies.filter(
     (anomaly) => anomaly.severity === "critical"

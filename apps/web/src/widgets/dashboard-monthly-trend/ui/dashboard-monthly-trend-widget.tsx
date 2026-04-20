@@ -13,16 +13,15 @@ import {
   YAxis,
 } from "recharts"
 
-import { cn } from "@/src/shared/lib/utils"
-
-import { getCategoryColor } from "./dashboard-category-colors"
-import { useClientReady } from "./dashboard-v0-helpers"
+import { useClientReady } from "@/src/shared/hooks/use-client-ready"
+import { getCategoryColor } from "@/src/shared/lib/dashboard-category-colors"
 import {
   type CategoryBreakdown,
   type MonthlyTrendData,
-} from "./dashboard-v0-mock"
+} from "@/src/shared/lib/dashboard-v0"
+import { cn } from "@/src/shared/lib/utils"
 
-interface MonthlyTrendChartProps {
+interface DashboardMonthlyTrendWidgetProps {
   data: MonthlyTrendData[]
   categories: CategoryBreakdown[]
 }
@@ -164,10 +163,10 @@ function TrendTooltip({
   )
 }
 
-export function MonthlyTrendChart({
+export function DashboardMonthlyTrendWidget({
   data,
   categories,
-}: MonthlyTrendChartProps) {
+}: DashboardMonthlyTrendWidgetProps) {
   const clientReady = useClientReady()
   const [hoveredMonth, setHoveredMonth] = useState<string | null>(null)
 
