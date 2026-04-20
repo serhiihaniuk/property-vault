@@ -47,7 +47,7 @@ function ProvenanceBlock({
     <div
       data-slot="provenance-block"
       className={cn(
-        "flex flex-col gap-2 rounded-md border border-border-default bg-surface-subtle/50 p-3 text-[12px]",
+        "min-w-0 flex flex-col gap-2 rounded-md border border-border-default bg-surface-subtle/50 p-3 text-[12px]",
         className,
       )}
       {...props}
@@ -94,15 +94,15 @@ function ProvenanceItem({
     <div
       data-slot="provenance-item"
       className={cn(
-        "flex items-baseline justify-between gap-3 text-[12px]",
+        "grid gap-1 text-[12px] sm:grid-cols-[minmax(7.5rem,9rem)_minmax(0,1fr)] sm:items-start sm:gap-x-3",
         className,
       )}
       {...props}
     >
-      <span className="text-fg-subtle">{label}</span>
+      <span className="pt-0.5 text-fg-subtle">{label}</span>
       <span
         className={cn(
-          "text-right text-fg-primary",
+          "min-w-0 break-all text-left text-fg-primary whitespace-normal",
           mono && "font-mono tabular-nums",
         )}
       >

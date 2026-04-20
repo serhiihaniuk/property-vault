@@ -63,6 +63,7 @@
 - Completion signal: document surfaces are dense, readable, provenance-forward, and visually aligned with the redesigned dashboard without bespoke styling drift.
 - Files changed:
   - `apps/web/src/shared/lib/document-format.ts`
+  - `apps/web/src/shared/ui/provenance.tsx`
   - `apps/web/src/views/documents/ui/documents-page.tsx`
   - `apps/web/src/views/document-detail/ui/document-detail-page.tsx`
   - `apps/web/src/widgets/documents-catalog/ui/documents-catalog-widget.tsx`
@@ -83,6 +84,8 @@
   - `npx playwright screenshot --browser chromium --viewport-size "1440,2200" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000/documents/<hash> apps/web/.t38-detail-desktop.png`
   - `npx playwright screenshot --browser chromium --viewport-size "1024,1400" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000/documents/<hash> apps/web/.t38-detail-tablet.png`
   - `npm run --workspace @dabrowskiego/web dev -- --hostname 127.0.0.1 --port 3000` with a fresh rerun of `/documents` and `/documents/<hash>` after the duplicate-key fix; stderr stayed empty on the restarted server
+  - follow-up overflow fix verification: `npm run --workspace @dabrowskiego/web typecheck`
+  - follow-up overflow fix verification: `npx playwright screenshot --browser chromium --viewport-size "1440,2200" --full-page --wait-for-timeout 2000 http://localhost:3000/documents/<hash> apps/web/.overflow-check.png`
 - Coordinator notes:
   - Carry-forward from `T37`: if documents surfaces need signed-money, delta-intent, or change-status formatting already duplicated in dashboard widgets, extract those helpers into a shared finance-format module in `apps/web/src/shared/lib/**` instead of copying them again inside document widgets.
   - Why it matters: the sibling-slice import rule blocks widget-to-widget reuse, so shared formatting logic must move downward into the shared layer before later redesign slices accumulate drift.

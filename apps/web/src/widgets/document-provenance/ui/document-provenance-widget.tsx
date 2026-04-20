@@ -208,7 +208,7 @@ export function DocumentProvenanceWidget({
                   label={source.sourceKindLabel}
                 />
                 <div className="flex flex-col gap-2">
-                  <p className="font-mono text-[12px] text-fg-primary">
+                  <p className="min-w-0 break-all font-mono text-[12px] text-fg-primary">
                     {source.originalFilename ?? "Original filename unavailable"}
                   </p>
                   {source.reference.length === 0 ? (
