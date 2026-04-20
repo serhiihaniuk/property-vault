@@ -65,13 +65,18 @@
 - Merge status: `ready`
 - Architecture note: acceptable and aligned. `dashboard-page.tsx` stays a thin route-level composition surface, the major v0 dashboard sections live in dedicated widget slices, mocked data remains local to `T45`, and the repo-native split preserves the generated v0 page shell without mixing in `T46` live-data wiring.
 - Coordinator notes review: confirmed. The committed `T45` refactor is visually aligned with the generated v0 dashboard source, structurally aligned with the repo's minimal FSD rules, and the earlier legacy-widget hygiene blocker has been removed.
-- Coordinator final review: none yet
+- Coordinator final review:
+  - merged the reviewer-approved `T45` v0 dashboard transplant into `master`
+  - accepted the generated v0 dashboard source as the sole visual authority for this task and confirmed the final page preserves that shell inside `apps/web`
+  - accepted the refactor that keeps `src/views/dashboard/**` thin, moves the major screen sections into widget slices, and keeps live-data wiring deferred to `T46`
 - Actions taken:
   - restored the generated v0 page composition, shell hierarchy, and panel order from the stash-backed `apps/v0` source instead of preserving the monolithic drifted transplant
   - re-homed the major dashboard sections from the dashboard view slice into dedicated widget slices while keeping the route-level page shell and mocked data wiring in `src/views/dashboard/ui/**`
   - moved shared dashboard-only helpers and types downward into `src/shared/**` so widgets do not depend sideways on the view layer
   - restored the unrelated local edits in the legacy dashboard widgets so the branch is clean for fresh review
+  - merged `codex/T45-v0-dashboard-architecture-refactor` into `master`
+  - recorded `T45` as `done` in `APP_IMPLEMENTATION_PLAN.md`
 - Actions ignored:
   - did not use `UI_REDESIGN_SPEC.md`, the redesign screenshot, or `Property Vault.html` as fallback or tie-breaker
   - did not hybridize with `T37` and did not start `T46` live-data work
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Next handoff note: nothing right now.
