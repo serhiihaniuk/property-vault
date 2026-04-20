@@ -343,7 +343,7 @@ integration. Do not resume `T38` or `T39` until `T46` is complete.
 | `T45` | Refactor v0 dashboard into `apps/web` architecture | `done` | `T35`, `T36` | dashboard route/view, dashboard-local components, dashboard-local mock data wiring, page shell integration | `gpt-5.4 / xhigh` | `redesign-dash-a` | `strong` | live dashboard route renders the exact v0 page shell and dashboard composition with mocked data inside `apps/web` structure and conventions |
 | `T46` | Wire live dashboard data into v0 dashboard | `done` | `T30`, `T32`, `T34`, `T45` | dashboard query wiring, dashboard view-model adapters, minimal dashboard-only compatibility helpers | `gpt-5.4 / xhigh` | `redesign-dash-b` | `strong` | the `T45` dashboard render is preserved while powered by real contracts, carried-forward months, provenance, anomalies, and reconciliation data |
 | `T38` | Redesign documents and document detail | `done` | `T31`, `T36`, `T46` | document list/detail views and widgets only | `gpt-5.4 / high` | `redesign-d` | `strong` | document surfaces are dense, readable, provenance-forward, and visually aligned with the v0-integrated dashboard shell |
-| `T39` | Redesign reconciliation and anomaly surfaces | `claimed` | `T32`, `T36`, `T46` | yearly reconciliation and anomaly UI only | `gpt-5.4 / high` | `redesign-e` | `strong` | yearly review and anomalies feel like part of the same product, with shared states and no bespoke styling drift after the v0 dashboard integration lands |
+| `T39` | Redesign reconciliation and anomaly surfaces | `done` | `T32`, `T36`, `T46` | yearly reconciliation and anomaly UI only | `gpt-5.4 / high` | `redesign-e` | `strong` | yearly review and anomalies feel like part of the same product, with shared states and no bespoke styling drift after the v0 dashboard integration lands |
 
 ### Wave 4 - Access
 
@@ -358,8 +358,9 @@ integration. Do not resume `T38` or `T39` until `T46` is complete.
 | `T40` | Import-boundary lint rules | `todo` | `T20`, `T36` | lint config and boundary rules only | `gpt-5.4-mini / medium` | `hardening-a` | `standard` | forbidden imports fail lint with useful messages, including redesign-related UI boundary rules |
 | `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T39`, `T46` | application, contracts, and UI surfaces for sync status only | `gpt-5.4 / high` | `hardening-b` | `strong` | app clearly shows last sync/freshness state inside the v0-integrated redesigned finance surfaces with tested behavior |
 | `T42` | Error, empty, and loading states | `todo` | `T33`, `T38`, `T39`, `T46` | slice UI states only | `gpt-5.4-mini / medium` | `hardening-c` | `standard` | primary redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path lands |
+| `T47` | Remove orphaned pre-v0 reconciliation/anomaly widgets | `todo` | `T39`, `T46` | legacy reconciliation/anomaly widget files and stale references only | `gpt-5.4-mini / medium` | `hardening-c2` | `standard` | only one authoritative reconciliation/anomaly UI path remains, with no orphaned pre-v0 widgets or mojibake-laden leftovers confusing future work |
 | `T43` | Dev/bootstrap scripts | `todo` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / low` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
-| `T44` | Final documentation cleanup | `todo` | `T33`, `T35`-`T43`, `T45`, `T46` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
+| `T44` | Final documentation cleanup | `todo` | `T33`, `T35`-`T43`, `T45`, `T46`, `T47` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
 
 ## 10. Reviewer Workflow
 

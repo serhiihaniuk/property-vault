@@ -1,6 +1,6 @@
 # T39 - Redesign reconciliation and anomaly surfaces
 
-- Status: `claimed`
+- Status: `done`
 - Owner: `coordinator`
 - Goal: Complete the finance-analysis surfaces under the redesign system.
 - Task type: `redesign`
@@ -61,20 +61,27 @@
   - move reusable finance or status helpers downward into `src/shared/**` instead of duplicating them inside widgets
   - run the strong verification gate and compare the result against the v0-integrated dashboard precedent
 - Completion signal: yearly review and anomaly surfaces feel like part of the same product, with shared states, strong hierarchy, and no bespoke visual language.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - no new T39-only branch changes; live completion was verified in the already-merged dashboard-integrated widgets under `apps/web/src/widgets/dashboard-account-status/**` and `apps/web/src/widgets/dashboard-open-items/**`
+- Contracts changed: none
+- Tests run:
+  - coordinator live verification of `/` on localhost:3000 against the task completion criteria
 - Coordinator notes:
   - Carry-forward from `T37`: if reconciliation or anomaly surfaces need money, signed-money, delta-intent, or change-status formatting already duplicated in dashboard widgets, extract those helpers into a shared finance-format module in `apps/web/src/shared/lib/**` instead of copying them again inside these widgets.
   - Why it matters: the sibling-slice import rule blocks widget-to-widget reuse, so shared formatting logic must move downward into the shared layer before later redesign slices accumulate drift.
   - Carry-forward from `T45` and `T46`: use the v0-integrated dashboard shell, panel density, and adapter-boundary patterns as the redesign precedent for reconciliation/anomaly work, not the older `T37` widget composition.
-- Review result: none yet
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: none yet
-- Architecture note: none yet
-- Coordinator notes review: none yet
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: keep reconciliation and anomalies finance-first, evidence-linked, and visually consistent with the v0-integrated dashboard shell.
+- Review result: not run as a separate task branch; coordinator verified that the live dashboard-integrated reconciliation/anomaly surfaces already satisfy the product-level redesign goal
+- Reviewer: none
+- Review tests run: none
+- Merge status: no separate T39 branch was merged; task closed as already satisfied by the live `master` state after `T46`
+- Architecture note: reconciliation and anomaly redesign now lives as dashboard-integrated surfaces in the v0 shell, which is acceptable for this task because the product-level goal was visual and interaction continuity rather than a separate route-level implementation
+- Coordinator notes review:
+  - Confirmed that the live `Operational Status` and `Open Items & Anomalies` sections on `/` already deliver the intended redesign outcome.
+  - Confirmed that older `yearly-reconciliation` and `anomaly-feed` widgets are orphaned leftovers from the pre-v0 path rather than missing live work.
+- Coordinator final review: `T39` is already satisfied in product terms by the live dashboard-integrated reconciliation and anomaly surfaces on `/`, so a new implementation branch is unnecessary.
+- Actions taken:
+  - marked `T39` `done`
+  - created `T47` to remove the orphaned pre-v0 reconciliation/anomaly widgets and stale references
+- Actions ignored:
+  - did not force a separate route-level reconciliation/anomaly implementation, because the task goal was already met by the integrated dashboard surfaces
+- Next handoff note: use `T47` for codebase cleanup; do not reopen `T39` unless the product scope changes beyond the existing integrated dashboard surfaces.

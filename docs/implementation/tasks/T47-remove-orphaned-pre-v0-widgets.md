@@ -1,0 +1,64 @@
+# T47 - Remove orphaned pre-v0 reconciliation/anomaly widgets
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Remove the dead pre-v0 reconciliation/anomaly widget path so future UI work sees only one authoritative implementation.
+- Task type: `cleanup/refactor`
+- Dependencies: `T39`, `T46`
+- Write scope: legacy reconciliation/anomaly widget files and stale references only
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4-mini / medium`
+- Wave group: `hardening-c2`
+- Required verification: `standard`
+- Success criteria: only the live dashboard-integrated reconciliation/anomaly path remains, orphaned pre-v0 widgets are removed or clearly retired, and future implementers cannot mistake them for active UI.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - the completed `T46` dashboard-integrated implementation
+  - the completed `T39` coordinator disposition
+- Secondary context:
+  - `APP_IMPLEMENTATION_PLAN.md`
+  - `docs/implementation/tasks/T39-reconciliation-anomalies-redesign.md`
+- Not authoritative:
+  - the older `T37` dashboard composition
+  - unused pre-v0 widget files as a design reference
+  - keeping dead code around "just in case"
+- Must do:
+  - preserve the live reconciliation/anomaly experience already mounted on `/`
+  - remove or explicitly retire orphaned pre-v0 widget files and stale references
+  - eliminate confusing mojibake-bearing leftovers from the dead path
+  - leave one clear authoritative implementation path for future work
+- Must not do:
+  - do not redesign the live dashboard
+  - do not change contracts, routes, or adapter boundaries
+  - do not widen this into a new reconciliation/anomaly feature task
+- Expected ownership shape:
+  - live reconciliation and anomaly summary surfaces remain in the active dashboard-integrated widgets
+  - dead alternative widget paths should not remain under `src/widgets/**` without a live mount point
+  - any retained shared helpers must still live in `src/shared/**`
+- Non-goals:
+  - no new route-level reconciliation screen
+  - no anomaly UX redesign
+  - no dashboard shell changes
+- Known traps:
+  - deleting currently mounted dashboard-integrated widgets by mistake
+  - leaving stale imports, task references, or comments that still imply two active implementations
+  - preserving mojibake text in files that should either be fixed or removed
+- Review focus:
+  - no regression to the live dashboard-integrated reconciliation/anomaly surfaces
+  - only one authoritative implementation path remains
+  - no stale references or dead widget drift remain in the repo
+- Implementation outline:
+  - identify the currently mounted reconciliation/anomaly widgets and protect that live path
+  - remove the orphaned pre-v0 `yearly-reconciliation` and `anomaly-feed` widget path if it is truly unused
+  - clean any stale imports, references, or task notes that imply the orphaned path is still active
+  - run the standard verification gate and confirm the live dashboard still renders the active reconciliation/anomaly surfaces
+- Completion signal: the repo has one clear reconciliation/anomaly implementation path and future redesign work cannot confuse dead pre-v0 widgets for active UI.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes:
+  - This task exists because `T39` was already satisfied by the live dashboard-integrated surfaces on `/`, but the repo still contained older unused `yearly-reconciliation` and `anomaly-feed` widgets from the pre-v0 path.
+  - Why it matters: those leftovers confused queue planning and made it look like `T39` was incomplete even though the live product already had the intended redesign outcome.
+- Next handoff note: preserve the live dashboard-integrated surfaces and remove only the dead alternative path.
