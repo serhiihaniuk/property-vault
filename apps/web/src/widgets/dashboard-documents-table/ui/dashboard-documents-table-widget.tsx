@@ -30,7 +30,7 @@ function DocumentTypeBadge({
 
   const labels: Record<DocumentListItem["documentType"], string> = {
     monthly_charge: "zawiadomienie",
-    resolution: "uchwala",
+    resolution: "uchwała",
     settlement: "rozliczenie",
   }
 

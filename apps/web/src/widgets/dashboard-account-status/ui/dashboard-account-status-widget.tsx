@@ -157,7 +157,7 @@ export function DashboardAccountStatusWidget({
                     {
                       minimumFractionDigits: 2,
                     }
-                  )} zl`}
+                  )} zł`}
             </div>
           </div>
         </div>

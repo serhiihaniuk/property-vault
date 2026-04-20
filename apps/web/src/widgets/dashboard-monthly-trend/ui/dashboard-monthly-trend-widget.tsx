@@ -135,7 +135,7 @@ function TrendTooltip({
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground">Total</span>
           <span className="font-mono font-medium text-foreground tabular-nums">
-            {total.toLocaleString("pl-PL", { minimumFractionDigits: 2 })} zl
+            {total.toLocaleString("pl-PL", { minimumFractionDigits: 2 })} zł
           </span>
         </div>
         <div className="flex justify-between text-[10px]">
@@ -249,7 +249,7 @@ export function DashboardMonthlyTrendWidget({
             Monthly Trend
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {rangeLabel} · avg {hasTrendData ? avgTotal.toFixed(0) : "—"} zl
+            {rangeLabel} · avg {hasTrendData ? avgTotal.toFixed(0) : "—"} zł
           </p>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">

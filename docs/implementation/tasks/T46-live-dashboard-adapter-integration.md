@@ -107,13 +107,24 @@
     - Why it matters: on a machine without Docker Desktop or another local Postgres listener on the configured `DATABASE_URL`, every live dashboard endpoint returns `500`, which masks the real-data render during verification even though the frontend wiring is correct.
     - Suggested follow-up: rerun the documented local bootstrap (`npm run docker:db:up`, `npm run db:migrate`, then `npm run dev`) before reviewer or coordinator sign-off so the preserved `T45` shell can be checked against real data instead of fallback states.
     - Urgency: `soon`
-- Review result: none yet
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: none yet
-- Architecture note: none yet
-- Coordinator notes review: none yet
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/application test`
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `npm run docker:db:up`
+  - `npm run db:migrate`
+  - `npm run vault -- context`
+  - `curl.exe http://127.0.0.1:3000/api/health`
+  - `curl.exe http://127.0.0.1:3000/api/dashboard/month-breakdown`
+  - `curl.exe http://127.0.0.1:3000/api/documents`
+  - live browser verification at `http://127.0.0.1:3000` with desktop and tablet screenshots after local Postgres was up
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. `src/views/dashboard/lib/**` now owns the live dashboard adapter and query orchestration, widgets remain presentational, and reviewer verification confirmed the `T45` shell holds up against real API data without contract drift.
+- Coordinator notes review: confirmed with one reviewer fix. The adapter boundary and fallback strategy are sound, the earlier Docker/Postgres blocker was environmental rather than architectural, and reviewer restored the exact `T45` user-facing copy (`zł`, `uchwała`) before final browser verification on live data.
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: start a reviewer chat on branch `codex/T46-live-dashboard-adapter-integration` and say `reviewer T46`. Mention that typecheck/lint/build passed and that live browser verification hit a local environment blocker because Docker Desktop/Postgres was not available.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.

@@ -86,7 +86,7 @@ export function DashboardPrimarySummaryWidget({
             {wholePart}
           </span>
           <span className="font-mono text-2xl text-muted-foreground">
-            {totalCharge === null ? "" : `,${decimalPart} zl`}
+            {totalCharge === null ? "" : `,${decimalPart} zł`}
           </span>
         </div>
         <div className="mt-2 flex items-center gap-2 text-sm">
@@ -104,7 +104,7 @@ export function DashboardPrimarySummaryWidget({
                 {previousTotal?.toLocaleString("pl-PL", {
                   minimumFractionDigits: 2,
                 }) ?? "—"}{" "}
-                zl)
+                zł)
               </span>
             </>
           )}
@@ -126,7 +126,7 @@ export function DashboardPrimarySummaryWidget({
             {summary?.largestCategory
               ? `${formatAmountShort(
                   summary.largestCategory.amount
-                ).toLocaleString("pl-PL", { minimumFractionDigits: 2 })} zl`
+                ).toLocaleString("pl-PL", { minimumFractionDigits: 2 })} zł`
               : "—"}
           </div>
         </div>
@@ -160,7 +160,7 @@ export function DashboardPrimarySummaryWidget({
                   summary.topChange.delta
                 ).toLocaleString("pl-PL", {
                   minimumFractionDigits: 2,
-                })} zl`
+                })} zł`
               : "—"}
           </div>
         </div>
