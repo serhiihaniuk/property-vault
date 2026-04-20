@@ -54,12 +54,17 @@
     - Why it matters: later redesign tasks can still extract a common app shell once the finance surfaces converge, but `T45` stays focused on repo-native ownership plus exact v0 fidelity.
     - Suggested follow-up: consider a dedicated shell extraction only after `T45` is reviewed and the redesign wave settles on a common full-width page shell.
     - Urgency: `soon`
-- Review result: none yet after latest implementer cleanup
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: none yet
-- Architecture note: the current committed `T45` refactor is structurally aligned with the repo’s minimal FSD rules: `dashboard-page.tsx` is thin route composition plus page-local glue, major dashboard sections are widget-owned, and small dashboard-only helpers moved downward into `src/shared/**` without starting `T46` live-data wiring. The remaining blocker is branch hygiene, not ownership or v0 fidelity.
-- Coordinator notes review: the latest blocked review confirmed the committed `T45` refactor itself is visually aligned with the generated v0 source and structurally aligned with the repo's minimal FSD rules. The only blocker was unrelated local drift in legacy dashboard widgets outside the declared write scope, which has now been cleaned from the branch.
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `npm run --workspace @dabrowskiego/web dev -- --hostname 127.0.0.1 --port 3000`
+  - headless browser verification at `http://127.0.0.1:3000` with desktop and tablet renders plus DOM checks for key v0 dashboard sections and error overlays
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. `dashboard-page.tsx` stays a thin route-level composition surface, the major v0 dashboard sections live in dedicated widget slices, mocked data remains local to `T45`, and the repo-native split preserves the generated v0 page shell without mixing in `T46` live-data wiring.
+- Coordinator notes review: confirmed. The committed `T45` refactor is visually aligned with the generated v0 dashboard source, structurally aligned with the repo's minimal FSD rules, and the earlier legacy-widget hygiene blocker has been removed.
 - Coordinator final review: none yet
 - Actions taken:
   - restored the generated v0 page composition, shell hierarchy, and panel order from the stash-backed `apps/v0` source instead of preserving the monolithic drifted transplant
@@ -69,4 +74,4 @@
 - Actions ignored:
   - did not use `UI_REDESIGN_SPEC.md`, the redesign screenshot, or `Property Vault.html` as fallback or tie-breaker
   - did not hybridize with `T37` and did not start `T46` live-data work
-- Next handoff note: start a reviewer chat on branch `codex/T45-v0-dashboard-architecture-refactor` and say `reviewer T45 branch codex/T45-v0-dashboard-architecture-refactor`.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
