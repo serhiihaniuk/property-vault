@@ -1,6 +1,6 @@
 # T45 - Refactor v0 dashboard into `apps/web` architecture
 
-- Status: `done`
+- Status: `blocked`
 - Owner: `codex/T45-v0-dashboard-architecture-refactor`
 - Goal: Make the generated v0 dashboard repo-native inside `apps/web` without visual drift.
 - Dependencies: `T35`, `T36`
@@ -32,13 +32,18 @@
     - Why it matters: if `T38` and `T39` adopt the same v0-integrated shell, the repo will want a shared app-shell extraction instead of repeating the full-bleed wrapper per page.
     - Suggested follow-up: once the redesigned finance surfaces converge, extract the common full-width page shell into shared UI or the `(app)` layout in one bounded follow-up rather than during `T45`.
     - Urgency: `soon`
-- Review result: none yet
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: none yet
-- Architecture note: none yet
-- Coordinator notes review: none yet
+- Review result: `blocked`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `npm run --workspace @dabrowskiego/web dev -- --hostname 127.0.0.1 --port 3000`
+  - headless browser verification at `http://127.0.0.1:3000` with desktop and tablet screenshots plus DOM spot-check for key dashboard sections
+- Merge status: `blocked`
+- Architecture note: the view-local full-bleed shell escape is acceptable and aligned for `T45`, but the rendered dashboard still drifts too far from the hard-template v0 composition to serve as the stable base for `T46`.
+- Coordinator notes review: the shared-shell follow-up note is valid, but it should only be promoted after `T45` is brought back to exact v0 fidelity and becomes merge-ready.
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: start a reviewer chat on branch `codex/T45-v0-dashboard-architecture-refactor` and say `reviewer T45 branch codex/T45-v0-dashboard-architecture-refactor`.
+- Next handoff note: send this branch back to the implementer and preserve the hard-template v0 shell and section composition before requesting another review.
