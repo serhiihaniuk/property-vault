@@ -103,7 +103,14 @@
 - Merge status: `ready`
 - Architecture note: acceptable and aligned. T38 keeps route composition in `src/views/**`, screen sections in `src/widgets/**`, and shared document formatting in `src/shared/**`; reviewer only tightened table/layout behavior so the redesigned evidence metadata stays visible at desktop width and detail surfaces no longer stretch empty panels against taller sibling cards.
 - Coordinator notes review: confirmed. The carry-forward shared-format guidance was applied through `apps/web/src/shared/lib/document-format.ts`, and reviewer added two bounded presentational fixes on the task branch so the dense documents table and two-column detail layout match the intended evidence-first operator surface in real browser verification.
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - merged the reviewer-approved `T38` documents redesign into `master`
+  - accepted the redesign as aligned with the v0-integrated dashboard precedent, with document list/detail surfaces now dense, evidence-first, and visually consistent with the current product shell
+  - accepted the shared document-format and provenance primitive extraction as the right downward move to avoid widget-local formatting drift in later redesign slices
+- Actions taken:
+  - merged `codex/T38-documents-detail-redesign` into `master`
+  - recorded `T38` as `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - kept the shared formatting/provenance extraction in `src/shared/**` as the reuse path for later redesign work instead of duplicating those helpers in sibling widgets
+- Actions ignored:
+  - did not widen this task into reconciliation/anomaly redesign or access/auth work
+- Next handoff note: nothing right now.
