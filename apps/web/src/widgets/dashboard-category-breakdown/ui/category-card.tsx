@@ -48,7 +48,12 @@ export function CategoryCard({ category }: CategoryCardProps) {
 
   const { avgValue, maxValue, minValue, trend } = useMemo(() => {
     if (!category.history || category.history.length === 0) {
-      return { avgValue: 0, maxValue: 0, minValue: 0, trend: "flat" as const }
+      return {
+        avgValue: null,
+        maxValue: null,
+        minValue: null,
+        trend: "flat" as const,
+      }
     }
 
     const values = category.history.map((entry) => entry.value)
@@ -179,12 +184,14 @@ export function CategoryCard({ category }: CategoryCardProps) {
                   </linearGradient>
                 </defs>
                 <YAxis domain={["dataMin - 10", "dataMax + 10"]} hide />
-                <ReferenceLine
-                  stroke="var(--muted-foreground)"
-                  strokeDasharray="2 2"
-                  strokeOpacity={0.25}
-                  y={avgValue}
-                />
+                {avgValue !== null ? (
+                  <ReferenceLine
+                    stroke="var(--muted-foreground)"
+                    strokeDasharray="2 2"
+                    strokeOpacity={0.25}
+                    y={avgValue}
+                  />
+                ) : null}
                 <Area
                   dataKey="value"
                   dot={false}
@@ -206,7 +213,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
             avg
           </span>
           <span className="font-mono text-muted-foreground tabular-nums">
-            {avgValue.toFixed(0)}
+            {avgValue === null ? "—" : avgValue.toFixed(0)}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -214,7 +221,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
             min
           </span>
           <span className="font-mono text-muted-foreground tabular-nums">
-            {minValue.toFixed(0)}
+            {minValue === null ? "—" : minValue.toFixed(0)}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -222,7 +229,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
             max
           </span>
           <span className="font-mono text-muted-foreground tabular-nums">
-            {maxValue.toFixed(0)}
+            {maxValue === null ? "—" : maxValue.toFixed(0)}
           </span>
         </div>
       </div>

@@ -240,7 +240,7 @@ export function buildDashboardV0ViewModel({
       ]),
     },
     categoryBreakdown: {
-      categories: selectedCategories,
+      categories: trendCategories,
       categoryCount: dashboard?.summary?.categoryCount ?? breakdownItems.length,
       changedCategoryCount:
         dashboard?.summary?.changedCategoryCount ??
