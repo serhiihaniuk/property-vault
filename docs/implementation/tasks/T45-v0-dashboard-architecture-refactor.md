@@ -1,6 +1,6 @@
 # T45 - Refactor v0 dashboard into `apps/web` architecture
 
-- Status: `done`
+- Status: `blocked`
 - Owner: `codex/T45-v0-dashboard-architecture-refactor`
 - Goal: Make the generated v0 dashboard repo-native inside `apps/web` without visual drift.
 - Dependencies: `T35`, `T36`
@@ -34,6 +34,10 @@
   - `apps/web/src/views/dashboard/ui/dashboard-category-colors.ts` (removed)
   - `apps/web/src/views/dashboard/ui/dashboard-v0-helpers.ts` (removed)
   - `docs/implementation/tasks/T45-v0-dashboard-architecture-refactor.md`
+  - local branch also currently has unreviewed edits outside T45 scope in:
+    - `apps/web/src/widgets/dashboard-foundation/ui/dashboard-foundation-widget.tsx`
+    - `apps/web/src/widgets/dashboard-overview/ui/dashboard-overview-widget.tsx`
+    - `apps/web/src/widgets/dashboard-summary/ui/dashboard-summary-widget.tsx`
 - Contracts changed: none
 - Tests run:
   - `npm run --workspace @dabrowskiego/web typecheck`
@@ -54,12 +58,17 @@
     - Why it matters: later redesign tasks can still extract a common app shell once the finance surfaces converge, but `T45` stays focused on repo-native ownership plus exact v0 fidelity.
     - Suggested follow-up: consider a dedicated shell extraction only after `T45` is reviewed and the redesign wave settles on a common full-width page shell.
     - Urgency: `soon`
-- Review result: none yet
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: none yet
-- Architecture note: `dashboard-page.tsx` now stays in `src/views/dashboard/ui/**` as route composition plus page-local glue, while the primary summary, account status, monthly trend, category breakdown, open items, and recent documents surfaces are re-homed into dedicated widget slices. Shared dashboard-only types, color helpers, and client-ready helpers moved downward into `src/shared/**`, mocked data remains view-local, `app/` stays thin, and the full-bleed compatibility wrapper remains localized to the dashboard view so the v0 shell can render without redesign drift.
-- Coordinator notes review: none yet
+- Review result: `blocked`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `npm run --workspace @dabrowskiego/web dev -- --hostname 127.0.0.1 --port 3000`
+  - headless browser verification at `http://127.0.0.1:3000` with desktop and tablet screenshots plus DOM spot-check for the v0 dashboard sections
+- Merge status: `blocked`
+- Architecture note: the current committed `T45` refactor is structurally aligned with the repo’s minimal FSD rules: `dashboard-page.tsx` is thin route composition plus page-local glue, major dashboard sections are widget-owned, and small dashboard-only helpers moved downward into `src/shared/**` without starting `T46` live-data wiring. The remaining blocker is branch hygiene, not ownership or v0 fidelity.
+- Coordinator notes review: the coordinator notes are valid. The bounded full-bleed shell shim stays acceptable for `T45`, but the branch cannot be treated as review-ready while unrelated legacy-widget edits remain in the checkout outside the declared write scope.
 - Coordinator final review: none yet
 - Actions taken:
   - restored the generated v0 page composition, shell hierarchy, and panel order from the stash-backed `apps/v0` source instead of preserving the monolithic drifted transplant
@@ -68,4 +77,4 @@
 - Actions ignored:
   - did not use `UI_REDESIGN_SPEC.md`, the redesign screenshot, or `Property Vault.html` as fallback or tie-breaker
   - did not hybridize with `T37` and did not start `T46` live-data work
-- Next handoff note: start a reviewer chat on branch `codex/T45-v0-dashboard-architecture-refactor` and say `reviewer T45 branch codex/T45-v0-dashboard-architecture-refactor`.
+- Next handoff note: clean or move the unrelated local edits in the legacy dashboard widgets, then request reviewer again on branch `codex/T45-v0-dashboard-architecture-refactor`.
