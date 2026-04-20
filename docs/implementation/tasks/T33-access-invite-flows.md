@@ -1,7 +1,7 @@
 # T33 — Access/invite flows
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Deliver private invite-only access flows.
 - Task type: `standard slice`
 - Dependencies: `T12`, `T21`, `T22`, `T23`, `T36`

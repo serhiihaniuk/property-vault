@@ -1,7 +1,7 @@
 # Property Vault App Implementation Plan
 
 **Status:** Active  
-**Last updated:** 2026-04-20  
+**Last updated:** 2026-04-21  
 **Scope:** App architecture, package foundations, web shell, redesign system,
 first vertical slices, and supporting test/reporting workflow
 
@@ -349,7 +349,7 @@ integration. Do not resume `T38` or `T39` until `T46` is complete.
 
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `T33` | Access/invite flows | `todo` | `T12`, `T21`, `T22`, `T23`, `T36` | auth/access routes, application, widgets | `gpt-5.4 / xhigh` | `slice-access` | `strong` | invite-only access flow works end to end, access/auth screens use the redesign token/primitives system, and auth UI does not invent a parallel visual language |
+| `T33` | Access/invite flows | `claimed` | `T12`, `T21`, `T22`, `T23`, `T36` | auth/access routes, application, widgets | `gpt-5.4 / xhigh` | `slice-access` | `strong` | invite-only access flow works end to end, access/auth screens use the redesign token/primitives system, and auth UI does not invent a parallel visual language |
 
 ### Wave 5 - Hardening
 
