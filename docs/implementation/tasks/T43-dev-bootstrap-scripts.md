@@ -59,6 +59,10 @@
   - Why it matters: the documented bootstrap path could look successful through Docker, migrations, and sync while the web app still failed at runtime with missing DB env in route execution.
   - Suggested follow-up: T43 should make the local run path boring and explicit from `master`, either by standardizing app-local env files or by adding a root startup script that exports env to the web process.
   - Urgency: `soon`
+  - Observation: live dashboard/browser verification in `T46` only became meaningful once local Postgres was actually up, so bootstrap docs/scripts should make that prerequisite explicit instead of letting reviewers discover it indirectly from `500` responses.
+  - Why it matters: the app shell can boot and still mask real-data verification behind fallback states or failing API routes if Docker Desktop/local Postgres is not running.
+  - Suggested follow-up: T43 should document and script the exact prerequisite order for live verification (`docker:db:up`, migrations, then app startup) so future review and support runs do not rely on coordinator memory.
+  - Urgency: `soon`
 - Next handoff note: prefer boring explicit scripts over clever wrappers
 
 

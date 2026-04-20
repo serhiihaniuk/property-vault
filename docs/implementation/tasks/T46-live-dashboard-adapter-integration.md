@@ -124,7 +124,14 @@
 - Merge status: `ready`
 - Architecture note: acceptable and aligned. `src/views/dashboard/lib/**` now owns the live dashboard adapter and query orchestration, widgets remain presentational, and reviewer verification confirmed the `T45` shell holds up against real API data without contract drift.
 - Coordinator notes review: confirmed with one reviewer fix. The adapter boundary and fallback strategy are sound, the earlier Docker/Postgres blocker was environmental rather than architectural, and reviewer restored the exact `T45` user-facing copy (`zł`, `uchwała`) before final browser verification on live data.
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - merged the reviewer-approved `T46` live dashboard adapter work into `master`
+  - accepted the adapter boundary that keeps `src/views/dashboard/lib/**` responsible for live-query orchestration and view-model mapping while preserving the `T45` widget-owned presentational layer
+  - accepted the fallback-state strategy as aligned with the task contract because it preserves the `T45` shell without forcing contract drift or shell reinterpretation
+- Actions taken:
+  - merged `codex/T46-live-dashboard-adapter-integration` into `master`
+  - recorded `T46` as `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - updated `T43` so bootstrap/docs work now explicitly carries the live-Postgres prerequisite for meaningful browser verification
+- Actions ignored:
+  - did not introduce new public REST/OpenAPI changes because the existing dashboard, reconciliation, anomaly, and documents endpoints were sufficient for the adapter layer
+- Next handoff note: nothing right now.
