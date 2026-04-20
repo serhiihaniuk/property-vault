@@ -1,7 +1,7 @@
 # T38 - Redesign documents and document detail
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Apply the redesign system to the documents catalog, document detail, and provenance surfaces.
 - Task type: `redesign`
 - Dependencies: `T31`, `T36`, `T46`
