@@ -1,0 +1,669 @@
+export interface Amount {
+  amountMinor: number
+  currency: string
+}
+
+export interface Period {
+  kind: "month" | "year" | "custom"
+  label: string
+  value: string
+  startDate?: string
+  endDate?: string
+}
+
+export interface SourceDocument {
+  hash: string
+  title: string
+  documentType: "monthly_charge" | "settlement" | "resolution"
+  documentDate: string
+}
+
+export interface CategoryHistoryPoint {
+  month: string
+  value: number
+}
+
+export interface CategoryBreakdown {
+  category: string
+  categoryLabel: string
+  categoryGroup: string
+  categoryGroupLabel: string
+  amount: Amount
+  previousAmount: Amount
+  delta: Amount
+  changeStatus: "up" | "down" | "flat" | "new" | "no_previous"
+  sharePercent: number
+  sourceDocuments: SourceDocument[]
+  history?: CategoryHistoryPoint[]
+}
+
+export interface MonthData {
+  isCarriedForward: boolean
+  period: Period
+  sourceMonth: Period
+  totalCharges: Amount
+  sourceDocuments: SourceDocument[]
+}
+
+export interface DashboardSummary {
+  categoryCount: number
+  changedCategoryCount: number
+  totalCharges: Amount
+  previousTotalCharges: Amount
+  totalDelta: Amount
+  largestCategory: {
+    category: string
+    categoryLabel: string
+    amount: Amount
+  }
+  topChange: {
+    category: string
+    categoryLabel: string
+    changeStatus: "up" | "down" | "flat"
+    delta: Amount
+  }
+}
+
+export interface Anomaly {
+  id: number
+  ruleId: string
+  ruleLabel: string
+  severity: "critical" | "warning" | "info"
+  severityLabel: string
+  status: "open" | "resolved" | "dismissed"
+  detectedAt: string
+  date: string
+  summary: string
+  context: { label: string; value: string }[]
+  subjectDocument?: SourceDocument
+}
+
+export interface ReconciliationCoverage {
+  monthsCovered: number
+  status: "year_to_date" | "complete" | "partial"
+  throughMonth: Period
+}
+
+export interface ReconciliationSummary {
+  scheduledTotal: Amount
+  settlementAdvanceTotal: Amount
+  actualCostTotal: Amount
+  creditsTotal: Amount
+  netBalance: Amount
+  openLineCount: number
+  settledLineCount: number
+}
+
+export interface MonthlyTrendData {
+  month: string
+  total: number
+  carriedForward: boolean
+  hasAnomaly: boolean
+}
+
+export interface DocumentListItem {
+  hash: string
+  title: string
+  documentType: "monthly_charge" | "settlement" | "resolution"
+  documentTypeLabel: string
+  documentDate: string
+  extractedAt: string
+  confidence: number
+  financialRowCount: number
+  pageCount: number
+  sourceCount: number
+  status: "ok" | "needs_review" | "pending" | "failed"
+  summaryPlain: string
+  period: Period | null
+}
+
+export function formatAmountShort(amount: Amount): number {
+  return amount.amountMinor / 100
+}
+
+export const generatedAt = "2026-04-19T11:30:00+02:00"
+
+export const selectedMonth: Period = {
+  kind: "month",
+  label: "April 2026",
+  value: "2026-04",
+}
+
+export const previousMonth: Period = {
+  kind: "month",
+  label: "March 2026",
+  value: "2026-03",
+}
+
+export const dashboardSummary: DashboardSummary = {
+  categoryCount: 8,
+  changedCategoryCount: 5,
+  totalCharges: { amountMinor: 129900, currency: "PLN" },
+  previousTotalCharges: { amountMinor: 123930, currency: "PLN" },
+  totalDelta: { amountMinor: 5970, currency: "PLN" },
+  largestCategory: {
+    category: "shared_property_advance",
+    categoryLabel: "Shared property advance",
+    amount: { amountMinor: 41200, currency: "PLN" },
+  },
+  topChange: {
+    category: "central_heating_energy",
+    categoryLabel: "Central heating energy",
+    changeStatus: "up",
+    delta: { amountMinor: 3600, currency: "PLN" },
+  },
+}
+
+export const currentMonthData: MonthData = {
+  isCarriedForward: true,
+  period: { kind: "month", label: "April 2026", value: "2026-04" },
+  sourceMonth: { kind: "month", label: "March 2026", value: "2026-03" },
+  totalCharges: { amountMinor: 129900, currency: "PLN" },
+  sourceDocuments: [
+    {
+      hash: "a111111111111111111111111111111111111111111111111111111111111111",
+      title: "Nal 03/2026 - monthly charges",
+      documentType: "monthly_charge",
+      documentDate: "2026-03-28",
+    },
+  ],
+}
+
+export const months: MonthData[] = [
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "May 2025", value: "2025-05" },
+    sourceMonth: { kind: "month", label: "May 2025", value: "2025-05" },
+    totalCharges: { amountMinor: 98500, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "June 2025", value: "2025-06" },
+    sourceMonth: { kind: "month", label: "June 2025", value: "2025-06" },
+    totalCharges: { amountMinor: 92300, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "July 2025", value: "2025-07" },
+    sourceMonth: { kind: "month", label: "July 2025", value: "2025-07" },
+    totalCharges: { amountMinor: 88100, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "August 2025", value: "2025-08" },
+    sourceMonth: { kind: "month", label: "August 2025", value: "2025-08" },
+    totalCharges: { amountMinor: 89500, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "September 2025", value: "2025-09" },
+    sourceMonth: { kind: "month", label: "September 2025", value: "2025-09" },
+    totalCharges: { amountMinor: 95800, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "October 2025", value: "2025-10" },
+    sourceMonth: { kind: "month", label: "October 2025", value: "2025-10" },
+    totalCharges: { amountMinor: 108200, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "November 2025", value: "2025-11" },
+    sourceMonth: { kind: "month", label: "November 2025", value: "2025-11" },
+    totalCharges: { amountMinor: 118500, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "December 2025", value: "2025-12" },
+    sourceMonth: { kind: "month", label: "December 2025", value: "2025-12" },
+    totalCharges: { amountMinor: 125300, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: true,
+    period: { kind: "month", label: "January 2026", value: "2026-01" },
+    sourceMonth: { kind: "month", label: "December 2025", value: "2025-12" },
+    totalCharges: { amountMinor: 125300, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "February 2026", value: "2026-02" },
+    sourceMonth: { kind: "month", label: "February 2026", value: "2026-02" },
+    totalCharges: { amountMinor: 121500, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: false,
+    period: { kind: "month", label: "March 2026", value: "2026-03" },
+    sourceMonth: { kind: "month", label: "March 2026", value: "2026-03" },
+    totalCharges: { amountMinor: 123930, currency: "PLN" },
+    sourceDocuments: [],
+  },
+  {
+    isCarriedForward: true,
+    period: { kind: "month", label: "April 2026", value: "2026-04" },
+    sourceMonth: { kind: "month", label: "March 2026", value: "2026-03" },
+    totalCharges: { amountMinor: 129900, currency: "PLN" },
+    sourceDocuments: [],
+  },
+]
+
+export const monthlyTrend: MonthlyTrendData[] = months.map((month, index) => ({
+  month: month.period.label.replace(" 2025", "").replace(" 2026", " '26"),
+  total: month.totalCharges.amountMinor / 100,
+  carriedForward: month.isCarriedForward,
+  hasAnomaly: index === months.length - 1,
+}))
+
+export const categories: CategoryBreakdown[] = [
+  {
+    category: "shared_property_advance",
+    categoryLabel: "Zaliczka - część wspólna",
+    categoryGroup: "shared_property",
+    categoryGroupLabel: "Shared property",
+    amount: { amountMinor: 41200, currency: "PLN" },
+    previousAmount: { amountMinor: 40200, currency: "PLN" },
+    delta: { amountMinor: 1000, currency: "PLN" },
+    changeStatus: "up",
+    sharePercent: 31.7,
+    sourceDocuments: [
+      {
+        hash: "a111111111111111111111111111111111111111111111111111111111111111",
+        title: "Nal 03/2026 - monthly charges",
+        documentType: "monthly_charge",
+        documentDate: "2026-03-28",
+      },
+    ],
+    history: [
+      { month: "May", value: 310 },
+      { month: "Jun", value: 292 },
+      { month: "Jul", value: 278 },
+      { month: "Aug", value: 283 },
+      { month: "Sep", value: 303 },
+      { month: "Oct", value: 343 },
+      { month: "Nov", value: 375 },
+      { month: "Dec", value: 397 },
+      { month: "Jan", value: 397 },
+      { month: "Feb", value: 385 },
+      { month: "Mar", value: 392 },
+      { month: "Apr", value: 412 },
+    ],
+  },
+  {
+    category: "central_heating_energy",
+    categoryLabel: "Energia cieplna - c.o.",
+    categoryGroup: "media",
+    categoryGroupLabel: "Media",
+    amount: { amountMinor: 34800, currency: "PLN" },
+    previousAmount: { amountMinor: 31200, currency: "PLN" },
+    delta: { amountMinor: 3600, currency: "PLN" },
+    changeStatus: "up",
+    sharePercent: 26.8,
+    sourceDocuments: [
+      {
+        hash: "a111111111111111111111111111111111111111111111111111111111111111",
+        title: "Nal 03/2026 - monthly charges",
+        documentType: "monthly_charge",
+        documentDate: "2026-03-28",
+      },
+    ],
+    history: [
+      { month: "May", value: 85 },
+      { month: "Jun", value: 60 },
+      { month: "Jul", value: 45 },
+      { month: "Aug", value: 42 },
+      { month: "Sep", value: 78 },
+      { month: "Oct", value: 165 },
+      { month: "Nov", value: 245 },
+      { month: "Dec", value: 298 },
+      { month: "Jan", value: 298 },
+      { month: "Feb", value: 275 },
+      { month: "Mar", value: 312 },
+      { month: "Apr", value: 348 },
+    ],
+  },
+  {
+    category: "cold_water_and_sewage",
+    categoryLabel: "Woda i ścieki",
+    categoryGroup: "media",
+    categoryGroupLabel: "Media",
+    amount: { amountMinor: 17640, currency: "PLN" },
+    previousAmount: { amountMinor: 16820, currency: "PLN" },
+    delta: { amountMinor: 820, currency: "PLN" },
+    changeStatus: "up",
+    sharePercent: 13.6,
+    sourceDocuments: [
+      {
+        hash: "a111111111111111111111111111111111111111111111111111111111111111",
+        title: "Nal 03/2026 - monthly charges",
+        documentType: "monthly_charge",
+        documentDate: "2026-03-28",
+      },
+    ],
+    history: [
+      { month: "May", value: 165 },
+      { month: "Jun", value: 155 },
+      { month: "Jul", value: 148 },
+      { month: "Aug", value: 150 },
+      { month: "Sep", value: 160 },
+      { month: "Oct", value: 168 },
+      { month: "Nov", value: 172 },
+      { month: "Dec", value: 175 },
+      { month: "Jan", value: 175 },
+      { month: "Feb", value: 170 },
+      { month: "Mar", value: 168 },
+      { month: "Apr", value: 176 },
+    ],
+  },
+  {
+    category: "hot_water_heating",
+    categoryLabel: "Podgrzanie wody",
+    categoryGroup: "media",
+    categoryGroupLabel: "Media",
+    amount: { amountMinor: 11200, currency: "PLN" },
+    previousAmount: { amountMinor: 10850, currency: "PLN" },
+    delta: { amountMinor: 350, currency: "PLN" },
+    changeStatus: "up",
+    sharePercent: 8.6,
+    sourceDocuments: [
+      {
+        hash: "a111111111111111111111111111111111111111111111111111111111111111",
+        title: "Nal 03/2026 - monthly charges",
+        documentType: "monthly_charge",
+        documentDate: "2026-03-28",
+      },
+    ],
+    history: [
+      { month: "May", value: 95 },
+      { month: "Jun", value: 88 },
+      { month: "Jul", value: 82 },
+      { month: "Aug", value: 80 },
+      { month: "Sep", value: 88 },
+      { month: "Oct", value: 98 },
+      { month: "Nov", value: 105 },
+      { month: "Dec", value: 110 },
+      { month: "Jan", value: 110 },
+      { month: "Feb", value: 108 },
+      { month: "Mar", value: 108 },
+      { month: "Apr", value: 112 },
+    ],
+  },
+  {
+    category: "renovation_investment_fund",
+    categoryLabel: "Fundusz remontowo-inw.",
+    categoryGroup: "funds",
+    categoryGroupLabel: "Funds",
+    amount: { amountMinor: 12000, currency: "PLN" },
+    previousAmount: { amountMinor: 12000, currency: "PLN" },
+    delta: { amountMinor: 0, currency: "PLN" },
+    changeStatus: "flat",
+    sharePercent: 9.2,
+    sourceDocuments: [
+      {
+        hash: "a111111111111111111111111111111111111111111111111111111111111111",
+        title: "Nal 03/2026 - monthly charges",
+        documentType: "monthly_charge",
+        documentDate: "2026-03-28",
+      },
+    ],
+    history: [
+      { month: "May", value: 120 },
+      { month: "Jun", value: 120 },
+      { month: "Jul", value: 120 },
+      { month: "Aug", value: 120 },
+      { month: "Sep", value: 120 },
+      { month: "Oct", value: 120 },
+      { month: "Nov", value: 120 },
+      { month: "Dec", value: 120 },
+      { month: "Jan", value: 120 },
+      { month: "Feb", value: 120 },
+      { month: "Mar", value: 120 },
+      { month: "Apr", value: 120 },
+    ],
+  },
+  {
+    category: "municipal_waste",
+    categoryLabel: "Wywóz odpadów komunalnych",
+    categoryGroup: "individual",
+    categoryGroupLabel: "Individual",
+    amount: { amountMinor: 6200, currency: "PLN" },
+    previousAmount: { amountMinor: 6200, currency: "PLN" },
+    delta: { amountMinor: 0, currency: "PLN" },
+    changeStatus: "flat",
+    sharePercent: 4.8,
+    sourceDocuments: [
+      {
+        hash: "a111111111111111111111111111111111111111111111111111111111111111",
+        title: "Nal 03/2026 - monthly charges",
+        documentType: "monthly_charge",
+        documentDate: "2026-03-28",
+      },
+    ],
+    history: [
+      { month: "May", value: 62 },
+      { month: "Jun", value: 62 },
+      { month: "Jul", value: 62 },
+      { month: "Aug", value: 62 },
+      { month: "Sep", value: 62 },
+      { month: "Oct", value: 62 },
+      { month: "Nov", value: 62 },
+      { month: "Dec", value: 62 },
+      { month: "Jan", value: 62 },
+      { month: "Feb", value: 62 },
+      { month: "Mar", value: 62 },
+      { month: "Apr", value: 62 },
+    ],
+  },
+  {
+    category: "ordered_heating_power",
+    categoryLabel: "Moc zamówiona c.o.",
+    categoryGroup: "media",
+    categoryGroupLabel: "Media",
+    amount: { amountMinor: 6500, currency: "PLN" },
+    previousAmount: { amountMinor: 6300, currency: "PLN" },
+    delta: { amountMinor: 200, currency: "PLN" },
+    changeStatus: "up",
+    sharePercent: 5,
+    sourceDocuments: [
+      {
+        hash: "a111111111111111111111111111111111111111111111111111111111111111",
+        title: "Nal 03/2026 - monthly charges",
+        documentType: "monthly_charge",
+        documentDate: "2026-03-28",
+      },
+    ],
+    history: [
+      { month: "May", value: 58 },
+      { month: "Jun", value: 58 },
+      { month: "Jul", value: 58 },
+      { month: "Aug", value: 60 },
+      { month: "Sep", value: 60 },
+      { month: "Oct", value: 62 },
+      { month: "Nov", value: 62 },
+      { month: "Dec", value: 63 },
+      { month: "Jan", value: 63 },
+      { month: "Feb", value: 63 },
+      { month: "Mar", value: 63 },
+      { month: "Apr", value: 65 },
+    ],
+  },
+  {
+    category: "e_kartoteka_access",
+    categoryLabel: "e-Kartoteka access",
+    categoryGroup: "individual",
+    categoryGroupLabel: "Individual",
+    amount: { amountMinor: 360, currency: "PLN" },
+    previousAmount: { amountMinor: 360, currency: "PLN" },
+    delta: { amountMinor: 0, currency: "PLN" },
+    changeStatus: "flat",
+    sharePercent: 0.3,
+    sourceDocuments: [
+      {
+        hash: "a111111111111111111111111111111111111111111111111111111111111111",
+        title: "Nal 03/2026 - monthly charges",
+        documentType: "monthly_charge",
+        documentDate: "2026-03-28",
+      },
+    ],
+    history: [
+      { month: "May", value: 3.6 },
+      { month: "Jun", value: 3.6 },
+      { month: "Jul", value: 3.6 },
+      { month: "Aug", value: 3.6 },
+      { month: "Sep", value: 3.6 },
+      { month: "Oct", value: 3.6 },
+      { month: "Nov", value: 3.6 },
+      { month: "Dec", value: 3.6 },
+      { month: "Jan", value: 3.6 },
+      { month: "Feb", value: 3.6 },
+      { month: "Mar", value: 3.6 },
+      { month: "Apr", value: 3.6 },
+    ],
+  },
+]
+
+export const anomalies: Anomaly[] = [
+  {
+    id: 101,
+    ruleId: "PAYMENT_DEADLINE_UNCONFIRMED",
+    ruleLabel: "Payment deadline needs confirmation",
+    severity: "warning",
+    severityLabel: "Warning",
+    status: "open",
+    detectedAt: "2026-04-18T08:15:00+02:00",
+    date: "2026-04-25",
+    summary:
+      "Selected month is carried forward from March 2026; deadline is not re-confirmed.",
+    context: [
+      { label: "Selected month", value: "2026-04" },
+      { label: "Source month", value: "2026-03" },
+    ],
+    subjectDocument: {
+      hash: "a111111111111111111111111111111111111111111111111111111111111111",
+      title: "Nal 03/2026 - monthly charges",
+      documentType: "monthly_charge",
+      documentDate: "2026-03-28",
+    },
+  },
+  {
+    id: 102,
+    ruleId: "DEADLINE_MISSED",
+    ruleLabel: "Missed deadline",
+    severity: "warning",
+    severityLabel: "Warning",
+    status: "open",
+    detectedAt: "2026-04-17T12:00:00+02:00",
+    date: "2026-04-10",
+    summary:
+      "Media settlement H2 2025 still has an unresolved heating-energy balance.",
+    context: [
+      { label: "Category", value: "Central heating energy" },
+      { label: "Net balance", value: "31.20 PLN due" },
+    ],
+    subjectDocument: {
+      hash: "b111111111111111111111111111111111111111111111111111111111111111",
+      title: "Media settlement H2 2025",
+      documentType: "settlement",
+      documentDate: "2026-02-10",
+    },
+  },
+  {
+    id: 103,
+    ruleId: "RESOLUTION_PENDING_VOTE",
+    ruleLabel: "Resolution still pending vote",
+    severity: "info",
+    severityLabel: "Info",
+    status: "open",
+    detectedAt: "2026-04-15T09:00:00+02:00",
+    date: "2026-04-02",
+    summary:
+      "Resolution 04/2026 may affect future monthly charges but is not yet reflected.",
+    context: [{ label: "Resolution", value: "04/2026" }],
+    subjectDocument: {
+      hash: "c111111111111111111111111111111111111111111111111111111111111111",
+      title: "Resolution 04/2026",
+      documentType: "resolution",
+      documentDate: "2026-04-02",
+    },
+  },
+]
+
+export const reconciliationCoverage: ReconciliationCoverage = {
+  monthsCovered: 4,
+  status: "year_to_date",
+  throughMonth: { kind: "month", label: "April 2026", value: "2026-04" },
+}
+
+export const reconciliationSummary: ReconciliationSummary = {
+  scheduledTotal: { amountMinor: 510230, currency: "PLN" },
+  settlementAdvanceTotal: { amountMinor: 498000, currency: "PLN" },
+  actualCostTotal: { amountMinor: 494120, currency: "PLN" },
+  creditsTotal: { amountMinor: 3880, currency: "PLN" },
+  netBalance: { amountMinor: -7760, currency: "PLN" },
+  openLineCount: 2,
+  settledLineCount: 5,
+}
+
+export const sourceDocuments: DocumentListItem[] = [
+  {
+    hash: "a111111111111111111111111111111111111111111111111111111111111111",
+    title: "Nal 03/2026 - monthly charges",
+    documentType: "monthly_charge",
+    documentTypeLabel: "Monthly charge",
+    documentDate: "2026-03-28",
+    extractedAt: "2026-03-28T19:15:00+02:00",
+    confidence: 0.97,
+    financialRowCount: 8,
+    pageCount: 1,
+    sourceCount: 1,
+    status: "ok",
+    summaryPlain:
+      "Monthly charge schedule used for March 2026 and carried forward into April 2026.",
+    period: { kind: "month", label: "March 2026", value: "2026-03" },
+  },
+  {
+    hash: "b111111111111111111111111111111111111111111111111111111111111111",
+    title: "Media settlement H2 2025",
+    documentType: "settlement",
+    documentTypeLabel: "Settlement",
+    documentDate: "2026-02-10",
+    extractedAt: "2026-02-10T14:10:00+02:00",
+    confidence: 0.95,
+    financialRowCount: 14,
+    pageCount: 2,
+    sourceCount: 1,
+    status: "ok",
+    summaryPlain:
+      "Settlement document covering shared-property and media balances for H2 2025.",
+    period: {
+      kind: "custom",
+      label: "H2 2025",
+      startDate: "2025-07-01",
+      endDate: "2025-12-31",
+      value: "2025-H2",
+    },
+  },
+  {
+    hash: "c111111111111111111111111111111111111111111111111111111111111111",
+    title: "Resolution 04/2026",
+    documentType: "resolution",
+    documentTypeLabel: "Resolution",
+    documentDate: "2026-04-02",
+    extractedAt: "2026-04-02T21:00:00+02:00",
+    confidence: 0.89,
+    financialRowCount: 0,
+    pageCount: 3,
+    sourceCount: 1,
+    status: "needs_review",
+    summaryPlain: "Resolution draft with possible future tariff changes.",
+    period: null,
+  },
+]
