@@ -148,6 +148,63 @@ test('documents service returns detail provenance and extracted facts', async ()
   });
 });
 
+test('documents service normalizes postgres timestamp strings in catalog and detail responses', async () => {
+  const documents = createDocumentsApplicationService(createDocumentsContext(), {
+    async loadCatalogBaseRows() {
+      return [
+        {
+          ...CATALOG_ROWS[0],
+          extractedAt: '2026-04-18 08:00:00+00',
+        },
+      ];
+    },
+    async loadDocumentDetailRow() {
+      return {
+        ...DETAIL_ROW,
+        extractedAt: '2026-04-18 08:00:00+00',
+        ingestedAt: '2026-04-18 07:00:00+00',
+      };
+    },
+    async loadDocumentFinancialCounts(_db, hashes) {
+      return hashes.map((hash) => ({
+        count: hash === 'a'.repeat(64) ? 3 : 1,
+        hash,
+      }));
+    },
+    async loadDocumentFinancialRows() {
+      return [...DETAIL_FINANCIAL_ROWS];
+    },
+    async loadDocumentSourceCounts(_db, hashes) {
+      return hashes.map((hash) => ({
+        count: hash === 'a'.repeat(64) ? 2 : 1,
+        hash,
+      }));
+    },
+    async loadDocumentSourceRows() {
+      return DETAIL_SOURCE_ROWS.map((row) => ({
+        ...row,
+        seenAt: '2026-04-18 06:58:00+00',
+      }));
+    },
+    async loadDocumentTypes() {
+      return [
+        {
+          count: 1,
+          documentType: 'monthly_charges',
+        },
+      ];
+    },
+  });
+
+  const catalog = await documents.getCatalog();
+  const detail = await documents.getDetail('a'.repeat(64));
+
+  assert.equal(catalog.documents[0]?.extractedAt, '2026-04-18T08:00:00.000Z');
+  assert.equal(detail.document.extractedAt, '2026-04-18T08:00:00.000Z');
+  assert.equal(detail.document.ingestedAt, '2026-04-18T07:00:00.000Z');
+  assert.equal(detail.sourceObservations[0]?.seenAt, '2026-04-18T06:58:00.000Z');
+});
+
 test('documents service rejects a missing document detail request', async () => {
   const documents = createDocumentsApplicationService(createDocumentsContext(), {
     async loadCatalogBaseRows() {

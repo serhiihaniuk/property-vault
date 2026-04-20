@@ -455,7 +455,7 @@ function createDocumentCatalogItem(input: {
     documentDate: input.row.documentDate,
     documentType: input.row.documentType,
     documentTypeLabel: formatDocumentTypeLabel(input.row.documentType),
-    extractedAt: input.row.extractedAt,
+    extractedAt: normalizeIsoDateTime(input.row.extractedAt),
     financialRowCount: input.financialRowCount,
     hash: input.row.hash,
     pageCount: input.row.pageCount,
@@ -480,13 +480,13 @@ function createDocumentDetail(
     documentDate: row.documentDate,
     documentType: row.documentType,
     documentTypeLabel: formatDocumentTypeLabel(row.documentType),
-    extractedAt: row.extractedAt,
+    extractedAt: normalizeIsoDateTime(row.extractedAt),
     extractedBy: row.extractedBy,
     extractorVersion: row.extractorVersion,
     financialRowCount: counts.financialRowCount,
     hash: row.hash,
     hasTextLayer: row.hasTextLayer,
-    ingestedAt: row.ingestedAt,
+    ingestedAt: normalizeIsoDateTime(row.ingestedAt),
     mime: row.mime,
     needsOcr: row.needsOcr,
     noteAvailable: Boolean(row.notePath),
@@ -535,7 +535,7 @@ function createDocumentSourceObservation(
   return {
     originalFilename: row.originalFilename,
     reference: createSourceReferenceFields(row.sourceRef),
-    seenAt: row.seenAt,
+    seenAt: normalizeIsoDateTime(row.seenAt),
     sourceKind: row.sourceKind,
     sourceKindLabel: formatSourceKindLabel(row.sourceKind),
   };
@@ -793,6 +793,16 @@ function humanizeIdentifier(value: string): string {
     .filter((part) => part !== '')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
+}
+
+function normalizeIsoDateTime(value: string): string {
+  const normalized = new Date(value);
+
+  if (Number.isNaN(normalized.getTime())) {
+    return value;
+  }
+
+  return normalized.toISOString();
 }
 
 function parseDocumentRecordStatus(value: string): DocumentDetail['status'] {
