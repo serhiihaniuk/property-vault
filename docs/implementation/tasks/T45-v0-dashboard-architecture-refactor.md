@@ -1,6 +1,6 @@
 # T45 - Refactor v0 dashboard into `apps/web` architecture
 
-- Status: `blocked`
+- Status: `done`
 - Owner: `codex/T45-v0-dashboard-architecture-refactor`
 - Goal: Make the generated v0 dashboard repo-native inside `apps/web` without visual drift.
 - Dependencies: `T35`, `T36`
@@ -9,41 +9,49 @@
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Wave group: `ui-redesign-v0-a`
 - Required verification: `strong`
-- Design references: use the generated v0 dashboard source as the hard template first, then `docs/implementation/UI_REDESIGN_SPEC.md`, then the screenshot; consult the HTML only when the generated source or screenshot still leaves detail intent ambiguous.
+- Design references: use the generated v0 dashboard source as the only visual authority for `T45`; use `ARCHITECTURE.md`, `docs/implementation/UI_PLAYBOOK.md`, `docs/implementation/tasks/T20-web-minimal-fsd.md`, and `apps/web/README.md` as structural authority only; do not use `docs/implementation/UI_REDESIGN_SPEC.md`, `docs/design/property-vault-mvp/property-vault-reference.png`, or `docs/design/property-vault-mvp/Property Vault.html` as fallback or tie-breaker for this task.
 - Completion signal: the live dashboard route in `apps/web` renders the exact v0 page shell and dashboard composition with mocked data, inside repo-native structure and conventions, with no meaningful visual drift and no permanent second `apps/v0` runtime.
 - Files changed:
   - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
-  - `apps/web/src/views/dashboard/ui/dashboard-v0-mock.ts`
+  - `apps/web/src/views/dashboard/ui/top-bar.tsx`
+  - `apps/web/src/views/dashboard/ui/primary-summary-card.tsx`
+  - `apps/web/src/views/dashboard/ui/account-status-card.tsx`
+  - `apps/web/src/views/dashboard/ui/category-card.tsx`
+  - `apps/web/src/views/dashboard/ui/monthly-trend-chart.tsx`
+  - `apps/web/src/views/dashboard/ui/open-items-panel.tsx`
+  - `apps/web/src/views/dashboard/ui/documents-table.tsx`
+  - `apps/web/src/views/dashboard/ui/dashboard-category-colors.ts`
+  - `apps/web/src/views/dashboard/ui/dashboard-v0-helpers.ts`
+  - `docs/implementation/tasks/T45-v0-dashboard-architecture-refactor.md`
 - Contracts changed: none
 - Tests run:
   - `npm run --workspace @dabrowskiego/web typecheck`
   - `npm run --workspace @dabrowskiego/web lint`
   - `npm run --workspace @dabrowskiego/web build`
-  - `npm run --workspace @dabrowskiego/web dev -- --hostname 127.0.0.1 --port 3000`
-  - `Invoke-WebRequest http://127.0.0.1:3000` HTML spot-check for dashboard shell headings and section markers
+  - `Invoke-WebRequest http://127.0.0.1:3000`
+  - headless browser verification at `http://127.0.0.1:3000` with fresh Chromium desktop and tablet screenshots after the component split
 - Coordinator notes:
-  - The generated v0 dashboard is the hard template for the single dashboard page, including its top bar and page shell.
-  - Promote the stash-only/generated source into the task branch as the task input before refactoring begins so the dashboard no longer depends on off-branch local state.
-  - Use a view-local-first refactor. The exact dashboard composition should live primarily under the dashboard view layer; do not force it back into the older multi-widget split if that changes the render.
-  - Keep mocked data in place for `T45`. This task is about structure, ownership, and shell integration, not live API wiring.
-  - Preserve the rendered result exactly while changing only imports, aliases, folder ownership, shell hookup, mock-data location, and compatibility shims needed for `apps/web`.
-  - Shared-component purity is secondary to exact render preservation in this task. Move code into shared UI only when doing so does not change the rendered dashboard.
-  - Observation: the dashboard currently uses a view-local full-bleed shell escape inside `dashboard-page.tsx` so `T45` can preserve the v0 width and spacing without changing the shared `(app)` layout that still supports pre-v0 documents pages.
-    - Why it matters: if `T38` and `T39` adopt the same v0-integrated shell, the repo will want a shared app-shell extraction instead of repeating the full-bleed wrapper per page.
-    - Suggested follow-up: once the redesigned finance surfaces converge, extract the common full-width page shell into shared UI or the `(app)` layout in one bounded follow-up rather than during `T45`.
+  - The generated v0 dashboard source is the only visual authority for `T45`, including the page shell, top bar, panel order, and card hierarchy.
+  - Structural authority for this salvage pass is limited to `ARCHITECTURE.md`, `docs/implementation/UI_PLAYBOOK.md`, `docs/implementation/tasks/T20-web-minimal-fsd.md`, and `apps/web/README.md`.
+  - Use a view-local-first refactor under `src/views/dashboard/ui/**` and preserve the original generated v0 component seams where practical instead of collapsing the dashboard into one giant page file.
+  - Keep mocked data local to the dashboard view layer for `T45`; do not start `T46` live-data wiring.
+  - Preserve the rendered result exactly while changing only imports, aliases, folder ownership, route hookup, local helpers/types, mock-data location, and minimal compatibility shims needed inside `apps/web`.
+  - Do not hybridize this task with `T37` or reinterpret the dashboard using redesign docs, screenshot annotations, or the prototype HTML.
+  - Observation: the view-local full-bleed shell escape remains in `dashboard-page.tsx` as a bounded compatibility shim so the generated v0 page shell can render inside the existing `(app)` layout without broadening `T45` into a shared-shell follow-up.
+    - Why it matters: later redesign tasks can still extract a common app shell once the finance surfaces converge, but `T45` stays focused on repo-native ownership plus exact v0 fidelity.
+    - Suggested follow-up: consider a dedicated shell extraction only after `T45` is reviewed and the redesign wave settles on a common full-width page shell.
     - Urgency: `soon`
-- Review result: `blocked`
-- Reviewer: `Codex reviewer`
-- Review tests run:
-  - `npm run --workspace @dabrowskiego/web typecheck`
-  - `npm run --workspace @dabrowskiego/web lint`
-  - `npm run --workspace @dabrowskiego/web build`
-  - `npm run --workspace @dabrowskiego/web dev -- --hostname 127.0.0.1 --port 3000`
-  - headless browser verification at `http://127.0.0.1:3000` with desktop and tablet screenshots plus DOM spot-check for key dashboard sections
-- Merge status: `blocked`
-- Architecture note: the view-local full-bleed shell escape is acceptable and aligned for `T45`, but the rendered dashboard still drifts too far from the hard-template v0 composition to serve as the stable base for `T46`.
-- Coordinator notes review: the shared-shell follow-up note is valid, but it should only be promoted after `T45` is brought back to exact v0 fidelity and becomes merge-ready.
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: the dashboard route now stays thin, the generated v0 page is split back into view-local components under one dashboard view slice, and same-slice reuse is limited to small local helper files rather than cross-layer or same-level sideways coupling.
+- Coordinator notes review: none yet
 - Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: send this branch back to the implementer and preserve the hard-template v0 shell and section composition before requesting another review.
+- Actions taken:
+  - restored the generated v0 page composition, shell hierarchy, and panel order from the stash-backed `apps/v0` source instead of preserving the monolithic drifted transplant
+  - extracted the dashboard back into view-local component files that mirror the original generated v0 seams while keeping mocked data local and leaving `app/` thin
+- Actions ignored:
+  - did not use `UI_REDESIGN_SPEC.md`, the redesign screenshot, or `Property Vault.html` as fallback or tie-breaker
+  - did not hybridize with `T37` and did not start `T46` live-data work
+- Next handoff note: start a reviewer chat on branch `codex/T45-v0-dashboard-architecture-refactor` and say `reviewer T45 branch codex/T45-v0-dashboard-architecture-refactor`.
