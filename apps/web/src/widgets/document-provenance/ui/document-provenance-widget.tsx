@@ -1,13 +1,27 @@
 import type { DocumentDetailData } from "@/src/shared/api/client";
-import { Badge } from "@/src/shared/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/src/shared/ui/card";
-import { Separator } from "@/src/shared/ui/separator";
+  formatDocumentDateTime,
+  getDocumentPeriodLabel,
+} from "@/src/shared/lib/document-format";
+import {
+  Badge,
+  EmptyState,
+  ErrorState,
+  KeyValueGrid,
+  KeyValueRow,
+  LoadingState,
+  Money,
+  ProvenanceBlock,
+  ProvenanceHeader,
+  ProvenanceItem,
+  Surface,
+  SurfaceActions,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+} from "@/src/shared/ui";
 
 export interface DocumentProvenanceWidgetProps {
   data?: DocumentDetailData;
@@ -22,194 +36,202 @@ export function DocumentProvenanceWidget({
 }: DocumentProvenanceWidgetProps) {
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Provenance</CardTitle>
-          <CardDescription>
-            Loading source observations and extracted financial evidence.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Provenance and evidence</SurfaceTitle>
+            <SurfaceDescription>
+              Loading source observations and normalized financial evidence.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState label="Loading provenance and evidence" rows={8} />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   if (errorMessage) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Provenance unavailable</CardTitle>
-          <CardDescription>{errorMessage}</CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Provenance and evidence unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              Source observations and financial rows could not be loaded.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState title="Provenance unavailable" description={errorMessage} />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   if (!data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Provenance</CardTitle>
-          <CardDescription>No provenance detail is available yet.</CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Provenance and evidence</SurfaceTitle>
+            <SurfaceDescription>No provenance detail is available yet.</SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <EmptyState
+            title="No provenance detail"
+            description="Source observations and normalized financial rows appear here when available."
+          />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
-      <Card>
-        <CardHeader>
-          <CardTitle>Source observations</CardTitle>
-          <CardDescription>
-            Where this canonical document was first seen before it was normalized into
-            the app index.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {data.sourceObservations.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No source observations were recorded for this document.
-            </p>
-          ) : (
-            data.sourceObservations.map((source, index) => (
-              <div key={`${source.sourceKind}:${source.seenAt}`} className="flex flex-col gap-3">
-                {index > 0 ? <Separator /> : null}
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-medium">{source.sourceKindLabel}</h2>
-                      <Badge variant="outline">{formatDateTime(source.seenAt)}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {source.originalFilename ?? "Original filename unavailable"}
-                    </p>
-                  </div>
-                </div>
-                {source.reference.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No structured source fields were stored for this observation.
-                  </p>
-                ) : (
-                  <div className="grid gap-2">
-                    {source.reference.map((field) => (
-                      <div
-                        key={`${field.label}:${field.value}`}
-                        className="flex flex-col gap-1 rounded-lg border border-border/60 bg-muted/30 p-3"
-                      >
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {field.label}
-                        </p>
-                        <p className="text-sm font-mono">{field.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Financial evidence</CardTitle>
-          <CardDescription>
-            Extracted financial rows tied back to the document and source page when available.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Financial evidence</SurfaceTitle>
+            <SurfaceDescription>
+              Normalized monetary rows tied back to the document period, page, and
+              supporting note where available.
+            </SurfaceDescription>
+          </SurfaceHeading>
+          <SurfaceActions>
+            <Badge variant="secondary">{data.financialRows.length} rows</Badge>
+          </SurfaceActions>
+        </SurfaceHeader>
+        <SurfaceBody className="gap-3">
           {data.financialRows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No normalized financial rows were extracted from this document.
-            </p>
+            <EmptyState
+              title="No normalized financial rows"
+              description="This document does not expose extracted financial evidence yet."
+            />
           ) : (
             data.financialRows.map((row, index) => (
-              <div key={`${row.rowType}:${row.category}:${index}`} className="flex flex-col gap-3">
-                {index > 0 ? <Separator /> : null}
+              <ProvenanceBlock key={`${row.rowType}:${row.category}:${index}`}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex min-w-0 flex-col gap-1">
+                  <div className="flex min-w-0 flex-col gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-medium">{row.categoryLabel}</h2>
+                      <h3 className="text-[13px] font-medium text-fg-primary">
+                        {row.categoryLabel}
+                      </h3>
                       <Badge variant="secondary">{row.rowTypeLabel}</Badge>
                       <Badge variant="outline">{row.categoryGroupLabel}</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {row.period?.label ?? "No normalized period"}
-                      {" • "}
-                      {row.sourcePage ? `Page ${row.sourcePage}` : "No source page"}
+                    <p className="text-[11.5px] text-fg-subtle">
+                      {getDocumentPeriodLabel(row.period)}
+                      {" / "}
+                      {row.sourcePage ? `Page ${row.sourcePage}` : "Page n/a"}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 text-right">
-                    <p className="font-mono text-sm font-medium">
-                      {formatMoney(row.amount.amountMinor)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {row.unitPrice
-                        ? `${formatMoney(row.unitPrice.amountMinor)} unit price`
-                        : "No unit price"}
-                    </p>
+                    <Money
+                      amountMinor={row.amount.amountMinor}
+                      currency={row.amount.currency}
+                      size="sm"
+                    />
+                    <span className="text-[11px] text-fg-subtle">
+                      {row.unitPrice ? "Unit price captured" : "Unit price n/a"}
+                    </span>
                   </div>
                 </div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <MetadataField
+
+                <KeyValueGrid className="gap-y-3 md:grid-cols-2" columns={2}>
+                  <KeyValueRow
                     label="Quantity"
                     value={
-                      row.quantity ? `${row.quantity.value} ${row.quantity.unit}` : "n/a"
+                      row.quantity
+                        ? `${row.quantity.value} ${row.quantity.unit}`
+                        : "n/a"
                     }
                   />
-                  <MetadataField
-                    label="Original category key"
-                    value={row.category}
-                    mono
+                  <KeyValueRow
+                    label="Unit price"
+                    value={
+                      row.unitPrice ? (
+                        <Money
+                          amountMinor={row.unitPrice.amountMinor}
+                          currency={row.unitPrice.currency}
+                          size="sm"
+                        />
+                      ) : (
+                        "n/a"
+                      )
+                    }
                   />
-                </div>
+                  <KeyValueRow label="Category key" value={row.category} />
+                  <KeyValueRow
+                    label="Source page"
+                    value={row.sourcePage ? `Page ${row.sourcePage}` : "n/a"}
+                  />
+                </KeyValueGrid>
+
                 {row.note ? (
-                  <div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-sm">
+                  <div className="rounded-md border border-border-default bg-surface-elevated/60 px-3 py-2 text-[12.5px] text-fg-secondary">
                     {row.note}
                   </div>
                 ) : null}
-              </div>
+              </ProvenanceBlock>
             ))
           )}
-        </CardContent>
-      </Card>
+        </SurfaceBody>
+      </Surface>
+
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Source observations</SurfaceTitle>
+            <SurfaceDescription>
+              Where the canonical document was first seen before normalization into
+              the app index.
+            </SurfaceDescription>
+          </SurfaceHeading>
+          <SurfaceActions>
+            <Badge variant="outline">{data.sourceObservations.length} sources</Badge>
+          </SurfaceActions>
+        </SurfaceHeader>
+        <SurfaceBody className="gap-3">
+          {data.sourceObservations.length === 0 ? (
+            <EmptyState
+              title="No source observations"
+              description="The app has not stored any upstream sightings for this document yet."
+            />
+          ) : (
+            data.sourceObservations.map((source, index) => (
+              <ProvenanceBlock key={`${source.sourceKind}:${source.seenAt}:${index}`}>
+                <ProvenanceHeader
+                  hint={formatDocumentDateTime(source.seenAt)}
+                  label={source.sourceKindLabel}
+                />
+                <div className="flex flex-col gap-2">
+                  <p className="font-mono text-[12px] text-fg-primary">
+                    {source.originalFilename ?? "Original filename unavailable"}
+                  </p>
+                  {source.reference.length === 0 ? (
+                    <p className="text-[12px] text-fg-subtle">
+                      No structured source fields were stored for this observation.
+                    </p>
+                  ) : (
+                    <div className="grid gap-2">
+                      {source.reference.map((field) => (
+                        <ProvenanceItem
+                          key={`${field.label}:${field.value}`}
+                          label={field.label}
+                          value={field.value}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </ProvenanceBlock>
+            ))
+          )}
+        </SurfaceBody>
+      </Surface>
     </div>
   );
-}
-
-function MetadataField({
-  label,
-  mono = false,
-  value,
-}: {
-  label: string;
-  mono?: boolean;
-  value: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1 rounded-lg border border-border/60 bg-muted/30 p-3">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className={mono ? "font-mono text-sm" : "text-sm"}>{value}</p>
-    </div>
-  );
-}
-
-function formatMoney(amountMinor: number) {
-  return new Intl.NumberFormat("pl-PL", {
-    currency: "PLN",
-    style: "currency",
-  }).format(amountMinor / 100);
-}
-
-function formatDateTime(value: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "UTC",
-  }).format(date);
 }

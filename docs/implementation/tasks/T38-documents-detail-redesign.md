@@ -1,12 +1,12 @@
 # T38 - Redesign documents and document detail
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T38-documents-detail-redesign`
 - Goal: Apply the redesign system to the documents catalog, document detail, and provenance surfaces.
 - Task type: `redesign`
 - Dependencies: `T31`, `T36`, `T46`
 - Write scope: documents and document-detail views/widgets only
-- Worker branch: none yet
+- Worker branch: `codex/T38-documents-detail-redesign`
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `ui-redesign-d`
 - Required verification: `strong`
@@ -61,9 +61,28 @@
   - move any reusable finance/evidence helpers downward into `src/shared/**` instead of copying logic across widgets
   - run the strong verification gate and check the result against the v0-integrated dashboard precedent
 - Completion signal: document surfaces are dense, readable, provenance-forward, and visually aligned with the redesigned dashboard without bespoke styling drift.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `apps/web/src/shared/lib/document-format.ts`
+  - `apps/web/src/views/documents/ui/documents-page.tsx`
+  - `apps/web/src/views/document-detail/ui/document-detail-page.tsx`
+  - `apps/web/src/widgets/documents-catalog/ui/documents-catalog-widget.tsx`
+  - `apps/web/src/widgets/document-record/ui/document-record-widget.tsx`
+  - `apps/web/src/widgets/document-provenance/ui/document-provenance-widget.tsx`
+  - `docs/implementation/tasks/T38-documents-detail-redesign.md`
+- Contracts changed: none
+- Tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `npm run db:migrate`
+  - `Invoke-WebRequest http://127.0.0.1:3000/api/health`
+  - `Invoke-WebRequest http://127.0.0.1:3000/api/documents`
+  - `Invoke-WebRequest http://127.0.0.1:3000/api/documents/<hash>`
+  - `npx playwright screenshot --browser chromium --viewport-size "1440,2200" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000/documents apps/web/.t38-documents-desktop.png`
+  - `npx playwright screenshot --browser chromium --viewport-size "1024,1400" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000/documents apps/web/.t38-documents-tablet.png`
+  - `npx playwright screenshot --browser chromium --viewport-size "1440,2200" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000/documents/<hash> apps/web/.t38-detail-desktop.png`
+  - `npx playwright screenshot --browser chromium --viewport-size "1024,1400" --full-page --wait-for-timeout 2000 http://127.0.0.1:3000/documents/<hash> apps/web/.t38-detail-tablet.png`
+  - `npm run --workspace @dabrowskiego/web dev -- --hostname 127.0.0.1 --port 3000` with a fresh rerun of `/documents` and `/documents/<hash>` after the duplicate-key fix; stderr stayed empty on the restarted server
 - Coordinator notes:
   - Carry-forward from `T37`: if documents surfaces need signed-money, delta-intent, or change-status formatting already duplicated in dashboard widgets, extract those helpers into a shared finance-format module in `apps/web/src/shared/lib/**` instead of copying them again inside document widgets.
   - Why it matters: the sibling-slice import rule blocks widget-to-widget reuse, so shared formatting logic must move downward into the shared layer before later redesign slices accumulate drift.
@@ -77,4 +96,4 @@
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: preserve evidence trust and metadata readability; follow the v0-integrated dashboard precedent without over-simplifying provenance or financial detail presentation.
+- Next handoff note: start a reviewer chat on branch `codex/T38-documents-detail-redesign` and say `reviewer T38`.

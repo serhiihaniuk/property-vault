@@ -1,17 +1,42 @@
 import Link from "next/link";
+import { FileText } from "lucide-react";
 
 import type { DocumentsCatalogData } from "@/src/shared/api/client";
-import { Badge, badgeVariants } from "@/src/shared/ui/badge";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/src/shared/ui/card";
+  formatDocumentConfidence,
+  formatDocumentDate,
+  formatDocumentDateTime,
+  getDocumentPeriodLabel,
+  getDocumentStatusTone,
+  formatDocumentStatus,
+} from "@/src/shared/lib/document-format";
 import { cn } from "@/src/shared/lib/utils";
+import {
+  Badge,
+  buttonVariants,
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableRow,
+  DenseCard,
+  EmptyState,
+  ErrorState,
+  HashChip,
+  LoadingState,
+  MetricLabel,
+  MetricValue,
+  StatusBadge,
+  Surface,
+  SurfaceActions,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+  TableRow,
+} from "@/src/shared/ui";
 
 export interface DocumentsCatalogWidgetProps {
   data?: DocumentsCatalogData;
@@ -26,245 +51,323 @@ export function DocumentsCatalogWidget({
 }: DocumentsCatalogWidgetProps) {
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Documents</CardTitle>
-          <CardDescription>
-            Loading the indexed evidence catalog and document type filters.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Indexed catalog</SurfaceTitle>
+            <SurfaceDescription>
+              Loading indexed evidence records, extraction status, and available filters.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState label="Loading document catalog" rows={8} />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   if (errorMessage) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Documents unavailable</CardTitle>
-          <CardDescription>{errorMessage}</CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Indexed catalog unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              The evidence catalog could not be loaded from the indexed app data.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState
+            title="Document catalog unavailable"
+            description={errorMessage}
+          />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
   if (!data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Documents</CardTitle>
-          <CardDescription>
-            Document records will appear here after canonical evidence is synced into
-            Postgres.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Indexed catalog</SurfaceTitle>
+            <SurfaceDescription>
+              Document records appear here after canonical evidence is synced into
+              Postgres.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <EmptyState
+            title="No indexed evidence yet"
+            description="Sync the local evidence vault to populate the catalog, document detail, and provenance surfaces."
+          />
+        </SurfaceBody>
+      </Surface>
     );
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <CardTitle>Documents</CardTitle>
-            <CardDescription>
-              Indexed evidence records with extraction status, period context, and
-              provenance counts.
-            </CardDescription>
-          </div>
-          <CardAction className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{data.documents.length} shown</Badge>
-            <Badge variant="outline">
-              {data.availableTypes.reduce((sum, item) => sum + item.count, 0)} total indexed
-            </Badge>
-          </CardAction>
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-wrap gap-2">
-          <Link
-            className={cn(
-              badgeVariants({
-                variant: data.selectedDocumentType ? "outline" : "secondary",
-              }),
-            )}
-            href="/documents"
-          >
-            All types
-          </Link>
-          {data.availableTypes.map((type) => {
-            const isSelected = type.documentType === data.selectedDocumentType;
+  const totalIndexed = data.availableTypes.reduce((sum, item) => sum + item.count, 0);
+  const needsAttentionCount = data.documents.filter((document) => document.status !== "ok")
+    .length;
 
-            return (
-              <Link
-                key={type.documentType}
-                className={cn(
-                  badgeVariants({
-                    variant: isSelected ? "secondary" : "outline",
-                  }),
-                )}
-                href={`/documents?type=${encodeURIComponent(type.documentType)}`}
-              >
-                {type.label}
-                {" "}
-                <span className="font-mono">{type.count}</span>
-              </Link>
-            );
-          })}
-        </div>
-        {data.documents.length === 0 ? (
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>No matching documents</CardTitle>
-              <CardDescription>
-                {data.selectedDocumentType
+  return (
+    <div className="flex flex-col gap-4">
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Catalog overview</SurfaceTitle>
+            <SurfaceDescription>
+              Scannable evidence catalog with type filters, extraction state, and
+              provenance-ready detail links.
+            </SurfaceDescription>
+          </SurfaceHeading>
+          <SurfaceActions>
+            <Badge variant="outline" className="font-mono">
+              {formatDocumentDateTime(data.generatedAt)}
+            </Badge>
+          </SurfaceActions>
+        </SurfaceHeader>
+        <SurfaceBody className="gap-4">
+          <div className="grid gap-3 md:grid-cols-3">
+            <CatalogStatCard
+              detail={`${data.availableTypes.length} indexed types`}
+              label="Indexed records"
+              value={String(totalIndexed)}
+            />
+            <CatalogStatCard
+              detail={
+                data.selectedDocumentType
+                  ? "Filtered result set"
+                  : "Current catalog view"
+              }
+              label="Shown"
+              tone="info"
+              value={String(data.documents.length)}
+            />
+            <CatalogStatCard
+              detail={
+                needsAttentionCount > 0
+                  ? "Failed or needs review"
+                  : "All visible records extracted cleanly"
+              }
+              label="Needs attention"
+              tone={needsAttentionCount > 0 ? "warning" : "default"}
+              value={String(needsAttentionCount)}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <FilterLink href="/documents" isSelected={!data.selectedDocumentType}>
+              <span>All types</span>
+              <span className="font-mono text-[11px] text-fg-subtle">{totalIndexed}</span>
+            </FilterLink>
+            {data.availableTypes.map((type) => {
+              const isSelected = type.documentType === data.selectedDocumentType;
+
+              return (
+                <FilterLink
+                  key={type.documentType}
+                  href={`/documents?type=${encodeURIComponent(type.documentType)}`}
+                  isSelected={isSelected}
+                >
+                  <span>{type.label}</span>
+                  <span className="font-mono text-[11px] text-fg-subtle">{type.count}</span>
+                </FilterLink>
+              );
+            })}
+          </div>
+        </SurfaceBody>
+      </Surface>
+
+      <Surface density="comfortable" tone="default">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Indexed evidence table</SurfaceTitle>
+            <SurfaceDescription>
+              Dense review surface for document metadata, extracted coverage, and
+              provenance drill-down.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          {data.documents.length === 0 ? (
+            <EmptyState
+              icon={FileText}
+              title="No matching documents"
+              description={
+                data.selectedDocumentType
                   ? "No indexed documents match the selected type yet."
-                  : "No indexed documents are available yet."}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {data.documents.map((document) => (
-              <Card key={document.hash} size="sm">
-                <CardHeader>
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <CardTitle className="line-clamp-2">
+                  : "No indexed documents are available yet."
+              }
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <DataTable className="min-w-[1100px]">
+                <DataTableHeader>
+                  <TableRow>
+                    <DataTableHead>Document</DataTableHead>
+                    <DataTableHead>Period</DataTableHead>
+                    <DataTableHead>Evidence</DataTableHead>
+                    <DataTableHead>Extraction</DataTableHead>
+                    <DataTableHead>Hash</DataTableHead>
+                    <DataTableHead className="w-24 text-right">Detail</DataTableHead>
+                  </TableRow>
+                </DataTableHeader>
+                <DataTableBody divider="dashed">
+                  {data.documents.map((document) => (
+                    <DataTableRow key={document.hash}>
+                      <DataTableCell className="min-w-[320px]">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div className="flex min-w-0 flex-col gap-1">
+                              <Link
+                                className="line-clamp-2 font-medium text-fg-primary transition-colors hover:text-fg-secondary"
+                                href={`/documents/${document.hash}`}
+                              >
+                                {document.title}
+                              </Link>
+                              <p className="line-clamp-2 text-[11.5px] text-fg-subtle">
+                                {document.summaryPlain}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary">{document.documentTypeLabel}</Badge>
+                            {document.assetTag ? (
+                              <Badge variant="outline" className="font-mono">
+                                {document.assetTag}
+                              </Badge>
+                            ) : null}
+                          </div>
+                        </div>
+                      </DataTableCell>
+                      <DataTableCell className="min-w-[180px]">
+                        <div className="flex flex-col gap-1 text-[11.5px]">
+                          <span className="font-mono text-fg-primary">
+                            {getDocumentPeriodLabel(document.period)}
+                          </span>
+                          <span className="text-fg-subtle">
+                            Document date {formatDocumentDate(document.documentDate)}
+                          </span>
+                        </div>
+                      </DataTableCell>
+                      <DataTableCell className="min-w-[170px]">
+                        <div className="grid gap-1 text-[11.5px]">
+                          <EvidenceLine label="Rows" value={String(document.financialRowCount)} />
+                          <EvidenceLine label="Sources" value={String(document.sourceCount)} />
+                          <EvidenceLine
+                            label="Pages"
+                            value={
+                              document.pageCount ? String(document.pageCount) : "n/a"
+                            }
+                          />
+                        </div>
+                      </DataTableCell>
+                      <DataTableCell className="min-w-[200px]">
+                        <div className="flex flex-col gap-2">
+                          <StatusBadge
+                            status={getDocumentStatusTone(document.status)}
+                            dot
+                          >
+                            {formatDocumentStatus(document.status)}
+                          </StatusBadge>
+                          <div className="grid gap-1 text-[11.5px]">
+                            <EvidenceLine
+                              label="Confidence"
+                              value={formatDocumentConfidence(document.confidence)}
+                            />
+                            <EvidenceLine
+                              label="Extracted"
+                              value={formatDocumentDateTime(document.extractedAt)}
+                            />
+                          </div>
+                        </div>
+                      </DataTableCell>
+                      <DataTableCell className="min-w-[140px]">
+                        <HashChip hash={document.hash} />
+                      </DataTableCell>
+                      <DataTableCell className="text-right">
                         <Link
-                          className="hover:text-primary"
+                          className={cn(
+                            buttonVariants({ size: "xs", variant: "ghost" }),
+                            "ml-auto",
+                          )}
                           href={`/documents/${document.hash}`}
                         >
-                          {document.title}
+                          Open
                         </Link>
-                      </CardTitle>
-                      <CardDescription>{document.summaryPlain}</CardDescription>
-                    </div>
-                    <div className="flex shrink-0 flex-wrap gap-2">
-                      <Badge variant="secondary">{document.documentTypeLabel}</Badge>
-                      <Badge variant={getStatusBadgeVariant(document.status)}>
-                        {formatStatus(document.status)}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <MetadataField
-                      label="Document date"
-                      value={document.documentDate ? formatDate(document.documentDate) : "n/a"}
-                    />
-                    <MetadataField
-                      label="Reporting period"
-                      value={document.period?.label ?? "No normalized period"}
-                    />
-                    <MetadataField
-                      label="Financial rows"
-                      value={String(document.financialRowCount)}
-                    />
-                    <MetadataField
-                      label="Source observations"
-                      value={String(document.sourceCount)}
-                    />
-                    <MetadataField
-                      label="Extraction confidence"
-                      value={`${Math.round(document.confidence * 100)}%`}
-                    />
-                    <MetadataField
-                      label="Pages"
-                      value={document.pageCount ? String(document.pageCount) : "n/a"}
-                    />
-                  </div>
-                  {document.assetTag ? (
-                    <p className="text-sm text-muted-foreground">
-                      Asset tag:
-                      {" "}
-                      <span className="font-mono text-foreground">{document.assetTag}</span>
-                    </p>
-                  ) : null}
-                </CardContent>
-                <CardFooter className="justify-between gap-3 max-md:flex-col max-md:items-start">
-                  <p className="text-sm text-muted-foreground">
-                    Extracted
-                    {" "}
-                    {formatDateTime(document.extractedAt)}
-                  </p>
-                  <Link
-                    className={cn(badgeVariants({ variant: "outline" }))}
-                    href={`/documents/${document.hash}`}
-                  >
-                    Open provenance
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function MetadataField({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1 rounded-lg border border-border/60 bg-muted/30 p-3">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="text-sm">{value}</p>
+                      </DataTableCell>
+                    </DataTableRow>
+                  ))}
+                </DataTableBody>
+              </DataTable>
+            </div>
+          )}
+        </SurfaceBody>
+      </Surface>
     </div>
   );
 }
 
-function formatStatus(status: DocumentsCatalogData["documents"][number]["status"]) {
-  switch (status) {
-    case "failed":
-      return "Failed";
-    case "needs_review":
-      return "Needs review";
-    case "ok":
-      return "OK";
-    default:
-      return "Status";
-  }
+function CatalogStatCard({
+  detail,
+  label,
+  tone = "default",
+  value,
+}: {
+  detail: string;
+  label: string;
+  tone?: "default" | "info" | "warning";
+  value: string;
+}) {
+  return (
+    <DenseCard
+      className={cn(
+        tone === "info" && "border-status-info/25 bg-status-info-bg/50",
+        tone === "warning" && "border-status-warning/25 bg-status-warning-bg/50",
+      )}
+      tone={tone === "default" ? "default" : "muted"}
+    >
+      <MetricLabel>{label}</MetricLabel>
+      <MetricValue size="md">{value}</MetricValue>
+      <span className="text-[11.5px] text-fg-subtle">{detail}</span>
+    </DenseCard>
+  );
 }
 
-function getStatusBadgeVariant(status: DocumentsCatalogData["documents"][number]["status"]) {
-  if (status === "failed") {
-    return "destructive" as const;
-  }
-
-  if (status === "needs_review") {
-    return "secondary" as const;
-  }
-
-  return "outline" as const;
+function FilterLink({
+  children,
+  href,
+  isSelected,
+}: {
+  children: React.ReactNode;
+  href: string;
+  isSelected: boolean;
+}) {
+  return (
+    <Link
+      className={cn(
+        buttonVariants({
+          size: "sm",
+          variant: isSelected ? "secondary" : "outline",
+        }),
+        "h-7 gap-2 font-normal",
+      )}
+      href={href}
+    >
+      {children}
+    </Link>
+  );
 }
 
-function formatDate(value: string) {
-  const date = new Date(`${value}T00:00:00.000Z`);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  }).format(date);
-}
-
-function formatDateTime(value: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "UTC",
-  }).format(date);
+function EvidenceLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="text-fg-subtle">{label}</span>
+      <span className="font-mono tabular-nums text-fg-primary">{value}</span>
+    </div>
+  );
 }
