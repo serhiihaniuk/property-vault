@@ -14,7 +14,9 @@
 - Files changed: none yet
 - Contracts changed: none yet
 - Tests run: none yet
-- Coordinator notes: none.
+- Coordinator notes:
+  - Carry-forward from `T37`: if reconciliation or anomaly surfaces need money, signed-money, delta-intent, or change-status formatting already duplicated in dashboard widgets, extract those helpers into a shared finance-format module in `apps/web/src/shared/lib/**` instead of copying them again inside these widgets.
+  - Why it matters: the sibling-slice import rule blocks widget-to-widget reuse, so shared formatting logic must move downward into the shared layer before later redesign slices accumulate drift.
 - Review result: none yet
 - Reviewer: none yet
 - Review tests run: none yet

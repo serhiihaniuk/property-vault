@@ -1,7 +1,7 @@
 # T37 - Redesign dashboard to the finance-first MVP
 
 - Status: `done`
-- Owner: `implementer`
+- Owner: `coordinator`
 - Goal: Align the dashboard with the final finance-first MVP direction from the handoff.
 - Dependencies: `T30`, `T34`, `T36`
 - Write scope: dashboard view and dashboard widgets only
@@ -45,7 +45,14 @@
 - Coordinator notes review:
   - Helper-duplication note is valid and should be carried forward into a shared-layer cleanup task rather than copied again in later redesign tasks.
   - Ledger-context note is valid and non-blocking; the current snapshot uses the best available data until a dedicated ledger/payments contract exists.
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: review complete on `codex/T37-dashboard-redesign`; return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - merged the reviewer-approved T37 dashboard redesign into `master`
+  - accepted the finance-first snapshot layout and the redesigned dashboard widget composition as aligned with the redesign spec and shared T36 design-system foundation
+  - accepted the reviewer fix that groups anomaly severity by the highest-severity item in each rule group
+- Actions taken:
+  - merged `codex/T37-dashboard-redesign` into `master`
+  - recorded `T37` as `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - updated `T38` and `T39` to carry forward the shared finance-format helper extraction so later redesign slices do not keep copying widget-local formatter logic
+- Actions ignored:
+  - did not create a dedicated ledger/payments follow-up task yet, because the richer balance or transaction context implied by the reference design still lacks a real underlying ledger contract and should not be invented as a UI-only backlog item
+- Next handoff note: nothing right now.
