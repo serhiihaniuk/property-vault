@@ -3,7 +3,7 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Complete the finance-analysis surfaces under the redesign system.
-- Dependencies: `T32`, `T36`
+- Dependencies: `T32`, `T36`, `T46`
 - Write scope: yearly reconciliation and anomaly UI only
 - Worker branch: none yet
 - Recommended execution model: `gpt-5.4 / high`
@@ -17,6 +17,7 @@
 - Coordinator notes:
   - Carry-forward from `T37`: if reconciliation or anomaly surfaces need money, signed-money, delta-intent, or change-status formatting already duplicated in dashboard widgets, extract those helpers into a shared finance-format module in `apps/web/src/shared/lib/**` instead of copying them again inside these widgets.
   - Why it matters: the sibling-slice import rule blocks widget-to-widget reuse, so shared formatting logic must move downward into the shared layer before later redesign slices accumulate drift.
+  - Carry-forward from `T45` and `T46`: use the v0-integrated dashboard shell, panel density, and adapter-boundary patterns as the redesign precedent for reconciliation/anomaly work, not the older `T37` widget composition.
 - Review result: none yet
 - Reviewer: none yet
 - Review tests run: none yet
@@ -26,4 +27,4 @@
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: keep reconciliation and anomalies finance-first, evidence-linked, and visually consistent with the redesigned dashboard.
+- Next handoff note: keep reconciliation and anomalies finance-first, evidence-linked, and visually consistent with the v0-integrated dashboard shell.

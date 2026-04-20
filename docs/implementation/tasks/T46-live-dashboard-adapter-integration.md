@@ -1,0 +1,33 @@
+# T46 - Wire live dashboard data into v0 dashboard
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Replace mocked dashboard data with real REST/contract data while preserving the repo-native v0 dashboard render from `T45`.
+- Dependencies: `T30`, `T32`, `T34`, `T45`
+- Write scope: dashboard query wiring, dashboard view-model adapters, minimal dashboard-only compatibility helpers
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4 / xhigh`
+- Wave group: `ui-redesign-v0-b`
+- Required verification: `strong`
+- Design references: use the `T45` repo-native dashboard render as the first visual truth, then the generated v0 source, then `docs/implementation/UI_REDESIGN_SPEC.md`, then the screenshot; consult the HTML only when the repo-native render and source still leave detail intent ambiguous.
+- Completion signal: the `T45` dashboard render is preserved while the page is powered by real contracts, carried-forward months, provenance, anomalies, and reconciliation data.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes:
+  - Keep the `T45` presentational layer intact and add a dashboard adapter layer between our live API responses and the exact v0 component props.
+  - Do not redesign or simplify panels to fit live data. Adapt the data to the design, not the design to the data.
+  - No public REST/OpenAPI changes are planned by default. Use current dashboard, reconciliation, and anomaly contracts unless a real blocker appears during adapter wiring.
+  - Introduce internal dashboard-only mapping types such as `DashboardV0ViewModel`, `PrimarySummaryVM`, `AccountStatusVM`, `MonthlyTrendVM`, `CategoryCardVM`, `OpenItemsVM`, and `DocumentsTableVM` rather than pushing v0 assumptions into shared contracts.
+  - If a v0 panel expects richer data than current live contracts provide, preserve the exact layout and use honest unavailable or placeholder states instead of trimming the shell.
+  - Carried-forward months and provenance must remain correct in the final integrated dashboard. Source schedule documents still need to be discoverable from the rendered month state.
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: preserve the `T45` render exactly; wire real data through adapters instead of reinterpreting the design.

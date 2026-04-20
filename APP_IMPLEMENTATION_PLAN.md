@@ -1,7 +1,7 @@
 # Property Vault App Implementation Plan
 
 **Status:** Active  
-**Last updated:** 2026-04-19  
+**Last updated:** 2026-04-20  
 **Scope:** App architecture, package foundations, web shell, redesign system,
 first vertical slices, and supporting test/reporting workflow
 
@@ -331,13 +331,19 @@ first, then `docs/design/property-vault-mvp/property-vault-reference.png`, and
 consult `docs/design/property-vault-mvp/Property Vault.html` only when layout
 or micro-detail intent remains ambiguous.
 
+`T37` remains the historical redesign pass that landed on `master`, but
+`T45` and `T46` are now the authoritative path for exact v0 dashboard
+integration. Do not resume `T38` or `T39` until `T46` is complete.
+
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T35` | Codify the redesign handoff in repo docs | `done` | `T30`, `T31`, `T32`, `T34` | `docs/design/**`, `docs/implementation/UI_REDESIGN_SPEC.md`, doc references only | `gpt-5.4-mini / medium` | `redesign-a` | `light` | redesign references/spec are in-repo and startup guidance points UI agents at them |
 | `T36` | Establish design tokens and shared UI primitives | `done` | `T35` | `apps/web/app/globals.css`, `apps/web/src/shared/ui/**`, shared visual helpers, `apps/web/components.json` if needed | `gpt-5.4 / high` | `redesign-b` | `strong` | semantic tokens, surface system, typography rhythm, badges, metric/value display, dense cards, and shared visual states are centralized |
 | `T37` | Redesign dashboard to the finance-first MVP | `done` | `T30`, `T34`, `T36` | dashboard views and widgets only | `gpt-5.4 / high` | `redesign-c` | `strong` | dashboard presents snapshot-first current state, balance/ledger, category drill-down cards, trend, anomalies, and recent evidence in the new system |
-| `T38` | Redesign documents and document detail | `todo` | `T31`, `T36` | document list/detail views and widgets only | `gpt-5.4 / high` | `redesign-d` | `strong` | document surfaces are dense, readable, provenance-forward, and visually aligned with dashboard |
-| `T39` | Redesign reconciliation and anomaly surfaces | `todo` | `T32`, `T36` | yearly reconciliation and anomaly UI only | `gpt-5.4 / high` | `redesign-e` | `strong` | yearly review and anomalies feel like part of the same product, with shared states and no bespoke styling drift |
+| `T45` | Refactor v0 dashboard into `apps/web` architecture | `todo` | `T35`, `T36` | dashboard route/view, dashboard-local components, dashboard-local mock data wiring, page shell integration | `gpt-5.4 / xhigh` | `redesign-dash-a` | `strong` | live dashboard route renders the exact v0 page shell and dashboard composition with mocked data inside `apps/web` structure and conventions |
+| `T46` | Wire live dashboard data into v0 dashboard | `todo` | `T30`, `T32`, `T34`, `T45` | dashboard query wiring, dashboard view-model adapters, minimal dashboard-only compatibility helpers | `gpt-5.4 / xhigh` | `redesign-dash-b` | `strong` | the `T45` dashboard render is preserved while powered by real contracts, carried-forward months, provenance, anomalies, and reconciliation data |
+| `T38` | Redesign documents and document detail | `todo` | `T31`, `T36`, `T46` | document list/detail views and widgets only | `gpt-5.4 / high` | `redesign-d` | `strong` | document surfaces are dense, readable, provenance-forward, and visually aligned with the v0-integrated dashboard shell |
+| `T39` | Redesign reconciliation and anomaly surfaces | `todo` | `T32`, `T36`, `T46` | yearly reconciliation and anomaly UI only | `gpt-5.4 / high` | `redesign-e` | `strong` | yearly review and anomalies feel like part of the same product, with shared states and no bespoke styling drift after the v0 dashboard integration lands |
 
 ### Wave 4 - Access
 
@@ -350,10 +356,10 @@ or micro-detail intent remains ambiguous.
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `T40` | Import-boundary lint rules | `todo` | `T20`, `T36` | lint config and boundary rules only | `gpt-5.4-mini / medium` | `hardening-a` | `standard` | forbidden imports fail lint with useful messages, including redesign-related UI boundary rules |
-| `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T37`, `T39` | application, contracts, and UI surfaces for sync status only | `gpt-5.4 / high` | `hardening-b` | `strong` | app clearly shows last sync/freshness state inside the redesigned finance surfaces with tested behavior |
-| `T42` | Error, empty, and loading states | `todo` | `T33`, `T37`, `T38`, `T39` | slice UI states only | `gpt-5.4-mini / medium` | `hardening-c` | `standard` | primary redesigned screens handle loading, empty, and error states consistently |
+| `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T39`, `T46` | application, contracts, and UI surfaces for sync status only | `gpt-5.4 / high` | `hardening-b` | `strong` | app clearly shows last sync/freshness state inside the v0-integrated redesigned finance surfaces with tested behavior |
+| `T42` | Error, empty, and loading states | `todo` | `T33`, `T38`, `T39`, `T46` | slice UI states only | `gpt-5.4-mini / medium` | `hardening-c` | `standard` | primary redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path lands |
 | `T43` | Dev/bootstrap scripts | `todo` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / low` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
-| `T44` | Final documentation cleanup | `todo` | `T33`, `T35`-`T43` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
+| `T44` | Final documentation cleanup | `todo` | `T33`, `T35`-`T43`, `T45`, `T46` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
 
 ## 10. Reviewer Workflow
 

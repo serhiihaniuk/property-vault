@@ -3,7 +3,7 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Apply the redesign system to the documents catalog, document detail, and provenance surfaces.
-- Dependencies: `T31`, `T36`
+- Dependencies: `T31`, `T36`, `T46`
 - Write scope: documents and document-detail views/widgets only
 - Worker branch: none yet
 - Recommended execution model: `gpt-5.4 / high`
@@ -17,6 +17,7 @@
 - Coordinator notes:
   - Carry-forward from `T37`: if documents surfaces need signed-money, delta-intent, or change-status formatting already duplicated in dashboard widgets, extract those helpers into a shared finance-format module in `apps/web/src/shared/lib/**` instead of copying them again inside document widgets.
   - Why it matters: the sibling-slice import rule blocks widget-to-widget reuse, so shared formatting logic must move downward into the shared layer before later redesign slices accumulate drift.
+  - Carry-forward from `T45` and `T46`: use the v0-integrated dashboard shell, density, and adapter-boundary patterns as the redesign precedent for documents, not the older `T37` widget composition.
 - Review result: none yet
 - Reviewer: none yet
 - Review tests run: none yet
@@ -26,4 +27,4 @@
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: preserve evidence trust and metadata readability; do not over-simplify provenance or financial detail presentation.
+- Next handoff note: preserve evidence trust and metadata readability; follow the v0-integrated dashboard precedent without over-simplifying provenance or financial detail presentation.

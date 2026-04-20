@@ -1,0 +1,33 @@
+# T45 - Refactor v0 dashboard into `apps/web` architecture
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Make the generated v0 dashboard repo-native inside `apps/web` without visual drift.
+- Dependencies: `T35`, `T36`
+- Write scope: dashboard route/view, dashboard-local components, dashboard-local mock data wiring, page shell integration
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4 / xhigh`
+- Wave group: `ui-redesign-v0-a`
+- Required verification: `strong`
+- Design references: use the generated v0 dashboard source as the hard template first, then `docs/implementation/UI_REDESIGN_SPEC.md`, then the screenshot; consult the HTML only when the generated source or screenshot still leaves detail intent ambiguous.
+- Completion signal: the live dashboard route in `apps/web` renders the exact v0 page shell and dashboard composition with mocked data, inside repo-native structure and conventions, with no meaningful visual drift and no permanent second `apps/v0` runtime.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes:
+  - The generated v0 dashboard is the hard template for the single dashboard page, including its top bar and page shell.
+  - Promote the stash-only/generated source into the task branch as the task input before refactoring begins so the dashboard no longer depends on off-branch local state.
+  - Use a view-local-first refactor. The exact dashboard composition should live primarily under the dashboard view layer; do not force it back into the older multi-widget split if that changes the render.
+  - Keep mocked data in place for `T45`. This task is about structure, ownership, and shell integration, not live API wiring.
+  - Preserve the rendered result exactly while changing only imports, aliases, folder ownership, shell hookup, mock-data location, and compatibility shims needed for `apps/web`.
+  - Shared-component purity is secondary to exact render preservation in this task. Move code into shared UI only when doing so does not change the rendered dashboard.
+- Review result: none yet
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: preserve the exact v0 render; structure may change, appearance may not.

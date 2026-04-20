@@ -3,7 +3,7 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Reconcile architecture, package docs, and usage docs with implemented reality.
-- Dependencies: `T33`, `T35`, `T36`, `T37`, `T38`, `T39`, `T40`, `T41`, `T42`, `T43`
+- Dependencies: `T33`, `T35`, `T36`, `T37`, `T38`, `T39`, `T40`, `T41`, `T42`, `T43`, `T45`, `T46`
 - Write scope: docs only
 - Recommended execution model: `gpt-5.4-mini / low`
 - Wave group: `hardening-e`

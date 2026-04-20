@@ -3,12 +3,12 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Add consistent non-happy-path UI states to the first product slices.
-- Dependencies: `T33`, `T37`, `T38`, `T39`
+- Dependencies: `T33`, `T38`, `T39`, `T46`
 - Write scope: slice UI states only
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `hardening-c`
 - Required verification: `standard`
-- Completion signal: major redesigned screens handle loading, empty, and error states consistently.
+- Completion signal: major redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path lands.
 - Files changed: none yet
 - Contracts changed: none yet
 - Tests run: none yet
