@@ -1,7 +1,7 @@
 # T46 - Wire live dashboard data into v0 dashboard
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Replace mocked dashboard data with real REST/contract data while preserving the repo-native v0 dashboard render from `T45`.
 - Task type: `transplant/integration`
 - Dependencies: `T30`, `T32`, `T34`, `T45`
