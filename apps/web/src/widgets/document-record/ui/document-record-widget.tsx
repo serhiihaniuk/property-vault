@@ -98,7 +98,7 @@ export function DocumentRecordWidget({
   const flagCount = data.questionsForUser.length + data.warnings.length;
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)]">
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)]">
       <Surface density="comfortable" tone="elevated">
         <SurfaceHeader>
           <SurfaceHeading>

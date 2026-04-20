@@ -90,13 +90,20 @@
   - Carry-forward from `T37`: if documents surfaces need signed-money, delta-intent, or change-status formatting already duplicated in dashboard widgets, extract those helpers into a shared finance-format module in `apps/web/src/shared/lib/**` instead of copying them again inside document widgets.
   - Why it matters: the sibling-slice import rule blocks widget-to-widget reuse, so shared formatting logic must move downward into the shared layer before later redesign slices accumulate drift.
   - Carry-forward from `T45` and `T46`: use the v0-integrated dashboard shell, density, and adapter-boundary patterns as the redesign precedent for documents, not the older `T37` widget composition.
-- Review result: none yet
-- Reviewer: none yet
-- Review tests run: none yet
-- Merge status: none yet
-- Architecture note: none yet
-- Coordinator notes review: none yet
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `Invoke-WebRequest http://localhost:3000/api/documents`
+  - `Invoke-WebRequest http://localhost:3000/api/documents/<hash>`
+  - desktop browser verification at `http://localhost:3000/documents` and `http://localhost:3000/documents/<hash>` with reviewer screenshots after bounded layout fixes
+  - tablet browser verification at `http://localhost:3000/documents` and `http://localhost:3000/documents/<hash>` with reviewer screenshots after bounded layout fixes
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. T38 keeps route composition in `src/views/**`, screen sections in `src/widgets/**`, and shared document formatting in `src/shared/**`; reviewer only tightened table/layout behavior so the redesigned evidence metadata stays visible at desktop width and detail surfaces no longer stretch empty panels against taller sibling cards.
+- Coordinator notes review: confirmed. The carry-forward shared-format guidance was applied through `apps/web/src/shared/lib/document-format.ts`, and reviewer added two bounded presentational fixes on the task branch so the dense documents table and two-column detail layout match the intended evidence-first operator surface in real browser verification.
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: start a reviewer chat on branch `codex/T38-documents-detail-redesign` and say `reviewer T38`.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.

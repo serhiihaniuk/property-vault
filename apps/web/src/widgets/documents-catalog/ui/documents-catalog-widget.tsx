@@ -205,31 +205,31 @@ export function DocumentsCatalogWidget({
             />
           ) : (
             <div className="overflow-x-auto">
-              <DataTable className="min-w-[1100px]">
+              <DataTable className="min-w-[1180px] w-full table-fixed">
                 <DataTableHeader>
                   <TableRow>
-                    <DataTableHead>Document</DataTableHead>
-                    <DataTableHead>Period</DataTableHead>
-                    <DataTableHead>Evidence</DataTableHead>
-                    <DataTableHead>Extraction</DataTableHead>
-                    <DataTableHead>Hash</DataTableHead>
-                    <DataTableHead className="w-24 text-right">Detail</DataTableHead>
+                    <DataTableHead className="w-[34%]">Document</DataTableHead>
+                    <DataTableHead className="w-[15%]">Period</DataTableHead>
+                    <DataTableHead className="w-[13%]">Evidence</DataTableHead>
+                    <DataTableHead className="w-[16%]">Extraction</DataTableHead>
+                    <DataTableHead className="w-[12%]">Hash</DataTableHead>
+                    <DataTableHead className="w-[10%] text-right">Detail</DataTableHead>
                   </TableRow>
                 </DataTableHeader>
                 <DataTableBody divider="dashed">
                   {data.documents.map((document) => (
                     <DataTableRow key={document.hash}>
-                      <DataTableCell className="min-w-[320px]">
+                      <DataTableCell className="w-[34%] align-top">
                         <div className="flex flex-col gap-2">
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="flex min-w-0 flex-col gap-1">
                               <Link
-                                className="line-clamp-2 font-medium text-fg-primary transition-colors hover:text-fg-secondary"
+                                className="line-clamp-2 break-words font-medium text-fg-primary transition-colors hover:text-fg-secondary"
                                 href={`/documents/${document.hash}`}
                               >
                                 {document.title}
                               </Link>
-                              <p className="line-clamp-2 text-[11.5px] text-fg-subtle">
+                              <p className="line-clamp-2 break-words text-[11.5px] text-fg-subtle">
                                 {document.summaryPlain}
                               </p>
                             </div>
@@ -244,7 +244,7 @@ export function DocumentsCatalogWidget({
                           </div>
                         </div>
                       </DataTableCell>
-                      <DataTableCell className="min-w-[180px]">
+                      <DataTableCell className="w-[15%] align-top">
                         <div className="flex flex-col gap-1 text-[11.5px]">
                           <span className="font-mono text-fg-primary">
                             {getDocumentPeriodLabel(document.period)}
@@ -254,7 +254,7 @@ export function DocumentsCatalogWidget({
                           </span>
                         </div>
                       </DataTableCell>
-                      <DataTableCell className="min-w-[170px]">
+                      <DataTableCell className="w-[13%] align-top">
                         <div className="grid gap-1 text-[11.5px]">
                           <EvidenceLine label="Rows" value={String(document.financialRowCount)} />
                           <EvidenceLine label="Sources" value={String(document.sourceCount)} />
@@ -266,7 +266,7 @@ export function DocumentsCatalogWidget({
                           />
                         </div>
                       </DataTableCell>
-                      <DataTableCell className="min-w-[200px]">
+                      <DataTableCell className="w-[16%] align-top">
                         <div className="flex flex-col gap-2">
                           <StatusBadge
                             status={getDocumentStatusTone(document.status)}
@@ -286,10 +286,10 @@ export function DocumentsCatalogWidget({
                           </div>
                         </div>
                       </DataTableCell>
-                      <DataTableCell className="min-w-[140px]">
+                      <DataTableCell className="w-[12%] align-top">
                         <HashChip hash={document.hash} />
                       </DataTableCell>
-                      <DataTableCell className="text-right">
+                      <DataTableCell className="w-[10%] align-top text-right">
                         <Link
                           className={cn(
                             buttonVariants({ size: "xs", variant: "ghost" }),

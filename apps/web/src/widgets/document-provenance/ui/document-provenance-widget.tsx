@@ -90,7 +90,7 @@ export function DocumentProvenanceWidget({
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
       <Surface density="comfortable" tone="elevated">
         <SurfaceHeader>
           <SurfaceHeading>
