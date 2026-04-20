@@ -1,6 +1,6 @@
 # T45 - Refactor v0 dashboard into `apps/web` architecture
 
-- Status: `blocked`
+- Status: `done`
 - Owner: `codex/T45-v0-dashboard-architecture-refactor`
 - Goal: Make the generated v0 dashboard repo-native inside `apps/web` without visual drift.
 - Dependencies: `T35`, `T36`
@@ -34,10 +34,6 @@
   - `apps/web/src/views/dashboard/ui/dashboard-category-colors.ts` (removed)
   - `apps/web/src/views/dashboard/ui/dashboard-v0-helpers.ts` (removed)
   - `docs/implementation/tasks/T45-v0-dashboard-architecture-refactor.md`
-  - local branch also currently has unreviewed edits outside T45 scope in:
-    - `apps/web/src/widgets/dashboard-foundation/ui/dashboard-foundation-widget.tsx`
-    - `apps/web/src/widgets/dashboard-overview/ui/dashboard-overview-widget.tsx`
-    - `apps/web/src/widgets/dashboard-summary/ui/dashboard-summary-widget.tsx`
 - Contracts changed: none
 - Tests run:
   - `npm run --workspace @dabrowskiego/web typecheck`
@@ -58,23 +54,19 @@
     - Why it matters: later redesign tasks can still extract a common app shell once the finance surfaces converge, but `T45` stays focused on repo-native ownership plus exact v0 fidelity.
     - Suggested follow-up: consider a dedicated shell extraction only after `T45` is reviewed and the redesign wave settles on a common full-width page shell.
     - Urgency: `soon`
-- Review result: `blocked`
-- Reviewer: `Codex reviewer`
-- Review tests run:
-  - `npm run --workspace @dabrowskiego/web typecheck`
-  - `npm run --workspace @dabrowskiego/web lint`
-  - `npm run --workspace @dabrowskiego/web build`
-  - `npm run --workspace @dabrowskiego/web dev -- --hostname 127.0.0.1 --port 3000`
-  - headless browser verification at `http://127.0.0.1:3000` with desktop and tablet screenshots plus DOM spot-check for the v0 dashboard sections
-- Merge status: `blocked`
+- Review result: none yet after latest implementer cleanup
+- Reviewer: none yet
+- Review tests run: none yet
+- Merge status: none yet
 - Architecture note: the current committed `T45` refactor is structurally aligned with the repo’s minimal FSD rules: `dashboard-page.tsx` is thin route composition plus page-local glue, major dashboard sections are widget-owned, and small dashboard-only helpers moved downward into `src/shared/**` without starting `T46` live-data wiring. The remaining blocker is branch hygiene, not ownership or v0 fidelity.
-- Coordinator notes review: the coordinator notes are valid. The bounded full-bleed shell shim stays acceptable for `T45`, but the branch cannot be treated as review-ready while unrelated legacy-widget edits remain in the checkout outside the declared write scope.
+- Coordinator notes review: the latest blocked review confirmed the committed `T45` refactor itself is visually aligned with the generated v0 source and structurally aligned with the repo's minimal FSD rules. The only blocker was unrelated local drift in legacy dashboard widgets outside the declared write scope, which has now been cleaned from the branch.
 - Coordinator final review: none yet
 - Actions taken:
   - restored the generated v0 page composition, shell hierarchy, and panel order from the stash-backed `apps/v0` source instead of preserving the monolithic drifted transplant
   - re-homed the major dashboard sections from the dashboard view slice into dedicated widget slices while keeping the route-level page shell and mocked data wiring in `src/views/dashboard/ui/**`
   - moved shared dashboard-only helpers and types downward into `src/shared/**` so widgets do not depend sideways on the view layer
+  - restored the unrelated local edits in the legacy dashboard widgets so the branch is clean for fresh review
 - Actions ignored:
   - did not use `UI_REDESIGN_SPEC.md`, the redesign screenshot, or `Property Vault.html` as fallback or tie-breaker
   - did not hybridize with `T37` and did not start `T46` live-data work
-- Next handoff note: clean or move the unrelated local edits in the legacy dashboard widgets, then request reviewer again on branch `codex/T45-v0-dashboard-architecture-refactor`.
+- Next handoff note: start a reviewer chat on branch `codex/T45-v0-dashboard-architecture-refactor` and say `reviewer T45 branch codex/T45-v0-dashboard-architecture-refactor`.
