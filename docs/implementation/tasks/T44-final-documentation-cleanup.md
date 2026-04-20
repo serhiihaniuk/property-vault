@@ -3,11 +3,55 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Reconcile architecture, package docs, and usage docs with implemented reality.
+- Task type: `docs/process`
 - Dependencies: `T33`, `T35`, `T36`, `T37`, `T38`, `T39`, `T40`, `T41`, `T42`, `T43`, `T45`, `T46`
 - Write scope: docs only
 - Recommended execution model: `gpt-5.4-mini / low`
 - Wave group: `hardening-e`
 - Required verification: `light`
+- Success criteria: repo docs match the implemented architecture, package layout, redesign guidance, workflows, and task-contract rules without stale execution guidance left in the default read path.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `APP_IMPLEMENTATION_PLAN.md`
+  - `docs/implementation/AGENT_PROTOCOL.md`
+  - the actually implemented repo/package layout at the end of the backlog
+- Secondary context:
+  - role files
+  - redesign docs and task files
+  - package-level docs and root bootstrap docs
+- Not authoritative:
+  - historical protocol wording that has already been superseded
+  - stale startup/read chains that no longer match the current task-contract model
+- Must do:
+  - reconcile docs against the final implemented repo reality
+  - remove or relabel stale guidance that should no longer drive execution
+  - leave the startup/protocol/docs set coherent enough that fresh chats do not need coordinator memory
+- Must not do:
+  - do not preserve stale instructions just because they are old
+  - do not widen this into feature work
+  - do not leave conflicting execution guidance in multiple docs
+- Expected ownership shape:
+  - root docs own repo orientation
+  - protocol docs own workflow rules
+  - role docs own role behavior
+  - task files remain execution contracts
+- Non-goals:
+  - no code feature implementation
+  - no speculative future-process redesign beyond what the repo now uses
+- Known traps:
+  - keeping historical guidance in default startup paths
+  - documenting intended architecture rather than implemented reality
+  - leaving duplicate rules alive in multiple docs with slightly different wording
+- Review focus:
+  - docs match implemented reality
+  - no stale execution guidance remains in default read paths
+  - the task-contract model is reflected consistently across docs
+- Implementation outline:
+  - inspect the implemented repo state and identify docs that still describe superseded workflows or layouts
+  - reconcile root, protocol, role, redesign, and package docs against the final implementation
+  - remove, archive, or relabel stale execution guidance instead of merely layering more text on top
+  - run the light verification pass by checking that a fresh chat could follow the repo docs without hidden coordinator context
 - Completion signal: docs match the implemented package layout, redesign guidance, workflows, and guardrails.
 - Files changed: none yet
 - Contracts changed: none yet

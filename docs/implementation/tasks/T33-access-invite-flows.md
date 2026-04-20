@@ -3,11 +3,61 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Deliver private invite-only access flows.
+- Task type: `standard slice`
 - Dependencies: `T12`, `T21`, `T22`, `T23`, `T36`
 - Write scope: auth/access routes, application helpers, widgets
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Wave group: `slice-access`
 - Required verification: `strong`
+- Success criteria: invite-only access works end to end with real Postgres-backed credential and invite coverage, uses the redesign token/primitives system, and does not invent a parallel auth-only visual language.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - `docs/implementation/tasks/T12-package-auth-better-auth.md`
+  - `docs/implementation/tasks/T36-design-tokens-and-shared-ui-primitives.md`
+- Secondary context:
+  - `docs/implementation/UI_REDESIGN_SPEC.md`
+  - `docs/design/property-vault-mvp/README.md`
+  - `docs/design/property-vault-mvp/property-vault-reference.png`
+- Not authoritative:
+  - any auth-only or landing-page style treatment that diverges from the app redesign system
+  - generic dashboard layout patterns as page templates for auth flows
+  - `pg-mem`-only auth verification for invite/credential behavior
+- Must do:
+  - keep auth internals behind `packages/auth`
+  - implement invite-only flows with real Postgres-backed verification for credential and invite paths
+  - use the existing redesign token/primitives system rather than a parallel auth style language
+  - keep route, application, and widget boundaries aligned with the approved architecture
+- Must not do:
+  - do not redesign the dashboard or shell as part of auth work
+  - do not bypass `packages/auth` with ad hoc Better Auth wiring inside web widgets
+  - do not rely only on `pg-mem` where the real Better Auth `pg` path is the risk
+  - do not add a bespoke auth-only design system
+- Expected ownership shape:
+  - auth/access route entrypoints stay thin
+  - application helpers own flow orchestration
+  - widgets own screen sections
+  - `packages/auth` remains the boundary for auth internals
+- Non-goals:
+  - no broad redesign wave work
+  - no shell extraction or dashboard redesign
+  - no unrelated contract cleanup outside auth/access scope
+- Known traps:
+  - false confidence from `pg-mem` coverage that misses the real Better Auth `pg` driver path
+  - letting auth screens drift visually from the redesign token/primitives baseline
+  - leaking auth internals out of `packages/auth`
+- Review focus:
+  - real Postgres-backed credential and invite coverage
+  - correct auth boundary ownership through `packages/auth`
+  - no auth-only visual language drift
+  - route/application/widget boundaries remain clean
+- Implementation outline:
+  - inspect the existing auth package and current access/invite route helpers to identify the missing end-to-end flow pieces
+  - wire invite-only access behavior through the approved auth/application boundaries without bypassing `packages/auth`
+  - build or adjust the access widgets/screens using the current redesign token/primitives system instead of bespoke auth styling
+  - add real Postgres-backed coverage for the credential and invite paths that matter here
+  - rerun the strong verification gate and confirm the final auth UI stays inside the shared visual system
 - Completion signal: invite flow and access management work end to end with real Postgres-backed auth coverage for credential and invite paths, use the redesign token/primitives system, and do not invent a parallel visual language.
 - Files changed: none yet
 - Contracts changed: none yet

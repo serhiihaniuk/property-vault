@@ -3,11 +3,54 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Add consistent non-happy-path UI states to the first product slices.
+- Task type: `redesign`
 - Dependencies: `T33`, `T38`, `T39`, `T46`
 - Write scope: slice UI states only
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `hardening-c`
 - Required verification: `standard`
+- Success criteria: primary redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path, using shared primitives instead of ad hoc markup.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - `docs/implementation/UI_REDESIGN_SPEC.md`
+  - completed outputs from `T33`, `T38`, `T39`, and `T46`
+- Secondary context:
+  - `docs/design/property-vault-mvp/README.md`
+  - `docs/design/property-vault-mvp/property-vault-reference.png`
+- Not authoritative:
+  - one-off state treatments from pre-redesign screens
+  - ad hoc placeholder markup that bypasses shared primitives
+- Must do:
+  - make loading, empty, and error states consistent across the first redesigned product slices
+  - use existing shared primitives first and extend them only when the shared system truly needs it
+  - keep the states visually aligned with the v0-integrated shell and the redesign token system
+- Must not do:
+  - do not patch each surface with bespoke state markup
+  - do not let state handling drift into a parallel design language
+  - do not broaden this into unrelated feature work inside the slices
+- Expected ownership shape:
+  - shared primitives own common state treatments
+  - views/widgets compose those states into the redesigned screens
+  - no per-slice reinvention of loading/error/empty semantics
+- Non-goals:
+  - no feature logic redesign
+  - no dashboard/data-adapter work beyond consuming the completed surfaces
+  - no contract redesign
+- Known traps:
+  - adding inconsistent empty/error treatments across slices
+  - using custom markup where shared primitives should exist
+  - treating non-happy-path states as afterthoughts that break density or shell rhythm
+- Review focus:
+  - consistent shared-state treatment across slices
+  - visual alignment with the redesigned product shell
+  - no custom one-off state systems
+- Implementation outline:
+  - inspect the completed redesigned slices and catalog their loading, empty, and error gaps
+  - identify which of those states belong in shared primitives versus slice-level composition
+  - implement the shared state treatments first, then wire them into the target screens
+  - run the standard gate and confirm the resulting states feel like part of one product rather than per-page patches
 - Completion signal: major redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path lands.
 - Files changed: none yet
 - Contracts changed: none yet

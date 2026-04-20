@@ -3,11 +3,53 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Make local developer bootstrap and run flows simple.
+- Task type: `docs/process`
 - Dependencies: `T16`, `T20`, `T21`, `T22`, `T23`
 - Write scope: root scripts, docs, and local setup helpers
 - Recommended execution model: `gpt-5.4-mini / low`
 - Wave group: `hardening-d`
 - Required verification: `standard`
+- Success criteria: local bootstrap and run commands are documented and reproducible from clean `master`, including an explicit web app env-loading path that does not depend on coordinator chat memory.
+- Primary authorities:
+  - this task file
+  - `docs/implementation/AGENT_PROTOCOL.md`
+  - `docs/local-docker-bootstrap.md`
+  - `README.md`
+  - the current root/package scripts and env-loading behavior in the repo
+- Secondary context:
+  - `docs/implementation/tasks/T16-local-docker-bootstrap.md`
+  - the `Run/Support Boundary` rules in `AGENT_PROTOCOL.md`
+- Not authoritative:
+  - undocumented local coordinator workarounds
+  - implicit env assumptions that are not encoded in scripts or docs
+- Must do:
+  - make the local run path boring and explicit from clean `master`
+  - resolve the web env-loading path so it is documented and reproducible
+  - keep scripts/docs aligned so support or coordinator runs stop at a real failure point instead of relying on hidden knowledge
+- Must not do:
+  - do not rely on unstated local setup steps
+  - do not leave the web process env strategy implicit
+  - do not broaden this into feature implementation work
+- Expected ownership shape:
+  - root scripts and docs own the bootstrap flow
+  - the web app's env-loading path is explicit in the scripts/docs rather than living in coordinator memory
+- Non-goals:
+  - no redesign work
+  - no unrelated app feature implementation
+  - no clever wrapper abstractions that make local startup harder to debug
+- Known traps:
+  - a flow that appears to work through Docker/migrations/sync but still fails at web runtime
+  - documenting one env path while the scripts actually use another
+  - hiding operational assumptions in chat instead of repo artifacts
+- Review focus:
+  - reproducibility from clean `master`
+  - explicit web env-loading path
+  - boring, understandable scripts and docs
+- Implementation outline:
+  - inspect the current local bootstrap and web env-loading behavior from clean `master`
+  - decide on one explicit web env strategy and encode it in scripts/docs
+  - update bootstrap docs and any helper scripts so the documented path matches reality
+  - run the standard gate by following the documented bootstrap path from scratch and confirming the web process receives the expected env
 - Completion signal: local bootstrap/run commands are documented and reproducible from clean `master`, including the web app env-loading path.
 - Files changed: none yet
 - Contracts changed: none yet

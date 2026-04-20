@@ -3,11 +3,52 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Enforce package and slice boundaries with lint rules.
+- Task type: `hardening/tooling`
 - Dependencies: `T20`, `T36`
 - Write scope: lint config and boundary rules only
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `hardening-a`
 - Required verification: `standard`
+- Success criteria: meaningful forbidden imports fail lint with useful messages, including redesign-related UI boundary rules, without producing noisy or brittle rule spam.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - `docs/implementation/tasks/T20-web-minimal-fsd.md`
+- Secondary context:
+  - `docs/implementation/tasks/T36-design-tokens-and-shared-ui-primitives.md`
+  - `docs/implementation/tasks/T45-v0-dashboard-architecture-refactor.md`
+- Not authoritative:
+  - hypothetical future layers not present in the repo
+  - lint rules that merely mirror folder names without enforcing meaningful ownership
+- Must do:
+  - enforce the real package/FSD boundaries the repo currently depends on
+  - include redesign-related UI boundary rules where they are stable enough to be enforced
+  - keep rule messages useful enough that implementers understand the boundary they violated
+- Must not do:
+  - do not add brittle or noisy rules that will be ignored
+  - do not enforce speculative boundaries the codebase does not actually use
+  - do not broaden this into general formatting or style-lint work
+- Expected ownership shape:
+  - lint config owns the rules
+  - the rules should encode the existing layer/package boundaries rather than invent new runtime abstractions
+- Non-goals:
+  - no codebase-wide refactor just to satisfy lint
+  - no redesign implementation work
+  - no shell or route restructuring
+- Known traps:
+  - overfitting rules to one current folder shape
+  - adding cross-layer prohibitions that block legitimate composition
+  - producing failures without actionable messages
+- Review focus:
+  - rules match actual architecture and UI playbook boundaries
+  - errors are meaningful, not noisy
+  - the rule set is strict enough to catch real drift without becoming brittle
+- Implementation outline:
+  - inspect the existing lint setup and identify which package and slice boundaries are already stable enough to enforce
+  - encode the meaningful boundary rules with useful failure messages
+  - add redesign-related UI boundaries only where the structure is already settled
+  - run the standard gate and confirm both valid imports and representative invalid imports behave as intended
 - Completion signal: forbidden imports fail lint with useful messages, including redesign-related UI boundary rules.
 - Files changed: none yet
 - Contracts changed: none yet

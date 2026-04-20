@@ -3,11 +3,55 @@
 - Status: `todo`
 - Owner: `unassigned`
 - Goal: Surface data freshness and sync status in the app.
+- Task type: `standard slice`
 - Dependencies: `T15`, `T39`, `T46`
 - Write scope: application, contracts, and UI surfaces for sync status only
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `hardening-b`
 - Required verification: `strong`
+- Success criteria: the app clearly shows last sync/freshness state inside the v0-integrated finance surfaces, with the operational metadata boundary chosen explicitly and verified end to end.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - `docs/implementation/tasks/T15-package-sync.md`
+  - `docs/implementation/tasks/T46-live-dashboard-adapter-integration.md`
+  - `docs/implementation/tasks/T39-reconciliation-anomalies-redesign.md`
+- Secondary context:
+  - `docs/implementation/UI_REDESIGN_SPEC.md`
+  - current sync metadata split between `app.sync_state` and `vault.sync_runs`
+- Not authoritative:
+  - business-domain slice patterns unrelated to operational sync status
+  - ad hoc status UI that ignores the v0-integrated finance shell
+- Must do:
+  - decide whether the current operational/audit metadata split remains the intended boundary or should be consolidated
+  - surface freshness/status through application, contract, and UI layers consistently
+  - keep the result visually aligned with the v0-integrated finance surfaces
+- Must not do:
+  - do not blur sync freshness into unrelated business-domain concepts
+  - do not bolt on a bespoke status UI outside the redesign shell
+  - do not leave the metadata boundary ambiguous in the implementation
+- Expected ownership shape:
+  - operational metadata decisions live in application/contract boundaries
+  - views/widgets present status inside the existing redesigned finance surfaces
+  - audit history and operational freshness stay intentionally separated or intentionally unified, but not accidental
+- Non-goals:
+  - no broad sync-engine redesign
+  - no unrelated dashboard redesign
+  - no general observability platform work
+- Known traps:
+  - preserving the current metadata split by accident instead of by decision
+  - showing freshness in a way that feels detached from the rest of the redesigned product
+  - conflating audit history with the current operational state
+- Review focus:
+  - explicit sync metadata boundary choice
+  - end-to-end contract/application/UI consistency
+  - visual alignment with the v0-integrated finance shell
+- Implementation outline:
+  - inspect the current sync metadata sources and decide whether to keep or consolidate the operational/audit split
+  - update the application and contract surfaces to expose the chosen operational freshness state clearly
+  - integrate the resulting status into the redesigned finance UI without creating a parallel status language
+  - run the strong verification gate and confirm the status behavior is understandable from the live app state
 - Completion signal: app clearly shows last sync/freshness state inside the v0-integrated redesigned finance surfaces with tested behavior.
 - Files changed: none yet
 - Contracts changed: none yet
