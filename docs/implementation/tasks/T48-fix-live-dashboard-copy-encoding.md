@@ -1,7 +1,7 @@
 # T48 - Fix live dashboard copy and encoding drift
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Remove mojibake and corrupted punctuation from the live dashboard without redesigning the dashboard shell.
 - Task type: `cleanup/refactor`
 - Dependencies: `T46`, `T47`
