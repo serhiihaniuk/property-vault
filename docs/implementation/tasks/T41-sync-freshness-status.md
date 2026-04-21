@@ -117,6 +117,13 @@
 - Merge status: `merge ready`
 - Architecture note: acceptable and aligned. `T41` makes the sync metadata split explicit by keeping `app.sync_state` as the live operational source while leaving `vault.sync_runs` as append-only audit history, then exposes that choice through a dedicated system contract instead of leaking operational status into dashboard business payloads.
 - Coordinator notes review: confirmed. The carry-forward note from `T15` is resolved by explicit implementation choice rather than accident, and the resulting application, contract, route, and dashboard-shell surfaces stay consistent with that boundary.
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`
+- Coordinator final review:
+  - `T41` is complete and acceptable for `master`. The task resolved the sync metadata boundary deliberately, exposed it through a dedicated operational contract, and integrated the result into the existing finance shell without creating a parallel status language.
+- Actions taken:
+  - fast-forward merged `codex/T41-sync-freshness-status` into `master`
+  - marked `T41` `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored:
+  - none
+- Next handoff note: nothing right now.
 
 
