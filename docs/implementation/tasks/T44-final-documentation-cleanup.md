@@ -1,11 +1,12 @@
 # T44 — Final documentation cleanup
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T44-final-documentation-cleanup`
 - Goal: Reconcile architecture, package docs, and usage docs with implemented reality.
 - Task type: `docs/process`
 - Dependencies: `T33`, `T35`, `T36`, `T37`, `T38`, `T39`, `T40`, `T41`, `T42`, `T43`, `T45`, `T46`, `T47`, `T48`
 - Write scope: docs only
+- Worker branch: `codex/T44-final-documentation-cleanup`
 - Recommended execution model: `gpt-5.4-mini / low`
 - Wave group: `hardening-e`
 - Required verification: `light`
@@ -53,9 +54,49 @@
   - remove, archive, or relabel stale execution guidance instead of merely layering more text on top
   - run the light verification pass by checking that a fresh chat could follow the repo docs without hidden coordinator context
 - Completion signal: docs match the implemented package layout, redesign guidance, workflows, and guardrails.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: coordinator should review final docs for drift against code
+- Files changed:
+  - `AGENTS.md`
+  - `APP_IMPLEMENTATION_PLAN.md`
+  - `README.md`
+  - `apps/web/README.md`
+  - `docs/design/property-vault-mvp/README.md`
+  - `docs/implementation/AGENT_PROTOCOL.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - `docs/implementation/UI_REDESIGN_SPEC.md`
+  - `docs/implementation/roles/COORDINATOR.md`
+  - `docs/implementation/roles/IMPLEMENTER.md`
+  - `docs/implementation/roles/REVIEWER.md`
+  - `docs/implementation/WORKTREE_GUIDE.md`
+  - `docs/implementation/tasks/T44-final-documentation-cleanup.md`
+- Contracts changed: none
+- Tests run:
+  - manual consistency read of `AGENTS.md`, `README.md`, `APP_IMPLEMENTATION_PLAN.md`, `apps/web/README.md`, `docs/implementation/AGENT_PROTOCOL.md`, `docs/implementation/UI_PLAYBOOK.md`, `docs/implementation/UI_REDESIGN_SPEC.md`, `docs/implementation/WORKTREE_GUIDE.md`, and the role files under `docs/implementation/roles/`
+  - recursive stale-guidance scan across repo docs for outdated phrases including `spawned-agent workflow`, `worktree + reviewer flow`, `current app implementation starts from T10 onward`, `redesign work is the next major wave`, and `Do not resume T38 or T39 until T46 is complete` -> no matches in the default read path
+- Coordinator notes:
+  - none
+- Review result: `merge ready`
+- Reviewer: `Codex self-review`
+- Review tests run:
+  - `git diff --stat`
+  - manual consistency pass over the patched docs against the implemented repo layout and current branch-only workflow
+  - line-count check on `AGENT_PROTOCOL.md`, the three role files, and `WORKTREE_GUIDE.md` after trimming the default startup surface
+  - targeted stale-guidance scan across repo docs for the removed default-path phrases -> no matches
+- Merge status: `ready`
+- Architecture note:
+  - acceptable and aligned. The docs now describe the live branch-only workflow, task-first authority model, implemented app state, and redesign references as durable background context instead of leaving older startup or "upcoming wave" wording in the default read path.
+- Coordinator notes review:
+  - none
+- Coordinator final review:
+  - `T44` is complete and acceptable for `master`. The root/startup/protocol-adjacent docs, redesign references, and workspace README now match the implemented repo reality, and the default read path no longer carries stale spawned-agent, worktree, or pre-redesign-wave guidance.
+- Actions taken:
+  - updated root orientation docs and key document pointers to match the live app and branch-only workflow
+  - rewrote the `apps/web` README into a repo-specific workspace guide
+  - updated redesign/background references so they reflect the completed v0-integrated dashboard precedent instead of an upcoming redesign wave
+  - trimmed `docs/implementation/AGENT_PROTOCOL.md`, the role files, and `docs/implementation/WORKTREE_GUIDE.md` so the default startup path carries less duplicated workflow text
+  - removed `WORKTREE_GUIDE.md` from the default startup read path while keeping it as a short compatibility note
+  - marked `T44` `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored:
+  - none
+- Next handoff note: nothing right now.
 
 

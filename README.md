@@ -15,7 +15,9 @@ not be committed.
 - the approved app/system architecture is in `ARCHITECTURE.md`,
 - the detailed app backlog is in `APP_IMPLEMENTATION_PLAN.md`,
 - the agent execution protocol is in `docs/implementation/AGENT_PROTOCOL.md`,
-- current app implementation starts from `T10` onward.
+- implemented app packages now live under `packages/`,
+- the live Next.js app in `apps/web` covers the finance dashboard, documents,
+  reconciliation/anomalies, access flows, and sync status.
 
 ## Requirements
 
@@ -66,9 +68,9 @@ answers.
 
 - `ARCHITECTURE.md` contains the approved app/system architecture.
 - `APP_IMPLEMENTATION_PLAN.md` contains the detailed app build backlog.
-- `docs/implementation/AGENT_PROTOCOL.md` contains the spawned-agent workflow.
+- `docs/implementation/AGENT_PROTOCOL.md` contains the task-first execution workflow.
 - `docs/implementation/roles/` contains the short role guides for coordinator,
   implementer, and reviewer chats.
-- `docs/implementation/WORKTREE_GUIDE.md` explains the worktree + reviewer flow.
+- `docs/implementation/WORKTREE_GUIDE.md` is an optional short compatibility note for the branch-only worker/reviewer flow.
 - `docs/local-docker-bootstrap.md` contains the local Docker + Postgres startup flow.
 - `AGENTS.md` is the startup guide for future Codex sessions.

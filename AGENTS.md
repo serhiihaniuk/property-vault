@@ -37,8 +37,15 @@ The repo currently has:
   a production UI target in `docs/implementation/UI_REDESIGN_SPEC.md`,
   both kept as durable background references rather than universal default
   authorities for every redesign task,
-- initial documentation/protocol tasks complete (`T00`-`T04`),
-- real app implementation still starting from `T10` onward.
+- implemented app packages under `packages/` for vault, db, auth, contracts,
+  application, and sync,
+- a live web app under `apps/web/` covering the finance dashboard, documents,
+  reconciliation/anomalies, access flows, and sync status,
+- backlog state should be taken from the current queue in
+  `APP_IMPLEMENTATION_PLAN.md` rather than assuming early-wave tasks are still
+  pending,
+- `docs/implementation/WORKTREE_GUIDE.md` is now only a short compatibility
+  note, not part of the default startup read path.
 
 ## Startup
 
@@ -51,7 +58,6 @@ The repo currently has:
    - `reviewer` -> `docs/implementation/roles/REVIEWER.md`
 4. If doing coordination or queue planning, read:
    - `APP_IMPLEMENTATION_PLAN.md`
-   - `docs/implementation/WORKTREE_GUIDE.md`
 5. If implementing or reviewing one task, read the assigned task file under
    `docs/implementation/tasks/` next.
 6. Treat the assigned task file as the execution contract.

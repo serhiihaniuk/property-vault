@@ -1,25 +1,32 @@
-# Next.js template
+# Web Workspace
 
-This is a Next.js template with shadcn/ui.
+This workspace contains the deployed Next.js App Router application for
+Property Vault.
 
-For actual product UI work in this repo, also read:
+For product work here, also read:
 
+- `ARCHITECTURE.md`
 - `docs/implementation/UI_PLAYBOOK.md`
 
-## Adding components
+## Current shape
 
-To add components to your app, run the following command:
+- `app/` owns routing, layouts, and providers
+- `src/views/` owns route-level screens
+- `src/widgets/` owns screen sections
+- `src/features/` owns bounded interactions
+- `src/entities/` owns stable domain nouns
+- `src/shared/` owns cross-app UI, hooks, auth, API, config, and helpers
 
-```bash
-npx shadcn@latest add button
-```
+## Shared UI and shadcn
 
-This will place the ui components in the `components` directory.
-This will place shared UI components in `src/shared/ui`.
+- shadcn config lives in `components.json`
+- shared primitives live in `src/shared/ui`
+- aliases such as `ui`, `components`, `lib`, and `hooks` resolve into
+  `src/shared/**`
+- add new primitives in `src/shared/ui` and keep them compatible with the
+  token system in `app/globals.css`
 
-## Using components
-
-To use the components in your app, import them as follows:
+Example import:
 
 ```tsx
 import { Button } from "@/src/shared/ui/button";

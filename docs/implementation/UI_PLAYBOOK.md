@@ -44,6 +44,9 @@ The reference direction is the dashboard draft provided by Serhii:
 - visible provenance, anomalies, and time context,
 - no playful SaaS hero styling.
 
+The completed `T45`/`T46` dashboard is the current implemented benchmark for
+shell density, card rhythm, and finance-first layout in the live app.
+
 Important: this direction should stay close to the existing shadcn default
 style and the theme already started in `apps/web/app/globals.css`.
 

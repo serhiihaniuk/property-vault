@@ -331,9 +331,10 @@ first, then `docs/design/property-vault-mvp/property-vault-reference.png`, and
 consult `docs/design/property-vault-mvp/Property Vault.html` only when layout
 or micro-detail intent remains ambiguous.
 
-`T37` remains the historical redesign pass that landed on `master`, but
-`T45` and `T46` are now the authoritative path for exact v0 dashboard
-integration. Do not resume `T38` or `T39` until `T46` is complete.
+`T37` remains the historical redesign pass that first landed on `master`, but
+the live dashboard authority now comes from the completed `T45`/`T46` v0
+integration. The completed `T38` and `T39` redesign work should be read
+against that live precedent rather than the old pre-v0 dashboard path.
 
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -361,7 +362,7 @@ integration. Do not resume `T38` or `T39` until `T46` is complete.
 | `T47` | Remove orphaned pre-v0 reconciliation/anomaly widgets | `done` | `T39`, `T46` | legacy reconciliation/anomaly widget files and stale references only | `gpt-5.4-mini / medium` | `hardening-c2` | `standard` | only one authoritative reconciliation/anomaly UI path remains, with no orphaned pre-v0 widgets or mojibake-laden leftovers confusing future work |
 | `T48` | Fix live dashboard copy and encoding drift | `done` | `T46`, `T47` | live dashboard copy/formatting sources only | `gpt-5.4-mini / medium` | `hardening-c3` | `standard` | live dashboard status/copy no longer shows mojibake or corrupted punctuation, without redesigning the dashboard shell |
 | `T43` | Dev/bootstrap scripts | `done` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / low` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
-| `T44` | Final documentation cleanup | `claimed` | `T33`, `T35`-`T43`, `T45`, `T46`, `T47`, `T48` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
+| `T44` | Final documentation cleanup | `done` | `T33`, `T35`-`T43`, `T45`, `T46`, `T47`, `T48` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
 
 ## 10. Reviewer Workflow
 

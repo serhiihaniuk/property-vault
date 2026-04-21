@@ -9,6 +9,10 @@ They are durable redesign context, not universal default authorities. The
 assigned task file decides whether they are primary, secondary, or not
 authoritative for a specific implementation or review task.
 
+The live app has already absorbed this bundle through the redesign wave. Keep
+this folder as durable background reference for future UI work, not as a
+second implementation source that competes with the mounted app.
+
 ## Default redesign reference order
 
 Use this order only when a task file points here without defining a narrower

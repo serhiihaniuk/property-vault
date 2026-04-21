@@ -1,7 +1,7 @@
 # Property Vault UI Redesign Spec
 
 **Status:** Approved implementation target
-**Last updated:** 2026-04-19
+**Last updated:** 2026-04-21
 
 This document binds the external Property Vault handoff to the live app
 backlog. It is the production-facing interpretation of the design bundle, not a
@@ -14,13 +14,17 @@ transplants.
 
 ## 1. Current binding to the repo
 
-This redesign starts from the current app state:
+This redesign now sits on top of the current implemented app state:
 
 - data/API foundations are already implemented,
 - dashboard, documents, provenance, reconciliation, anomalies, and effective
   charge schedule logic already exist,
-- redesign work is the next major wave,
-- access/invite UI should land on top of the redesign system, not before it.
+- the v0-based dashboard shell from `T45`/`T46` is the live benchmark for the
+  finance-first product shell,
+- documents, reconciliation/anomaly surfaces, access flows, and sync-status
+  UI now also sit on the redesign foundation,
+- this spec is now a durable production reference for future UI cleanup,
+  extension, and review rather than an "upcoming wave" brief.
 
 The redesign must preserve the approved app architecture:
 
