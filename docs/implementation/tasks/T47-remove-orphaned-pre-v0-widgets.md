@@ -70,4 +70,13 @@
   - Why it matters: the dead-path cleanup removed mojibake-bearing leftovers from unused files, but the live dashboard can still show corrupted text that deserves a separate narrow polish/fix task.
   - Suggested follow-up: create a small dashboard copy-encoding cleanup task scoped to the live `dashboard-account-status` and `dashboard-open-items` widgets plus any shared formatter source that feeds those labels.
   - Urgency: `soon`
-- Next handoff note: start a reviewer chat on branch `codex/T47-remove-orphaned-pre-v0-widgets` and say `reviewer T47`.
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run --workspace @dabrowskiego/web build`
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. The cleanup removes the orphaned pre-v0 widget slices and leaves reconciliation/anomaly ownership on the live dashboard-integrated path established by `T46` and confirmed by `T39`, without changing contracts, routes, or shared boundaries.
+- Coordinator notes review: confirmed. The deleted files were truly orphaned, no app code still imports them, and the remaining mentions are historical task records rather than active implementation paths. The mojibake/copy follow-up note is valid but separate from this cleanup scope.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
