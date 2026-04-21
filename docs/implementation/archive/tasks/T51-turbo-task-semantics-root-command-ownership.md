@@ -1,0 +1,78 @@
+# T51 - Normalize task semantics and root command ownership
+
+- Status: `done`
+- Owner: `codex/T49-turbo-adoption`
+- Goal: Make scripts mean one thing and let Turbo own real workspace tasks.
+- Dependencies: `T50`
+- Write scope: root `package.json`, `turbo.json`, workspace scripts, and shared lint/test config where needed
+- Worker branch: `codex/T49-turbo-adoption`
+- Recommended execution model: `gpt-5.4 / high`
+- Wave group: `turbo-c`
+- Required verification: `strong`
+- Success criteria: root commands are consistent, Turbo runs real workspace tasks, and manual prebuild/typecheck compensation is removed.
+- Primary authorities:
+  - this task file
+  - `docs/implementation/TURBO_STRATEGY.md`
+  - root `package.json`
+  - `turbo.json`
+  - workspace `package.json` task definitions
+- Secondary context:
+  - `README.md`
+  - `docs/local-docker-bootstrap.md`
+  - current workspace test and typecheck commands
+- Not authoritative:
+  - old root scripts that manually enumerated packages to compensate for missing graph ownership
+  - package-local fake `build` scripts that only proxy `typecheck`
+- Must do:
+  - normalize root commands around deliberate ownership
+  - make `lint` and `test` real Turbo tasks
+  - keep `build` focused on real artifact production
+  - give contracts freshness its own explicit `openapi:check` path
+- Must not do:
+  - do not move Docker/bootstrap behavior into Turbo tasks
+  - do not add `dist/` outputs to internal packages
+  - do not leave fake or missing workspace scripts behind
+- Review focus:
+  - root commands are understandable and boring
+  - Turbo owns real workspace checks
+  - the repo no longer relies on manual root prebuild/typecheck compensation
+- Completion signal: root commands are consistent, Turbo runs real workspace tasks, and manual prebuild/typecheck compensation is removed.
+- Files changed:
+  - `eslint.config.mjs`
+  - `package-lock.json`
+  - `package.json`
+  - `packages/application/package.json`
+  - `packages/application/src/financials.ts`
+  - `packages/auth/package.json`
+  - `packages/contracts/package.json`
+  - `packages/contracts/src/client-runtime.ts`
+  - `packages/contracts/src/generated/client.ts`
+  - `packages/contracts/src/generated/openapi.json`
+  - `packages/contracts/src/openapi.ts`
+  - `packages/contracts/src/system.ts`
+  - `packages/db/package.json`
+  - `packages/sync/package.json`
+  - `packages/vault/package.json`
+  - `turbo.json`
+- Contracts changed: none; generated OpenAPI/client artifacts were refreshed to satisfy the new explicit `openapi:check` gate.
+- Tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `npx turbo run build --filter=@dabrowskiego/web --dry=json`
+  - `npx turbo run lint --dry=json`
+- Coordinator notes:
+  - Normalizing lint uncovered a small set of real pre-existing issues in `packages/contracts`, `packages/application`, and `packages/vault`; those were fixed directly so `npm run lint` could become a truthful repo command.
+  - The new root ESLint config intentionally treats underscore-prefixed unused variables as accepted discard markers for repo code.
+- Review result: `merge ready`
+- Reviewer: `Codex self-review`
+- Review tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `npx turbo run lint --dry=json`
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. Task semantics are now explicit: `build` means build, verification tasks stay separate, and Turbo owns real workspace execution without taking over infra bootstrap.
+- Coordinator notes review:
+  - Confirmed. The manual root compensation has been removed, and the remaining command surface is small enough to explain without coordinator memory.
+- Next handoff note: nothing right now.

@@ -8,6 +8,7 @@ import type { JsonRequestBody, ResponseContract, RouteContract } from './openapi
 
 type QueryValue = boolean | null | number | string | undefined;
 type SuccessfulStatusCode = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226;
+type EmptyOptions = Record<never, never>;
 
 type RouteStatusCode<TRoute extends RouteContract> = keyof TRoute['responses'] & number;
 type RouteSuccessfulStatusCode<TRoute extends RouteContract> = Extract<
@@ -15,9 +16,11 @@ type RouteSuccessfulStatusCode<TRoute extends RouteContract> = Extract<
   SuccessfulStatusCode
 >;
 type RequiredKeys<TValue extends object> = {
-  [TKey in keyof TValue]-?: {} extends Pick<TValue, TKey> ? never : TKey;
+  [TKey in keyof TValue]-?: Pick<TValue, TKey> extends Required<Pick<TValue, TKey>>
+    ? TKey
+    : never;
 }[keyof TValue];
-type Simplify<TValue> = { [TKey in keyof TValue]: TValue[TKey] } & {};
+type Simplify<TValue> = { [TKey in keyof TValue]: TValue[TKey] };
 
 type ContractResponseOutput<TResponse extends ResponseContract> =
   TResponse extends ResponseContract<infer TSchema>
@@ -78,7 +81,7 @@ type ContractRoutePathParamsOption<TRoute extends RouteContract> = TRoute extend
   ? {
       pathParams: ContractRoutePathParamsInput<TRoute>;
     }
-  : {};
+  : EmptyOptions;
 
 type ContractRouteQueryOption<TRoute extends RouteContract> = TRoute extends {
   query: infer TQuery extends AnyZodObject;
@@ -90,7 +93,7 @@ type ContractRouteQueryOption<TRoute extends RouteContract> = TRoute extends {
     : {
         query: ContractRouteQueryInput<TRoute>;
       }
-  : {};
+  : EmptyOptions;
 
 type ContractRouteRequestBodyOption<TRoute extends RouteContract> = TRoute extends {
   requestBody: infer TRequestBody extends JsonRequestBody;
@@ -104,7 +107,7 @@ type ContractRouteRequestBodyOption<TRoute extends RouteContract> = TRoute exten
     : {
         body: ContractRouteRequestBodyInput<TRoute>;
       }
-  : {};
+  : EmptyOptions;
 
 export type ContractClientMethodOptions<TRoute extends RouteContract> = Simplify<
   Omit<

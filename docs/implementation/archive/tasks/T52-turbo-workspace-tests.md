@@ -1,0 +1,58 @@
+# T52 - Integrate workspace tests into Turbo without breaking tool tests
+
+- Status: `done`
+- Owner: `codex/T49-turbo-adoption`
+- Goal: Let Turbo own workspace tests while keeping root `tools/` tests explicit.
+- Dependencies: `T51`
+- Write scope: root scripts, workspace test scripts, and supporting docs
+- Worker branch: `codex/T49-turbo-adoption`
+- Recommended execution model: `gpt-5.4 / medium`
+- Wave group: `turbo-d`
+- Required verification: `strong`
+- Success criteria: `npm run test` composes Turbo-backed workspace tests with explicit root tool tests without converting `tools/` into workspaces.
+- Primary authorities:
+  - this task file
+  - `docs/implementation/TURBO_STRATEGY.md`
+  - root `package.json`
+  - workspace `package.json` test scripts
+- Secondary context:
+  - `packages/vault/src/paths.test.ts`
+  - existing workspace test files
+  - root tool tests under `tools/**/*.test.ts`
+- Not authoritative:
+  - advice that collapses tool tests into workspace test ownership
+  - forcing `tools/` into a workspace package as part of this pass
+- Must do:
+  - make workspace tests first-class Turbo tasks
+  - keep root tool tests as an explicit separate command
+  - ensure the combined root `test` command is boring and reproducible
+- Must not do:
+  - do not convert `tools/` into workspaces
+  - do not rely on hidden local test commands outside repo scripts
+- Review focus:
+  - `npm run test` is composed cleanly
+  - workspace tests run through Turbo
+  - tool tests remain explicit and separate
+- Completion signal: `npm run test` composes Turbo-backed workspace tests with explicit root tool tests without converting `tools/` into workspaces.
+- Files changed:
+  - `apps/web/package.json`
+  - `package.json`
+  - `packages/vault/package.json`
+  - `packages/vault/src/paths.test.ts`
+- Contracts changed: none
+- Tests run:
+  - `npm run test`
+  - `npx turbo run test --dry=json`
+- Coordinator notes:
+  - Added a small package-local vault test so `@dabrowskiego/vault` participates in Turbo-owned workspace tests without dragging root tooling into the package layer.
+  - Root tool tests remain on `npm run test:tools`, which keeps the repo split understandable.
+- Review result: `merge ready`
+- Reviewer: `Codex self-review`
+- Review tests run:
+  - `npm run test`
+  - `npx turbo run test --dry=json`
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. Workspace tests now belong to Turbo, while root tool tests remain an explicit root concern instead of being folded into a fake workspace abstraction.
+- Coordinator notes review:
+  - Confirmed. The resulting `test` surface is clean, and the tooling split is still obvious to humans and agents.
+- Next handoff note: nothing right now.

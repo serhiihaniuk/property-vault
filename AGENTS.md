@@ -39,6 +39,8 @@ The repo currently has:
   a production UI target in `docs/implementation/UI_REDESIGN_SPEC.md`,
   both kept as durable background references rather than universal default
   authorities for every redesign task,
+- a repo-native Turbo/runtime strategy in `docs/implementation/TURBO_STRATEGY.md`
+  for workspace execution, cache, and CI-ready task ownership,
 - implemented app packages under `packages/` for vault, db, auth, contracts,
   application, and sync,
 - a live web app under `apps/web/` covering the finance dashboard, documents,
@@ -60,6 +62,8 @@ The repo currently has:
    - `reviewer` -> `docs/implementation/roles/REVIEWER.md`
 4. If doing coordination or queue planning, read:
    - `APP_IMPLEMENTATION_PLAN.md`
+   - `docs/implementation/TURBO_STRATEGY.md` when the work is about repo
+     tooling, command ownership, or Turbo task execution
 5. If implementing or reviewing one task, read the assigned task file under
    `docs/implementation/tasks/` next.
    - completed task records under `docs/implementation/archive/tasks/` are

@@ -3,7 +3,7 @@
 **Status:** Active  
 **Last updated:** 2026-04-21  
 **Scope:** App architecture, package foundations, web shell, redesign system,
-first vertical slices, and supporting test/reporting workflow
+first vertical slices, and supporting test/reporting/tooling workflow
 
 This file is the detailed execution backlog for the app. It is not the place
 for extraction history or ad hoc notes.
@@ -270,10 +270,13 @@ The app implementation should add and maintain these scripts:
 - `npm run lint`
 - `npm run build`
 - `npm run test`
+- `npm run test:workspace`
+- `npm run test:tools`
 - `npm run test:unit`
 - `npm run test:integration`
 - `npm run test:e2e`
 - `npm run test:contracts`
+- `npm run check`
 
 ## 8. Sequential Execution Rules
 
@@ -367,6 +370,23 @@ against that live precedent rather than the old pre-v0 dashboard path.
 | `T48` | Fix live dashboard copy and encoding drift | `done` | `T46`, `T47` | live dashboard copy/formatting sources only | `gpt-5.4-mini / medium` | `hardening-c3` | `standard` | live dashboard status/copy no longer shows mojibake or corrupted punctuation, without redesigning the dashboard shell |
 | `T43` | Dev/bootstrap scripts | `done` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / low` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
 | `T44` | Final documentation cleanup | `done` | `T33`, `T35`-`T43`, `T45`, `T46`, `T47`, `T48` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
+
+### Wave 6 - Turbo adoption
+
+This wave hardens Turbo around the repo we actually have. It does not replace
+the boring local bootstrap path, add package `dist/` outputs, or broaden into a
+workflow redesign.
+
+Use `docs/implementation/TURBO_STRATEGY.md` as the durable reference for the
+repo-specific Turbo role, task ownership split, and CI-ready constraints.
+
+| ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `T49` | Codify Turbo strategy for this repo | `done` | `T43`, `T44` | backlog/docs/process docs only | `gpt-5.4-mini / medium` | `turbo-a` | `light` | durable Turbo strategy docs exist and match the current bootstrap, package boundaries, and branch/task workflow |
+| `T50` | Make the workspace graph truthful | `done` | `T49` | workspace manifests only | `gpt-5.4 / medium` | `turbo-b` | `standard` | Turbo dry runs for filtered web tasks show real internal dependency edges instead of empty dependency lists |
+| `T51` | Normalize task semantics and root command ownership | `done` | `T50` | root scripts, `turbo.json`, workspace scripts, shared lint/test config | `gpt-5.4 / high` | `turbo-c` | `strong` | root commands are consistent, Turbo runs real workspace tasks, and manual prebuild/typecheck compensation is removed |
+| `T52` | Integrate workspace tests into Turbo without breaking tool tests | `done` | `T51` | root scripts, workspace test scripts, docs | `gpt-5.4 / medium` | `turbo-d` | `strong` | `npm run test` composes Turbo-backed workspace tests with explicit root tool tests without converting `tools/` into workspaces |
+| `T53` | CI-ready affected-run and cache readiness | `done` | `T51`, `T52` | docs, root scripts, optional helper commands only | `gpt-5.4-mini / medium` | `turbo-e` | `standard` | the repo has a documented CI-ready Turbo usage model with local cache expectations and affected-run guidance while remote cache remains deferred |
 
 ## 10. Reviewer Workflow
 

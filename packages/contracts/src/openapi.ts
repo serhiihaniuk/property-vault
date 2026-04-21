@@ -349,7 +349,8 @@ function mergeSchemas(
 }
 
 function omitDefinitions(schema: Record<string, unknown>): Record<string, unknown> {
-  const { definitions: _definitions, ...rest } = schema;
+  const rest = { ...schema };
+  delete rest.definitions;
 
   return rest;
 }

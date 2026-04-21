@@ -10,9 +10,14 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "test": "node --test --experimental-strip-types app/api/_lib/**/*.test.ts src/**/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@dabrowskiego/application": "0.1.0",
+    "@dabrowskiego/auth": "0.1.0",
+    "@dabrowskiego/contracts": "0.1.0",
+    "@dabrowskiego/db": "0.1.0",
     "@base-ui/react": "^1.4.0",
     "@tanstack/react-query": "^5.99.0",
     "better-auth": "^1.6.5",

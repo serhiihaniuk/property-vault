@@ -1,0 +1,56 @@
+# T50 - Make the workspace graph truthful
+
+- Status: `done`
+- Owner: `codex/T49-turbo-adoption`
+- Goal: Make Turbo see the real package graph the repo already has.
+- Dependencies: `T49`
+- Write scope: workspace manifests only, especially `apps/web/package.json`
+- Worker branch: `codex/T49-turbo-adoption`
+- Recommended execution model: `gpt-5.4 / medium`
+- Wave group: `turbo-b`
+- Required verification: `standard`
+- Success criteria: Turbo dry runs for filtered web tasks show real internal dependency edges instead of empty dependency lists.
+- Primary authorities:
+  - this task file
+  - `docs/implementation/TURBO_STRATEGY.md`
+  - `apps/web/package.json`
+  - workspace manifests for imported internal packages
+- Secondary context:
+  - `turbo.json`
+  - root `package.json`
+  - actual imports in `apps/web/**`
+- Not authoritative:
+  - assumptions that Turbo can infer undeclared package relationships from TypeScript imports alone
+  - protocol advice that requires `workspace:*` if the repo package manager does not actually support it
+- Must do:
+  - declare the real internal dependencies used by `apps/web`
+  - keep workspace graph truth in manifests
+  - validate the result with Turbo dry runs
+- Must not do:
+  - do not change runtime architecture or package boundaries
+  - do not add fake dependencies just to satisfy graph shape
+- Review focus:
+  - `@dabrowskiego/web` now has real upstream edges
+  - filtered Turbo runs describe actual dependency relationships
+  - manifest changes stay repo-native
+- Completion signal: Turbo dry runs for filtered web tasks show real internal dependency edges instead of empty dependency lists.
+- Files changed:
+  - `apps/web/package.json`
+- Contracts changed: none
+- Tests run:
+  - `npx turbo run build --filter=@dabrowskiego/web --dry=json`
+  - `npx turbo run typecheck --filter=@dabrowskiego/web --dry=json`
+- Coordinator notes:
+  - Repo-native deviation: attempted `workspace:*` dependency specifiers were rejected by local npm with `EUNSUPPORTEDPROTOCOL`, so the graph was normalized using the repo's existing explicit internal version style (`0.1.0`) instead.
+  - Why it matters: the repo now has a truthful Turbo graph without forcing a package-manager convention that this environment does not accept.
+- Review result: `merge ready`
+- Reviewer: `Codex self-review`
+- Review tests run:
+  - `npm install`
+  - `npx turbo run build --filter=@dabrowskiego/web --dry=json`
+  - `npx turbo run typecheck --filter=@dabrowskiego/web --dry=json`
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. Turbo graph truth now lives in manifests, and the implementation preserved the repo's working dependency-specifier convention instead of forcing an unsupported protocol.
+- Coordinator notes review:
+  - Confirmed. The `apps/web` workspace now declares the internal packages it already imports, and filtered Turbo runs show the expected upstream graph.
+- Next handoff note: nothing right now.

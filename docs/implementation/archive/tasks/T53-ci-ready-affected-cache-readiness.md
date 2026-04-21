@@ -1,0 +1,63 @@
+# T53 - CI-ready affected-run and cache readiness
+
+- Status: `done`
+- Owner: `codex/T49-turbo-adoption`
+- Goal: Make the repo ready for future CI and remote cache without requiring them now.
+- Dependencies: `T51`, `T52`
+- Write scope: docs, root scripts, and optional helper commands only
+- Worker branch: `codex/T49-turbo-adoption`
+- Recommended execution model: `gpt-5.4-mini / medium`
+- Wave group: `turbo-e`
+- Required verification: `standard`
+- Success criteria: the repo has a documented CI-ready Turbo usage model with local cache expectations and affected-run guidance while remote cache remains deferred.
+- Primary authorities:
+  - this task file
+  - `docs/implementation/TURBO_STRATEGY.md`
+  - `README.md`
+  - `AGENTS.md`
+  - `APP_IMPLEMENTATION_PLAN.md`
+- Secondary context:
+  - `docs/local-docker-bootstrap.md`
+  - `turbo.json`
+- Not authoritative:
+  - adding CI workflows before the repo asks for them
+  - remote-cache setup requirements that do not exist in the repo yet
+- Must do:
+  - document the CI-ready meaning for this repo
+  - document affected-run and local-cache expectations
+  - keep remote cache explicitly deferred
+- Must not do:
+  - do not add GitHub Actions in this pass
+  - do not change the boring local bootstrap path
+- Review focus:
+  - docs point future CI at the real root command surface
+  - affected-run guidance is compatible with the repo's current structure
+  - remote cache is deferred explicitly rather than forgotten
+- Completion signal: the repo has a documented CI-ready Turbo usage model with local cache expectations and affected-run guidance while remote cache remains deferred.
+- Files changed:
+  - `AGENTS.md`
+  - `APP_IMPLEMENTATION_PLAN.md`
+  - `README.md`
+  - `docs/implementation/TURBO_STRATEGY.md`
+  - `docs/local-docker-bootstrap.md`
+- Contracts changed: none
+- Tests run:
+  - `npx turbo run build --filter=@dabrowskiego/web --dry=json`
+  - `npx turbo run lint --dry=json`
+  - `npx turbo run test --dry=json`
+  - timed `npm run dev` verification of env load, Docker startup, migrations, vault sync, Turbo handoff to `@dabrowskiego/web`, and `apps/web` predev skip; the command then failed only because another unrelated `next dev` process was already running in `apps/web`
+- Coordinator notes:
+  - CI-ready in this repo now means the root commands are thin wrappers over truthful Turbo tasks and can later adopt `--affected` without redesigning task ownership.
+  - Remote cache remains intentionally deferred until actual CI/service wiring exists.
+- Review result: `merge ready`
+- Reviewer: `Codex self-review`
+- Review tests run:
+  - `npx turbo run build --filter=@dabrowskiego/web --dry=json`
+  - `npx turbo run lint --dry=json`
+  - `npx turbo run test --dry=json`
+  - timed `npm run dev`
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. The repo is now locally cacheable and CI-ready in structure, while the current bootstrap path and source-workspace model remain unchanged.
+- Coordinator notes review:
+  - Confirmed. The only `npm run dev` failure was an already-running Next dev process, not a Turbo or bootstrap regression.
+- Next handoff note: nothing right now.

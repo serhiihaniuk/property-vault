@@ -19,17 +19,6 @@ import {
   createPeriodReference,
 } from './shared.ts';
 
-const CATEGORY_LABELS: Record<string, string> = {
-  central_heating_energy: 'Central heating energy',
-  cold_water_and_sewage: 'Cold water and sewage',
-  e_kartoteka_access: 'e-Kartoteka access',
-  hot_water_heating: 'Hot water heating',
-  municipal_waste: 'Municipal waste',
-  ordered_heating_power: 'Ordered heating power',
-  renovation_investment_fund: 'Renovation and investment fund',
-  shared_property_advance: 'Shared property advance',
-};
-
 const ANOMALY_RULE_LABELS: Record<string, string> = {
   DEADLINE_MISSED: 'Missed deadline',
   OCR_PENDING: 'OCR pending',

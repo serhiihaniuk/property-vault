@@ -38,8 +38,9 @@ npm run dev
 
 `npm run dev` is now the one-command local startup path. It loads the root
 `.env`, starts Docker Postgres, runs migrations, syncs the canonical vault
-into Postgres, and then starts the web app. If Docker Desktop is not running
-or a required env var is missing, it fails fast with the real bootstrap error.
+into Postgres, and then hands the workspace dev task to Turbo for the web app.
+If Docker Desktop is not running or a required env var is missing, it fails
+fast with the real bootstrap error.
 
 The detailed step-by-step flow, including reset and shutdown commands, lives in
 `docs/local-docker-bootstrap.md`.
@@ -69,6 +70,7 @@ answers.
 - `ARCHITECTURE.md` contains the approved app/system architecture.
 - `APP_IMPLEMENTATION_PLAN.md` contains the detailed app build backlog.
 - `docs/implementation/AGENT_PROTOCOL.md` contains the task-first execution workflow.
+- `docs/implementation/TURBO_STRATEGY.md` explains the repo-specific Turbo ownership split and command surface.
 - `docs/implementation/tasks/README.md` explains the live task-file surface.
 - `docs/implementation/archive/tasks/` contains completed task records kept only for historical reference.
 - `docs/implementation/roles/` contains the short role guides for coordinator,

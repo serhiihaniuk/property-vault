@@ -1,0 +1,66 @@
+# T49 - Codify Turbo strategy for this repo
+
+- Status: `done`
+- Owner: `codex/T49-turbo-adoption`
+- Goal: Define the repo-specific Turbo role and boundaries before changing scripts.
+- Dependencies: `T43`, `T44`
+- Write scope: `APP_IMPLEMENTATION_PLAN.md`, one new Turbo strategy doc, task files, and root/process docs
+- Worker branch: `codex/T49-turbo-adoption`
+- Recommended execution model: `gpt-5.4-mini / medium`
+- Wave group: `turbo-a`
+- Required verification: `light`
+- Success criteria: the repo has a durable Turbo strategy that matches the current bootstrap, package boundaries, and branch/task workflow.
+- Primary authorities:
+  - this task file
+  - `docs/implementation/TURBO_STRATEGY.md`
+  - `APP_IMPLEMENTATION_PLAN.md`
+  - `package.json`
+  - `tools/dev.ts`
+- Secondary context:
+  - `README.md`
+  - `AGENTS.md`
+  - `docs/local-docker-bootstrap.md`
+- Not authoritative:
+  - generic Turborepo starter assumptions
+  - advice that requires package `dist/` outputs
+  - workflow changes that would replace the current boring local bootstrap path
+- Must do:
+  - define exactly what Turbo owns in this repo
+  - define exactly what stays outside Turbo
+  - keep `npm run dev` as the default local path
+  - document the source-workspace model explicitly
+- Must not do:
+  - do not broaden this into a workflow redesign
+  - do not move Docker, migrations, or vault sync into Turbo
+  - do not invent CI or remote-cache requirements that the repo does not have yet
+- Review focus:
+  - strategy matches the live repo
+  - docs do not contradict the current bootstrap flow
+  - Turbo is described as a workspace runner, not an infrastructure owner
+- Completion signal: durable Turbo strategy docs exist and match the current bootstrap, package boundaries, and branch/task workflow.
+- Files changed:
+  - `AGENTS.md`
+  - `APP_IMPLEMENTATION_PLAN.md`
+  - `README.md`
+  - `docs/implementation/TURBO_STRATEGY.md`
+  - `docs/local-docker-bootstrap.md`
+- Contracts changed: none
+- Tests run:
+  - manual consistency read of `package.json`, `turbo.json`, `tools/dev.ts`, `README.md`, `AGENTS.md`, `APP_IMPLEMENTATION_PLAN.md`, and `docs/local-docker-bootstrap.md`
+  - `npx turbo run build --filter=@dabrowskiego/web --dry=json`
+  - `npx turbo run typecheck --filter=@dabrowskiego/web --dry=json`
+- Coordinator notes:
+  - Turbo is accepted here as the owner of workspace graph execution only.
+  - Root bootstrap remains the owner of env loading, Docker startup, migrations, and vault sync.
+  - Source workspaces remain the accepted package model; no `dist/` pivot is allowed just to make Turbo look more traditional.
+- Review result: `merge ready`
+- Reviewer: `Codex self-review`
+- Review tests run:
+  - manual docs/process consistency pass against `tools/dev.ts`, root scripts, and `turbo.json`
+  - `npx turbo run build --filter=@dabrowskiego/web --dry=json`
+  - `npx turbo run typecheck --filter=@dabrowskiego/web --dry=json`
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. `npm run dev` stays the boring supported path, while Turbo is documented as the owner of workspace checks/builds rather than infra bootstrap.
+- Coordinator notes review:
+  - Confirmed. The durable strategy now matches the repo we actually have instead of a generic monorepo pattern.
+- Next handoff note: nothing right now.

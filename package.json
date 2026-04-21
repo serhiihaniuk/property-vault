@@ -13,8 +13,9 @@
   },
   "scripts": {
     "dev": "node --experimental-strip-types tools/dev.ts",
-    "build": "npm run --workspace @dabrowskiego/contracts build && npm run --workspace @dabrowskiego/application build && npm run --workspace @dabrowskiego/sync build && turbo build --filter=@dabrowskiego/web",
-    "lint": "turbo lint --filter=@dabrowskiego/web",
+    "build": "npm run openapi:check && turbo run build --filter=@dabrowskiego/web",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "lint": "turbo run lint",
     "db:generate": "npm run --workspace @dabrowskiego/db db:generate",
     "db:migrate": "npm run --workspace @dabrowskiego/db db:migrate",
     "docker:db:up": "docker compose up -d --wait postgres",
@@ -27,14 +28,13 @@
     "gmail": "node --experimental-strip-types tools/gmail-cli.ts",
     "reindex": "node --experimental-strip-types tools/cli.ts reindex",
     "validate": "node --experimental-strip-types tools/cli.ts validate",
-    "typecheck": "npm run typecheck:vault && npm run typecheck:db && npm run typecheck:auth && npm run typecheck:contracts && npm run typecheck:application && npm run typecheck:sync && turbo typecheck --filter=@dabrowskiego/web",
-    "typecheck:application": "npm run --workspace @dabrowskiego/application typecheck",
-    "typecheck:auth": "npm run --workspace @dabrowskiego/auth typecheck",
-    "typecheck:contracts": "npm run --workspace @dabrowskiego/contracts typecheck",
-    "typecheck:db": "npm run --workspace @dabrowskiego/db typecheck",
-    "typecheck:sync": "npm run --workspace @dabrowskiego/sync typecheck",
-    "typecheck:vault": "tsc --noEmit",
-    "test": "node --test --experimental-strip-types tools/**/*.test.ts",
+    "openapi:check": "npm run --workspace @dabrowskiego/contracts openapi:check",
+    "typecheck": "npm run typecheck:tools && npm run typecheck:workspace",
+    "typecheck:tools": "tsc --noEmit",
+    "typecheck:workspace": "turbo run typecheck",
+    "test": "npm run test:workspace && npm run test:tools",
+    "test:tools": "node --test --experimental-strip-types tools/**/*.test.ts",
+    "test:workspace": "turbo run test",
     "test:contracts": "npm run --workspace @dabrowskiego/contracts test"
   },
   "dependencies": {
@@ -53,11 +53,15 @@
     "zod-to-json-schema": "^3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
     "@types/better-sqlite3": "^7",
     "@types/node": "^22",
     "@types/proper-lockfile": "^4",
     "@types/write-file-atomic": "^4",
+    "eslint": "^9.39.1",
+    "globals": "^16.4.0",
     "turbo": "^2.6.3",
+    "typescript-eslint": "^8.46.3",
     "typescript": "^6.0.3"
   }
 }

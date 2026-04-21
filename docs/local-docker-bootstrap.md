@@ -44,7 +44,7 @@ The root `dev` script now runs the local prerequisites in this order:
 - starts Docker Postgres with `docker compose up -d --wait postgres`,
 - applies Drizzle migrations,
 - runs `npm run vault -- sync`,
-- starts the Next.js dev server.
+- starts the Turbo-owned workspace dev task for `@dabrowskiego/web`.
 
 If Docker Desktop is not running, Docker is not installed, or a required env
 var is missing, the command stops at the real failure point and prints that
@@ -62,6 +62,10 @@ npm run docker:db:reset
 
 - `docker:db:down` stops the container but preserves the named volume.
 - `docker:db:reset` removes the volume so the next boot is a truly blank database.
+
+Workspace verification commands such as `npm run typecheck`, `npm run lint`,
+`npm run test`, and `npm run build` are Turbo-owned and are described in
+`docs/implementation/TURBO_STRATEGY.md`.
 
 ## 3. Prove migrations work on a blank database
 

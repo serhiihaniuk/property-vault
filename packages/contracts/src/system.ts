@@ -144,8 +144,9 @@ export const propertyVaultBaseRoutes = Object.values(
   propertyVaultRouteCatalog,
 ) as readonly RouteContract[];
 
-export interface GeneratePropertyVaultOpenApiOptions
-  extends Partial<Omit<GenerateOpenApiDocumentOptions, 'components' | 'routes'>> {}
+export type GeneratePropertyVaultOpenApiOptions = Partial<
+  Omit<GenerateOpenApiDocumentOptions, 'components' | 'routes'>
+>;
 
 export function generatePropertyVaultOpenApiDocument(
   options: GeneratePropertyVaultOpenApiOptions = {},
