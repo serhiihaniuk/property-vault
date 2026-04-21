@@ -3,6 +3,7 @@ import type { PropertyVaultAuth, PropertyVaultSession } from './auth.ts';
 
 export interface PropertyVaultSessionLike {
   user: {
+    id?: string;
     role?: string | null;
   };
 }

@@ -171,6 +171,515 @@
         ],
         "description": "Runtime environment label."
       },
+      "AcceptAccessInvitationResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "redirectTo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "editor",
+              "owner"
+            ],
+            "description": "Access role for a private Property Vault user."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "redirectTo",
+          "role",
+          "status"
+        ],
+        "additionalProperties": false,
+        "description": "Result of a successful invitation acceptance."
+      },
+      "acceptAccessInvitationPathParams": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 16
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false,
+        "description": "Path params for a shared invitation token."
+      },
+      "acceptAccessInvitationRequestBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "name",
+          "password"
+        ],
+        "additionalProperties": false,
+        "description": "Name and password collected while accepting an invitation."
+      },
+      "CreateAccessInvitationResponse": {
+        "type": "object",
+        "properties": {
+          "invitation": {
+            "type": "object",
+            "properties": {
+              "acceptedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO 8601 timestamp with timezone offset.",
+                "nullable": true
+              },
+              "createdAt": {
+                "$ref": "#/components/schemas/CreateAccessInvitationResponse/properties/invitation/properties/acceptedAt"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "expiresAt": {
+                "$ref": "#/components/schemas/CreateAccessInvitationResponse/properties/invitation/properties/acceptedAt"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revokedAt": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateAccessInvitationResponse/properties/invitation/properties/acceptedAt"
+                  }
+                ],
+                "nullable": true,
+                "description": "ISO 8601 timestamp with timezone offset."
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "viewer",
+                  "editor",
+                  "owner"
+                ],
+                "description": "Access role for a private Property Vault user."
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "accepted",
+                  "expired",
+                  "revoked"
+                ],
+                "description": "Current lifecycle state for an access invitation."
+              },
+              "updatedAt": {
+                "$ref": "#/components/schemas/CreateAccessInvitationResponse/properties/invitation/properties/acceptedAt"
+              }
+            },
+            "required": [
+              "acceptedAt",
+              "createdAt",
+              "email",
+              "expiresAt",
+              "id",
+              "revokedAt",
+              "role",
+              "status",
+              "updatedAt"
+            ],
+            "additionalProperties": false,
+            "description": "Invite record visible from the access management screen."
+          },
+          "invitePath": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "invitation",
+          "invitePath"
+        ],
+        "additionalProperties": false,
+        "description": "Created invitation plus the one-time invite path to share privately."
+      },
+      "createAccessInvitationRequestBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "editor",
+              "owner"
+            ],
+            "description": "Access role for a private Property Vault user.",
+            "default": "viewer"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "additionalProperties": false,
+        "description": "Request to create a new invite-only access token."
+      },
+      "AccessInvitationPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "canAccept": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp with timezone offset."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "editor",
+              "owner"
+            ],
+            "description": "Access role for a private Property Vault user."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "expired",
+              "revoked"
+            ],
+            "description": "Current lifecycle state for an access invitation."
+          }
+        },
+        "required": [
+          "canAccept",
+          "email",
+          "expiresAt",
+          "role",
+          "status"
+        ],
+        "additionalProperties": false,
+        "description": "Public preview of an invitation token before acceptance."
+      },
+      "getAccessInvitationPathParams": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 16
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false,
+        "description": "Path params for a shared invitation token."
+      },
+      "AccessOverviewResponse": {
+        "type": "object",
+        "properties": {
+          "invitations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "acceptedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "ISO 8601 timestamp with timezone offset.",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "$ref": "#/components/schemas/AccessOverviewResponse/properties/invitations/items/properties/acceptedAt"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "expiresAt": {
+                  "$ref": "#/components/schemas/AccessOverviewResponse/properties/invitations/items/properties/acceptedAt"
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "revokedAt": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/AccessOverviewResponse/properties/invitations/items/properties/acceptedAt"
+                    }
+                  ],
+                  "nullable": true,
+                  "description": "ISO 8601 timestamp with timezone offset."
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "viewer",
+                    "editor",
+                    "owner"
+                  ],
+                  "description": "Access role for a private Property Vault user."
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "pending",
+                    "accepted",
+                    "expired",
+                    "revoked"
+                  ],
+                  "description": "Current lifecycle state for an access invitation."
+                },
+                "updatedAt": {
+                  "$ref": "#/components/schemas/AccessOverviewResponse/properties/invitations/items/properties/acceptedAt"
+                }
+              },
+              "required": [
+                "acceptedAt",
+                "createdAt",
+                "email",
+                "expiresAt",
+                "id",
+                "revokedAt",
+                "role",
+                "status",
+                "updatedAt"
+              ],
+              "additionalProperties": false,
+              "description": "Invite record visible from the access management screen."
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "$ref": "#/components/schemas/AccessOverviewResponse/properties/invitations/items/properties/acceptedAt"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "emailVerified": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "$ref": "#/components/schemas/AccessOverviewResponse/properties/invitations/items/properties/role"
+                },
+                "updatedAt": {
+                  "$ref": "#/components/schemas/AccessOverviewResponse/properties/invitations/items/properties/acceptedAt"
+                }
+              },
+              "required": [
+                "createdAt",
+                "email",
+                "emailVerified",
+                "id",
+                "name",
+                "role",
+                "updatedAt"
+              ],
+              "additionalProperties": false,
+              "description": "Authenticated user summary for access management."
+            }
+          }
+        },
+        "required": [
+          "invitations",
+          "members"
+        ],
+        "additionalProperties": false,
+        "description": "Current members and invitation records for access management."
+      },
+      "RemoveAccessMemberResponse": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp with timezone offset."
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "editor",
+              "owner"
+            ],
+            "description": "Access role for a private Property Vault user."
+          },
+          "updatedAt": {
+            "$ref": "#/components/schemas/RemoveAccessMemberResponse/properties/createdAt"
+          }
+        },
+        "required": [
+          "createdAt",
+          "email",
+          "emailVerified",
+          "id",
+          "name",
+          "role",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "description": "Removed access member returned after owner management."
+      },
+      "removeAccessMemberPathParams": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "memberId"
+        ],
+        "additionalProperties": false,
+        "description": "Path params for an existing access member."
+      },
+      "RevokeAccessInvitationResponse": {
+        "type": "object",
+        "properties": {
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp with timezone offset.",
+            "nullable": true
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/RevokeAccessInvitationResponse/properties/acceptedAt"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "expiresAt": {
+            "$ref": "#/components/schemas/RevokeAccessInvitationResponse/properties/acceptedAt"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revokedAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RevokeAccessInvitationResponse/properties/acceptedAt"
+              }
+            ],
+            "nullable": true,
+            "description": "ISO 8601 timestamp with timezone offset."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "viewer",
+              "editor",
+              "owner"
+            ],
+            "description": "Access role for a private Property Vault user."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "expired",
+              "revoked"
+            ],
+            "description": "Current lifecycle state for an access invitation."
+          },
+          "updatedAt": {
+            "$ref": "#/components/schemas/RevokeAccessInvitationResponse/properties/acceptedAt"
+          }
+        },
+        "required": [
+          "acceptedAt",
+          "createdAt",
+          "email",
+          "expiresAt",
+          "id",
+          "revokedAt",
+          "role",
+          "status",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "description": "Revoked invitation record returned after owner management."
+      },
+      "revokeAccessInvitationPathParams": {
+        "type": "object",
+        "properties": {
+          "invitationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "invitationId"
+        ],
+        "additionalProperties": false,
+        "description": "Path params for a stored invitation record."
+      },
       "DashboardMonthBreakdownResponse": {
         "type": "object",
         "properties": {
@@ -1731,6 +2240,374 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "openapi": "3.1.0",
   "paths": {
+    "/api/access/invitations/{token}": {
+      "post": {
+        "operationId": "acceptAccessInvitation",
+        "responses": {
+          "200": {
+            "description": "Invitation accepted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptAccessInvitationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid acceptance input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invitation token was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Invitation can no longer be accepted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Accept an invitation and create a credential account.",
+        "tags": [
+          "access"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 16
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/acceptAccessInvitationRequestBody"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "getAccessInvitation",
+        "responses": {
+          "200": {
+            "description": "Invitation preview.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessInvitationPreviewResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invitation token was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a public preview of an invitation token.",
+        "tags": [
+          "access"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 16
+            }
+          }
+        ]
+      }
+    },
+    "/api/access/invitations": {
+      "post": {
+        "operationId": "createAccessInvitation",
+        "responses": {
+          "201": {
+            "description": "Invitation created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAccessInvitationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid invitation input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Owner permissions are required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The email already belongs to an existing user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a private invite-only access token.",
+        "tags": [
+          "access"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/createAccessInvitationRequestBody"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/access": {
+      "get": {
+        "operationId": "getAccessOverview",
+        "responses": {
+          "200": {
+            "description": "Current members and invitations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessOverviewResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Owner permissions are required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get access management members and invites.",
+        "tags": [
+          "access"
+        ]
+      }
+    },
+    "/api/access/members/{memberId}": {
+      "delete": {
+        "operationId": "removeAccessMember",
+        "responses": {
+          "200": {
+            "description": "Member removed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoveAccessMemberResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Owner permissions are required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Member was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Member cannot be removed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Remove an existing access member account.",
+        "tags": [
+          "access"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "memberId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ]
+      }
+    },
+    "/api/access/invitations/by-id/{invitationId}": {
+      "delete": {
+        "operationId": "revokeAccessInvitation",
+        "responses": {
+          "200": {
+            "description": "Invitation revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokeAccessInvitationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Owner permissions are required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invitation record was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Invitation can no longer be managed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Revoke a pending invitation from the owner ledger.",
+        "tags": [
+          "access"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invitationId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
     "/api/dashboard/month-breakdown": {
       "get": {
         "operationId": "getDashboardMonthBreakdown",

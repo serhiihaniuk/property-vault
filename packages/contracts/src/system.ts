@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { accessRouteCatalog } from './access.ts';
 import { dashboardRouteCatalog } from './dashboard.ts';
 import { documentsRouteCatalog } from './documents.ts';
 import { financialsRouteCatalog } from './financials.ts';
@@ -92,6 +93,7 @@ export const healthCheckRoute = defineRoute({
 });
 
 export const propertyVaultRouteCatalog = {
+  ...accessRouteCatalog,
   ...dashboardRouteCatalog,
   ...documentsRouteCatalog,
   ...financialsRouteCatalog,

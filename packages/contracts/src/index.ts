@@ -1,3 +1,4 @@
+export * from './access.ts';
 export * from './dashboard.ts';
 export * from './documents.ts';
 export * from './financials.ts';

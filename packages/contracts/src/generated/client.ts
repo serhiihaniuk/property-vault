@@ -12,6 +12,24 @@ import { propertyVaultRouteCatalog } from '../system.ts';
 type PropertyVaultRouteCatalog = typeof propertyVaultRouteCatalog;
 
 export interface PropertyVaultContractClient {
+  acceptAccessInvitation(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['acceptAccessInvitation']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['acceptAccessInvitation']>>;
+  createAccessInvitation(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['createAccessInvitation']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['createAccessInvitation']>>;
+  getAccessInvitation(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getAccessInvitation']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getAccessInvitation']>>;
+  getAccessOverview(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getAccessOverview']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getAccessOverview']>>;
+  removeAccessMember(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['removeAccessMember']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['removeAccessMember']>>;
+  revokeAccessInvitation(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['revokeAccessInvitation']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['revokeAccessInvitation']>>;
   getDashboardMonthBreakdown(
     ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getDashboardMonthBreakdown']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getDashboardMonthBreakdown']>>;
@@ -39,6 +57,12 @@ export function createPropertyVaultContractClient(
   transport: ContractClientTransport,
 ): PropertyVaultContractClient {
   return {
+    acceptAccessInvitation: buildContractClientMethod(transport, propertyVaultRouteCatalog.acceptAccessInvitation),
+    createAccessInvitation: buildContractClientMethod(transport, propertyVaultRouteCatalog.createAccessInvitation),
+    getAccessInvitation: buildContractClientMethod(transport, propertyVaultRouteCatalog.getAccessInvitation),
+    getAccessOverview: buildContractClientMethod(transport, propertyVaultRouteCatalog.getAccessOverview),
+    removeAccessMember: buildContractClientMethod(transport, propertyVaultRouteCatalog.removeAccessMember),
+    revokeAccessInvitation: buildContractClientMethod(transport, propertyVaultRouteCatalog.revokeAccessInvitation),
     getDashboardMonthBreakdown: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDashboardMonthBreakdown),
     getDocumentDetail: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDocumentDetail),
     getDocuments: buildContractClientMethod(transport, propertyVaultRouteCatalog.getDocuments),

@@ -1,4 +1,8 @@
 import {
+  createAccessApplicationService,
+  type AccessApplicationService,
+} from './access.ts';
+import {
   createPropertyVaultApplicationContext,
   type CreatePropertyVaultApplicationContextOptions,
   type PropertyVaultApplicationContext,
@@ -21,6 +25,7 @@ import {
 } from './financials.ts';
 
 export interface PropertyVaultApplication {
+  access: AccessApplicationService;
   context: PropertyVaultApplicationContext;
   dashboard: DashboardApplicationService;
   documents: DocumentsApplicationService;
@@ -34,6 +39,7 @@ export function createPropertyVaultApplication(
   const context = createPropertyVaultApplicationContext(options);
 
   return {
+    access: createAccessApplicationService(context),
     context,
     dashboard: createDashboardApplicationService(context),
     documents: createDocumentsApplicationService(context),

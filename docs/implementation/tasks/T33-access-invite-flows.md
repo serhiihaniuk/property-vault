@@ -1,6 +1,6 @@
 # T33 — Access/invite flows
 
-- Status: `claimed`
+- Status: `done`
 - Owner: `coordinator`
 - Goal: Deliver private invite-only access flows.
 - Task type: `standard slice`
@@ -8,6 +8,7 @@
 - Write scope: auth/access routes, application helpers, widgets
 - Recommended execution model: `gpt-5.4 / xhigh`
 - Wave group: `slice-access`
+- Worker branch: `codex/T33-access-invite-flows`
 - Required verification: `strong`
 - Success criteria: invite-only access works end to end with real Postgres-backed credential and invite coverage, uses the redesign token/primitives system, and does not invent a parallel auth-only visual language.
 - Primary authorities:
@@ -59,13 +60,66 @@
   - add real Postgres-backed coverage for the credential and invite paths that matter here
   - rerun the strong verification gate and confirm the final auth UI stays inside the shared visual system
 - Completion signal: invite flow and access management work end to end with real Postgres-backed auth coverage for credential and invite paths, use the redesign token/primitives system, and do not invent a parallel visual language.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `docs/implementation/tasks/T33-access-invite-flows.md`
+  - `packages/auth/src/access.ts`
+  - `packages/auth/src/runtime.ts`
+  - `packages/auth/src/access.integration.test.ts`
+  - `packages/auth/src/index.ts`
+  - `packages/application/src/access.ts`
+  - `packages/application/src/application.ts`
+  - `packages/application/src/index.ts`
+  - `packages/contracts/src/access.ts`
+  - `packages/contracts/src/index.ts`
+  - `packages/contracts/src/system.ts`
+  - `packages/contracts/src/generated/*`
+  - `apps/web/app/(app)/layout.tsx`
+  - `apps/web/app/(app)/access/page.tsx`
+  - `apps/web/app/(auth)/sign-in/page.tsx`
+  - `apps/web/app/(auth)/invite/[token]/page.tsx`
+  - `apps/web/app/api/_lib/access-handlers.ts`
+  - `apps/web/app/api/access/**`
+  - `apps/web/app/api/auth/[...all]/route.ts`
+  - `apps/web/src/shared/api/client.ts`
+  - `apps/web/src/views/access/ui/access-page.tsx`
+  - `apps/web/src/views/sign-in/ui/sign-in-page.tsx`
+  - `apps/web/src/views/invite-accept/ui/invite-accept-page.tsx`
+  - `apps/web/src/widgets/access-management/ui/access-management-widget.tsx`
+  - `apps/web/src/widgets/sign-in/ui/sign-in-widget.tsx`
+  - `apps/web/src/widgets/invite-acceptance/ui/invite-acceptance-widget.tsx`
+- Contracts changed:
+  - added `/api/access` overview route
+  - added `/api/access/invitations` create route
+  - added `/api/access/invitations/{token}` preview + accept routes
+  - regenerated typed contract client artifacts for the new access methods
+- Tests run:
+  - `npm run --workspace @dabrowskiego/contracts openapi:generate`
+  - `npm run typecheck` -> passed
+  - `npm test` -> passed (`35/35`)
+  - `npm run test:contracts` -> passed (`3/3`)
+  - `node --test --import tsx packages\auth\src\auth.test.ts packages\auth\src\access.integration.test.ts` -> auth tests passed; the two real-Postgres invite integration cases were skipped in this shell because `PROPERTY_VAULT_AUTH_INTEGRATION_DATABASE_URL` was not loaded
+  - live local HTTP verification against `http://localhost:3000` -> passed for unauthenticated access rejection, owner sign-in, concurrent same-email invite creation keeping one pending invite, invite preview/acceptance, invited-user access denial, accepted member removal with session invalidation, pending invite revoke, repeat revoke `409`, and missing-record revoke `404`
 - Coordinator notes:
   - Carry-forward from `T12`: add real Postgres-backed auth integration coverage for credential and invite flows.
   - Why it matters: `pg-mem` does not cover the Better Auth `pg` driver `getTypeParser` path used by deeper credential queries such as `signInEmail`.
   - Expected outcome: `T33` verification should not rely only on `pg-mem` for the auth paths it introduces.
-- Next handoff note: keep auth internals behind `packages/auth`
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer on codex/T33-access-invite-flows`
+- Review tests run:
+  - `npm run docker:db:up`
+  - `npm run build` -> passed
+  - `npm run lint` -> passed
+  - `npm run typecheck` -> passed
+  - `npm run test:contracts` -> passed (`3/3`)
+  - `$env:DATABASE_URL='postgresql://postgres:postgres@localhost:5432/dabrowskiego'; npm run --workspace @dabrowskiego/db db:migrate` -> passed
+  - `$env:PROPERTY_VAULT_AUTH_INTEGRATION_DATABASE_URL='postgresql://postgres:postgres@localhost:5432/dabrowskiego'; npm run --workspace @dabrowskiego/auth test` -> passed (`5/5`, including real Postgres-backed invite coverage)
+  - `npm run docker:db:down`
+- Merge status: `merge ready`
+- Architecture note:
+  - Acceptable and aligned. Auth internals remain inside `packages/auth`, the application layer owns access orchestration, route handlers stay thin, and the web slice uses the shared redesign primitives instead of a parallel auth-only visual system.
+  - Reviewer made two bounded fixes while preserving the task shape: moved sign-in query-param reading back to the route entrypoint so the Next.js build remains valid, and stopped trimming accepted passwords so stored credentials match the user's exact input.
+- Coordinator notes review:
+  - Confirmed. This branch now includes real Postgres-backed invite coverage in `packages/auth/src/access.integration.test.ts`, and the reviewer reran that path successfully against local Docker Postgres instead of relying only on `pg-mem`.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
 
 

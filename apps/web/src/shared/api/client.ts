@@ -36,6 +36,18 @@ export type PropertyVaultApiClient = PropertyVaultApiTransport & PropertyVaultCo
 export type DashboardMonthBreakdownData = Awaited<
   ReturnType<PropertyVaultContractClient["getDashboardMonthBreakdown"]>
 >;
+export type AccessOverviewData = Awaited<
+  ReturnType<PropertyVaultContractClient["getAccessOverview"]>
+>;
+export type AccessInvitationPreviewData = Awaited<
+  ReturnType<PropertyVaultContractClient["getAccessInvitation"]>
+>;
+export type CreateAccessInvitationData = Awaited<
+  ReturnType<PropertyVaultContractClient["createAccessInvitation"]>
+>;
+export type AcceptAccessInvitationData = Awaited<
+  ReturnType<PropertyVaultContractClient["acceptAccessInvitation"]>
+>;
 export type DocumentsCatalogData = Awaited<
   ReturnType<PropertyVaultContractClient["getDocuments"]>
 >;

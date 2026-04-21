@@ -40,7 +40,9 @@ export {
   TableFooter,
 } from "@/src/shared/ui/data-table";
 export { DeltaValue, deltaVariants, type DeltaIntent } from "@/src/shared/ui/delta";
+export { Input } from "@/src/shared/ui/input";
 export { KeyValueGrid, KeyValueRow, kvGridVariants } from "@/src/shared/ui/key-value";
+export { Label } from "@/src/shared/ui/label";
 export {
   MetricLabel,
   MetricSub,
@@ -63,6 +65,7 @@ export {
   ProvenanceHeader,
   ProvenanceItem,
 } from "@/src/shared/ui/provenance";
+export { Select } from "@/src/shared/ui/select";
 export { Separator } from "@/src/shared/ui/separator";
 export { Skeleton } from "@/src/shared/ui/skeleton";
 export { Sparkline } from "@/src/shared/ui/sparkline";
