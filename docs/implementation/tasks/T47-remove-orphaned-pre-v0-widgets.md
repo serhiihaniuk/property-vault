@@ -1,12 +1,12 @@
 # T47 - Remove orphaned pre-v0 reconciliation/anomaly widgets
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T47-remove-orphaned-pre-v0-widgets`
 - Goal: Remove the dead pre-v0 reconciliation/anomaly widget path so future UI work sees only one authoritative implementation.
 - Task type: `cleanup/refactor`
 - Dependencies: `T39`, `T46`
 - Write scope: legacy reconciliation/anomaly widget files and stale references only
-- Worker branch: none yet
+- Worker branch: `codex/T47-remove-orphaned-pre-v0-widgets`
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `hardening-c2`
 - Required verification: `standard`
@@ -55,10 +55,19 @@
   - clean any stale imports, references, or task notes that imply the orphaned path is still active
   - run the standard verification gate and confirm the live dashboard still renders the active reconciliation/anomaly surfaces
 - Completion signal: the repo has one clear reconciliation/anomaly implementation path and future redesign work cannot confuse dead pre-v0 widgets for active UI.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `apps/web/src/widgets/anomaly-feed/ui/anomaly-feed-widget.tsx` (deleted)
+  - `apps/web/src/widgets/yearly-reconciliation/ui/yearly-reconciliation-widget.tsx` (deleted)
+  - `docs/implementation/tasks/T47-remove-orphaned-pre-v0-widgets.md`
+- Contracts changed: none
+- Tests run:
+  - `npm run typecheck`
+  - `npm run lint`
 - Coordinator notes:
   - This task exists because `T39` was already satisfied by the live dashboard-integrated surfaces on `/`, but the repo still contained older unused `yearly-reconciliation` and `anomaly-feed` widgets from the pre-v0 path.
   - Why it matters: those leftovers confused queue planning and made it look like `T39` was incomplete even though the live product already had the intended redesign outcome.
-- Next handoff note: preserve the live dashboard-integrated surfaces and remove only the dead alternative path.
+  - Observation: the live dashboard-integrated widgets still contain corrupted punctuation and currency copy in user-facing labels, but this task did not change them because the write scope was limited to the orphaned pre-v0 widget path.
+  - Why it matters: the dead-path cleanup removed mojibake-bearing leftovers from unused files, but the live dashboard can still show corrupted text that deserves a separate narrow polish/fix task.
+  - Suggested follow-up: create a small dashboard copy-encoding cleanup task scoped to the live `dashboard-account-status` and `dashboard-open-items` widgets plus any shared formatter source that feeds those labels.
+  - Urgency: `soon`
+- Next handoff note: start a reviewer chat on branch `codex/T47-remove-orphaned-pre-v0-widgets` and say `reviewer T47`.
