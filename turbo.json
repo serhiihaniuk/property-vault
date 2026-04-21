@@ -14,7 +14,18 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "passThroughEnv": ["PROPERTY_VAULT_SKIP_WEB_PREDEV"]
+      "passThroughEnv": [
+        "AUTH_SECRET",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_TRUSTED_ORIGINS",
+        "BETTER_AUTH_URL",
+        "DATABASE_URL",
+        "NEXT_PUBLIC_API_BASE_URL",
+        "NEXT_PUBLIC_APP_ORIGIN",
+        "NEXT_PUBLIC_AUTH_BASE_URL",
+        "PORT",
+        "PROPERTY_VAULT_SKIP_WEB_PREDEV"
+      ]
     }
   }
 }

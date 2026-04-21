@@ -88,6 +88,23 @@
   - Why it matters: that development convenience is now part of the real local startup behavior, so bootstrap ownership should live here instead of being remembered only from the `T42` task record.
   - Suggested follow-up: T43 should either codify or simplify the accepted local-only auth bootstrap path in scripts/docs so local startup remains explicit and debuggable from clean `master`.
   - Urgency: `soon`
-- Next handoff note: start a reviewer chat on `codex/T43-dev-bootstrap-scripts` and say `reviewer T43`
+- Review result: `merge ready after reviewer fix`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run docker:db:up`
+  - `npm run vault -- context`
+  - `node --env-file=.env` parent process spawning a child in `apps/web` confirmed inherited `DATABASE_URL` and `BETTER_AUTH_URL`
+  - `node --env-file=.env` parent process spawning a child in `apps/web` confirmed shell override `NEXT_PUBLIC_APP_ORIGIN=http://127.0.0.1:4010` survives root env loading
+  - timed `npm run dev` with `PORT=4010`, `NEXT_PUBLIC_APP_ORIGIN=http://127.0.0.1:4010`, `BETTER_AUTH_URL=http://127.0.0.1:4010`, and `BETTER_AUTH_TRUSTED_ORIGINS=http://127.0.0.1:4010` confirmed root `.env` load, `docker:db:up`, `db:migrate`, `vault sync`, Turbo env pass-through into `apps/web`, and web startup on `http://localhost:4010` before exiting because an unrelated existing `next dev` process already held the app directory dev lock
+- Merge status: `ready`
+- Architecture note:
+  - Passing the root bootstrap env surface through Turbo is aligned with the task's explicit-env goal and keeps the documented `npm run dev` path authoritative instead of depending on app-local env files or coordinator memory.
+- Coordinator notes review:
+  - Confirmed the worker's main risk. Review reproduced that the initial Turbo setup only forwarded `PROPERTY_VAULT_SKIP_WEB_PREDEV`, because a timed root launch ignored `PORT=4010` and still targeted the default Next.js port.
+  - Reviewer fix: expanded `turbo.json` `dev.passThroughEnv` to include the web/runtime env surface used by the app and local startup (`DATABASE_URL`, auth vars, public base-path vars, and `PORT`).
+  - Result: the root bootstrap now reaches the web task with the expected env, so the documented root `.env` flow is explicit and reproducible even when local `apps/web/.env.local` exists.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`
 
 
