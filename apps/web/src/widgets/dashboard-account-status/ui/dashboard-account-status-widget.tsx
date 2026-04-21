@@ -39,6 +39,9 @@ export function DashboardAccountStatusWidget({
     ? formatAmountShort(reconciliationSummary.netBalance)
     : null
   const isPositive = netBalance === null ? null : netBalance >= 0
+  const snapshotLabel = generatedAt
+    ? `snapshot ${extractTime(generatedAt)}`
+    : "snapshot pending"
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
@@ -92,7 +95,7 @@ export function DashboardAccountStatusWidget({
           </div>
         </div>
         <Badge className="px-2 py-0.5 font-mono text-xs" variant="outline">
-          synced {extractTime(generatedAt)}
+          {snapshotLabel}
         </Badge>
       </div>
 

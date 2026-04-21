@@ -1,11 +1,17 @@
+import type { PropertyVaultApplication } from '@dabrowskiego/application';
 import type { PropertyVaultApiRuntime } from './runtime.ts';
 import { getPropertyVaultApiRuntime } from './runtime.ts';
 import { createRouteHandler } from './route-handler.ts';
 import { ApiProblemError, createApiProblem } from './problem.ts';
-import { apiIndexRoute, healthCheckRoute } from '@dabrowskiego/contracts';
+import {
+  apiIndexRoute,
+  healthCheckRoute,
+  syncStatusRoute,
+} from '@dabrowskiego/contracts';
 import { createJsonResponse } from './response.ts';
 
 type RuntimeResolver = () => PropertyVaultApiRuntime;
+type DbApplicationResolver = (runtime: PropertyVaultApiRuntime) => PropertyVaultApplication;
 type SystemHealthChecks = Awaited<
   ReturnType<PropertyVaultApiRuntime['application']['system']['getHealthStatus']>
 >['checks'];
@@ -56,6 +62,21 @@ export function createOpenApiDocumentGetHandler(
       status: 200,
     });
   };
+}
+
+export function createSyncStatusGetHandler(
+  resolveRuntime: RuntimeResolver = getPropertyVaultApiRuntime,
+  resolveDbApplication: DbApplicationResolver = (runtime) => runtime.getDbApplication(),
+) {
+  return createRouteHandler({
+    contract: syncStatusRoute,
+    async execute() {
+      const runtime = resolveRuntime();
+      const application = resolveDbApplication(runtime);
+
+      return application.system.getSyncStatus();
+    },
+  });
 }
 
 function hasUnavailableHealthCheck(checks: SystemHealthChecks): boolean {

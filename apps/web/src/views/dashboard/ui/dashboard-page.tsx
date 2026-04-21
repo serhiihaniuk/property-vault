@@ -24,7 +24,7 @@ export function DashboardPage() {
           title="Finances"
           subtitle={viewModel.subtitle}
           property="63713"
-          syncFreshness={viewModel.generatedAt}
+          syncStatus={viewModel.syncStatus}
           timeRange={timeRange}
           onTimeRangeChange={setTimeRange}
         />

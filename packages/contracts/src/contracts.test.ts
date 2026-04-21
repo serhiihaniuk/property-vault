@@ -42,12 +42,14 @@ test('property vault OpenAPI generation exposes system routes and shared compone
   assert.equal(document.info.version, 'test-version');
   assert.ok(document.paths['/api']?.get);
   assert.ok(document.paths['/api/health']?.get);
+  assert.ok(document.paths['/api/sync-status']?.get);
   assert.ok(document.paths['/api/dashboard/month-breakdown']?.get);
   assert.ok(document.paths['/api/documents']?.get);
   assert.ok(document.paths['/api/documents/{hash}']?.get);
   assert.ok(document.paths['/api/financials/year-reconciliation']?.get);
   assert.ok(document.paths['/api/anomalies']?.get);
   assert.deepEqual(document.paths['/api/health']?.get?.tags, ['system']);
+  assert.deepEqual(document.paths['/api/sync-status']?.get?.tags, ['system']);
   assert.deepEqual(document.paths['/api/dashboard/month-breakdown']?.get?.tags, [
     'dashboard',
   ]);

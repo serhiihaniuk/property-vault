@@ -1,11 +1,12 @@
 # T41 — Sync freshness and status surfaces
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T41-sync-freshness-status`
 - Goal: Surface data freshness and sync status in the app.
 - Task type: `standard slice`
 - Dependencies: `T15`, `T39`, `T46`
 - Write scope: application, contracts, and UI surfaces for sync status only
+- Worker branch: `codex/T41-sync-freshness-status`
 - Recommended execution model: `gpt-5.4 / high`
 - Wave group: `hardening-b`
 - Required verification: `strong`
@@ -53,13 +54,48 @@
   - integrate the resulting status into the redesigned finance UI without creating a parallel status language
   - run the strong verification gate and confirm the status behavior is understandable from the live app state
 - Completion signal: app clearly shows last sync/freshness state inside the v0-integrated redesigned finance surfaces with tested behavior.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `apps/web/app/api/_lib/system-handlers.test.ts`
+  - `apps/web/app/api/_lib/system-handlers.ts`
+  - `apps/web/app/api/sync-status/route.ts`
+  - `apps/web/src/shared/api/client.ts`
+  - `apps/web/src/views/dashboard/lib/dashboard-v0-adapter.ts`
+  - `apps/web/src/views/dashboard/lib/use-dashboard-v0-view-model.ts`
+  - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
+  - `apps/web/src/views/dashboard/ui/top-bar.tsx`
+  - `apps/web/src/widgets/dashboard-account-status/ui/dashboard-account-status-widget.tsx`
+  - `docs/implementation/tasks/T41-sync-freshness-status.md`
+  - `packages/application/src/system.test.ts`
+  - `packages/application/src/system.ts`
+  - `packages/contracts/src/contracts.test.ts`
+  - `packages/contracts/src/generated/client.ts`
+  - `packages/contracts/src/generated/openapi.json`
+  - `packages/contracts/src/system.ts`
+- Contracts changed:
+  - added `GET /api/sync-status` as a dedicated operational sync-status contract instead of folding freshness into business-domain dashboard payloads
+  - kept `app.sync_state` as the live operational source of truth and left `vault.sync_runs` as append-only audit history by explicit implementation choice
+  - regenerated the typed contract client and OpenAPI snapshot for the new system route
+- Tests run:
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `npm run --workspace @dabrowskiego/application test`
+  - `node --test --experimental-strip-types apps/web/app/api/_lib/system-handlers.test.ts`
+  - `node --test --experimental-strip-types apps/web/src/shared/api/client.test.ts`
+  - `npm run --workspace @dabrowskiego/contracts build`
+  - `npm run --workspace @dabrowskiego/application typecheck`
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `npm run vault -- context`
+  - `npm run docker:db:up`
+  - `curl.exe http://127.0.0.1:3000/api/health`
+  - `curl.exe http://127.0.0.1:3000/api/dashboard/month-breakdown`
+  - `curl.exe http://127.0.0.1:3000/api/documents`
+  - `curl.exe http://127.0.0.1:3000/api/sync-status`
+  - `curl.exe http://127.0.0.1:3000/sign-in`
 - Coordinator notes:
   - Carry-forward from `T15`: sync freshness/status currently lives in `app.sync_state`, while append-only run history still lives in `vault.sync_runs`.
   - Why it matters: this task should decide whether the split remains the intended long-term boundary for operational status versus audit history, or whether sync metadata should be consolidated before the UI and application surfaces harden around it.
   - Expected outcome: `T41` should either keep the split explicitly and build on it, or migrate toward one canonical operational metadata location with the contract/application/UI surfaces updated consistently.
-- Next handoff note: keep freshness logic distinct from business-domain slices
+- Next handoff note: start a reviewer chat on `codex/T41-sync-freshness-status` and say `reviewer T41`
 
 

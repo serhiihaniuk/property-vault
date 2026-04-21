@@ -54,6 +54,31 @@ export const healthCheckResponseSchema = z
   .strict()
   .describe('Aggregate API health response.');
 
+export const syncStatusSchema = z
+  .enum(['never_synced', 'idle', 'running', 'error'])
+  .describe('Current operational state for the canonical vault sync.');
+
+export const syncStatusResponseSchema = z
+  .object({
+    lastError: z
+      .string()
+      .min(1)
+      .nullable()
+      .describe('Most recent sync error when the latest sync attempt failed.'),
+    lastFinishedAt: isoDateTimeSchema
+      .nullable()
+      .describe('Timestamp when the latest sync attempt finished.'),
+    lastStartedAt: isoDateTimeSchema
+      .nullable()
+      .describe('Timestamp when the latest sync attempt started.'),
+    lastSuccessAt: isoDateTimeSchema
+      .nullable()
+      .describe('Timestamp when the latest successful sync completed.'),
+    status: syncStatusSchema,
+  })
+  .strict()
+  .describe('Current canonical vault sync freshness and operational status.');
+
 export const propertyVaultSharedSchemas = [
   namedSchema('ApiProblem', apiProblemSchema),
   namedSchema('DocumentReference', documentReferenceSchema),
@@ -92,6 +117,19 @@ export const healthCheckRoute = defineRoute({
   tags: ['system'],
 });
 
+export const syncStatusRoute = defineRoute({
+  method: 'get',
+  operationId: 'getSyncStatus',
+  path: '/api/sync-status',
+  responses: {
+    200: jsonResponse('Current canonical vault sync status.', syncStatusResponseSchema, {
+      schemaName: 'SyncStatusResponse',
+    }),
+  },
+  summary: 'Get canonical vault sync freshness and operational status.',
+  tags: ['system'],
+});
+
 export const propertyVaultRouteCatalog = {
   ...accessRouteCatalog,
   ...dashboardRouteCatalog,
@@ -99,6 +137,7 @@ export const propertyVaultRouteCatalog = {
   ...financialsRouteCatalog,
   getApiIndex: apiIndexRoute,
   getApiHealth: healthCheckRoute,
+  getSyncStatus: syncStatusRoute,
 } as const;
 
 export const propertyVaultBaseRoutes = Object.values(

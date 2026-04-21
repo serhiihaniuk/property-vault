@@ -2229,6 +2229,60 @@
         ],
         "additionalProperties": false,
         "description": "Aggregate API health response."
+      },
+      "SyncStatusResponse": {
+        "type": "object",
+        "properties": {
+          "lastError": {
+            "type": "string",
+            "minLength": 1,
+            "nullable": true,
+            "description": "Most recent sync error when the latest sync attempt failed."
+          },
+          "lastFinishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the latest sync attempt finished.",
+            "nullable": true
+          },
+          "lastStartedAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SyncStatusResponse/properties/lastFinishedAt"
+              }
+            ],
+            "nullable": true,
+            "description": "Timestamp when the latest sync attempt started."
+          },
+          "lastSuccessAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SyncStatusResponse/properties/lastFinishedAt"
+              }
+            ],
+            "nullable": true,
+            "description": "Timestamp when the latest successful sync completed."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "never_synced",
+              "idle",
+              "running",
+              "error"
+            ],
+            "description": "Current operational state for the canonical vault sync."
+          }
+        },
+        "required": [
+          "lastError",
+          "lastFinishedAt",
+          "lastStartedAt",
+          "lastSuccessAt",
+          "status"
+        ],
+        "additionalProperties": false,
+        "description": "Current canonical vault sync freshness and operational status."
       }
     }
   },
@@ -2840,6 +2894,27 @@
           }
         },
         "summary": "Get API health status.",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/sync-status": {
+      "get": {
+        "operationId": "getSyncStatus",
+        "responses": {
+          "200": {
+            "description": "Current canonical vault sync status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get canonical vault sync freshness and operational status.",
         "tags": [
           "system"
         ]

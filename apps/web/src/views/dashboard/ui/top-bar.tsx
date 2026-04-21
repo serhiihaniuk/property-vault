@@ -1,14 +1,15 @@
 "use client"
 
-import { extractTime } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge } from "@/src/shared/ui/badge"
+import { StatusBadge } from "@/src/shared/ui/status-badge"
+
+import type { DashboardSyncStatusVM } from "../lib/dashboard-v0-adapter"
 
 interface TopBarProps {
   title: string
   subtitle: string
   property: string
-  syncFreshness: string | null
+  syncStatus: DashboardSyncStatusVM
   timeRange: "6m" | "12m" | "24m" | "all"
   onTimeRangeChange: (range: "6m" | "12m" | "24m" | "all") => void
 }
@@ -17,7 +18,7 @@ export function TopBar({
   title,
   subtitle,
   property,
-  syncFreshness,
+  syncStatus,
   timeRange,
   onTimeRangeChange,
 }: TopBarProps) {
@@ -27,12 +28,9 @@ export function TopBar({
     "24m",
     "all",
   ]
-  const freshnessLabel = syncFreshness
-    ? `synced · ${extractTime(syncFreshness)}`
-    : "sync pending"
 
   return (
-    <header className="flex items-center justify-between py-6">
+    <header className="flex items-start justify-between py-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           {title}
@@ -42,10 +40,21 @@ export function TopBar({
         </p>
       </div>
       <div className="flex items-center gap-3">
-        <Badge className="px-2 py-1 font-mono text-xs" variant="outline">
-          <span className="text-emerald-400">●</span>
-          <span className="ml-1.5">{freshnessLabel}</span>
-        </Badge>
+        <div className="flex flex-col items-end gap-1">
+          <StatusBadge
+            className="px-2 py-1 font-mono text-xs"
+            dot
+            status={syncStatus.tone}
+            title={syncStatus.title ?? undefined}
+          >
+            {syncStatus.label}
+          </StatusBadge>
+          {syncStatus.detail ? (
+            <span className="max-w-64 text-right text-[11px] text-muted-foreground">
+              {syncStatus.detail}
+            </span>
+          ) : null}
+        </div>
         <div className="flex items-center rounded-md border border-border bg-secondary/30">
           {ranges.map((range) => (
             <button

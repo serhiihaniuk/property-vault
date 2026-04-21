@@ -2,6 +2,7 @@ import type {
   DashboardMonthBreakdownData,
   DocumentsCatalogData,
   OpenAnomaliesData,
+  SyncStatusData,
   YearlyReconciliationData,
 } from "@/src/shared/api/client"
 import type {
@@ -62,6 +63,13 @@ export interface DocumentsTableVM {
   unavailableReason: string | null
 }
 
+export interface DashboardSyncStatusVM {
+  detail: string | null
+  label: string
+  title: string | null
+  tone: "danger" | "neutral" | "pending" | "success" | "warning"
+}
+
 export interface DashboardV0ViewModel {
   accountStatus: AccountStatusVM
   categoryBreakdown: CategoryBreakdownVM
@@ -71,6 +79,7 @@ export interface DashboardV0ViewModel {
   openItems: OpenItemsVM
   primarySummary: PrimarySummaryVM
   subtitle: string
+  syncStatus: DashboardSyncStatusVM
 }
 
 export interface BuildDashboardV0ViewModelInput {
@@ -90,6 +99,9 @@ export interface BuildDashboardV0ViewModelInput {
   reconciliation: YearlyReconciliationData | undefined
   reconciliationError: string | null
   reconciliationLoading: boolean
+  syncStatus: SyncStatusData | undefined
+  syncStatusError: string | null
+  syncStatusLoading: boolean
   timeRange: DashboardTimeRange
 }
 
@@ -127,6 +139,9 @@ export function buildDashboardV0ViewModel({
   reconciliation,
   reconciliationError,
   reconciliationLoading,
+  syncStatus,
+  syncStatusError,
+  syncStatusLoading,
   timeRange,
 }: BuildDashboardV0ViewModelInput): DashboardV0ViewModel {
   const normalizedAnomalies = (anomalies?.anomalies ?? []).map(mapAnomaly)
@@ -284,6 +299,11 @@ export function buildDashboardV0ViewModel({
       dashboardError,
       dashboardLoading,
       selectedMonth,
+    }),
+    syncStatus: buildSyncStatusVM({
+      syncStatus,
+      syncStatusError,
+      syncStatusLoading,
     }),
   }
 }
@@ -458,6 +478,80 @@ function buildDashboardSubtitle({
   }
 
   return `Latest state · ${selectedMonth.label}`
+}
+
+function buildSyncStatusVM({
+  syncStatus,
+  syncStatusError,
+  syncStatusLoading,
+}: {
+  syncStatus: SyncStatusData | undefined
+  syncStatusError: string | null
+  syncStatusLoading: boolean
+}): DashboardSyncStatusVM {
+  if (syncStatusLoading) {
+    return {
+      detail: null,
+      label: "checking sync",
+      title: "Checking canonical vault sync status.",
+      tone: "neutral",
+    }
+  }
+
+  if (syncStatusError) {
+    return {
+      detail: syncStatusError,
+      label: "sync unavailable",
+      title: syncStatusError,
+      tone: "warning",
+    }
+  }
+
+  if (!syncStatus || syncStatus.status === "never_synced") {
+    return {
+      detail: "Canonical vault sync has not run yet.",
+      label: "sync pending",
+      title: "Canonical vault sync has not run yet.",
+      tone: "pending",
+    }
+  }
+
+  if (syncStatus.status === "running") {
+    const startedAt = formatSyncMoment(syncStatus.lastStartedAt)
+
+    return {
+      detail: syncStatus.lastSuccessAt
+        ? `Last successful sync ${formatSyncMoment(syncStatus.lastSuccessAt)}`
+        : "No successful sync recorded yet.",
+      label: startedAt ? `syncing · ${startedAt}` : "syncing",
+      title: buildSyncStatusTitle(syncStatus),
+      tone: "pending",
+    }
+  }
+
+  if (syncStatus.status === "error") {
+    const failedAt = formatSyncMoment(
+      syncStatus.lastFinishedAt ?? syncStatus.lastStartedAt
+    )
+
+    return {
+      detail: syncStatus.lastSuccessAt
+        ? `Last successful sync ${formatSyncMoment(syncStatus.lastSuccessAt)}`
+        : "No successful sync recorded yet.",
+      label: failedAt ? `sync failed · ${failedAt}` : "sync failed",
+      title: buildSyncStatusTitle(syncStatus),
+      tone: "danger",
+    }
+  }
+
+  const syncedAt = formatSyncMoment(syncStatus.lastSuccessAt)
+
+  return {
+    detail: null,
+    label: syncedAt ? `synced · ${syncedAt}` : "synced",
+    title: buildSyncStatusTitle(syncStatus),
+    tone: "success",
+  }
 }
 
 function buildTrendRangeLabel(timeRange: DashboardTimeRange) {
@@ -941,4 +1035,42 @@ function pickLatestGeneratedAt(values: Array<string | null | undefined>) {
 
 function formatHistoryMonthLabel(label: string) {
   return label.slice(0, 3)
+}
+
+function formatSyncMoment(value: string | null) {
+  if (!value) {
+    return null
+  }
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+  }).format(date)
+}
+
+function buildSyncStatusTitle(syncStatus: SyncStatusData) {
+  const details = [
+    syncStatus.lastStartedAt
+      ? `Started: ${formatSyncMoment(syncStatus.lastStartedAt)} UTC`
+      : null,
+    syncStatus.lastFinishedAt
+      ? `Finished: ${formatSyncMoment(syncStatus.lastFinishedAt)} UTC`
+      : null,
+    syncStatus.lastSuccessAt
+      ? `Last success: ${formatSyncMoment(syncStatus.lastSuccessAt)} UTC`
+      : null,
+    syncStatus.lastError ? `Error: ${syncStatus.lastError}` : null,
+  ].filter((value): value is string => Boolean(value))
+
+  return details.length > 0 ? details.join(" | ") : null
 }

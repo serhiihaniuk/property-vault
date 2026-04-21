@@ -60,6 +60,9 @@ export type OpenAnomaliesData = Awaited<
 export type YearlyReconciliationData = Awaited<
   ReturnType<PropertyVaultContractClient["getYearlyReconciliation"]>
 >;
+export type SyncStatusData = Awaited<
+  ReturnType<PropertyVaultContractClient["getSyncStatus"]>
+>;
 
 export class PropertyVaultApiError extends Error {
   readonly problem?: PropertyVaultApiProblem;

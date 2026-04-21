@@ -30,6 +30,10 @@ export function useDashboardV0ViewModel(timeRange: DashboardTimeRange) {
     queryKey: ["documents", "catalog", "all"],
     queryFn: () => apiClient.getDocuments(),
   })
+  const syncStatusQuery = useQuery({
+    queryKey: ["system", "sync-status"],
+    queryFn: () => apiClient.getSyncStatus(),
+  })
   const historyRangeMonths = useMemo(
     () =>
       getHistoryMonthsForRange(dashboardQuery.data?.months ?? [], timeRange),
@@ -78,6 +82,9 @@ export function useDashboardV0ViewModel(timeRange: DashboardTimeRange) {
         reconciliation: reconciliationQuery.data,
         reconciliationError: getApiErrorMessage(reconciliationQuery.error),
         reconciliationLoading: reconciliationQuery.isPending,
+        syncStatus: syncStatusQuery.data,
+        syncStatusError: getApiErrorMessage(syncStatusQuery.error),
+        syncStatusLoading: syncStatusQuery.isPending,
         timeRange,
       }),
     [
@@ -96,6 +103,9 @@ export function useDashboardV0ViewModel(timeRange: DashboardTimeRange) {
       reconciliationQuery.data,
       reconciliationQuery.error,
       reconciliationQuery.isPending,
+      syncStatusQuery.data,
+      syncStatusQuery.error,
+      syncStatusQuery.isPending,
       timeRange,
     ]
   )

@@ -51,6 +51,9 @@ export interface PropertyVaultContractClient {
   getApiHealth(
     ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getApiHealth']>
   ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getApiHealth']>>;
+  getSyncStatus(
+    ...args: ContractClientMethodArgs<PropertyVaultRouteCatalog['getSyncStatus']>
+  ): Promise<ContractRouteSuccessResponse<PropertyVaultRouteCatalog['getSyncStatus']>>;
 }
 
 export function createPropertyVaultContractClient(
@@ -70,5 +73,6 @@ export function createPropertyVaultContractClient(
     getYearlyReconciliation: buildContractClientMethod(transport, propertyVaultRouteCatalog.getYearlyReconciliation),
     getApiIndex: buildContractClientMethod(transport, propertyVaultRouteCatalog.getApiIndex),
     getApiHealth: buildContractClientMethod(transport, propertyVaultRouteCatalog.getApiHealth),
+    getSyncStatus: buildContractClientMethod(transport, propertyVaultRouteCatalog.getSyncStatus),
   };
 }
