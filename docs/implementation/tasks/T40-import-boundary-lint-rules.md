@@ -60,13 +60,17 @@
   - `npm run lint`
   - targeted `npx eslint --stdin --stdin-filename ...` checks in `apps/web` covering one allowed import plus representative forbidden imports for widget -> view, widget -> sibling widget, `src/**` -> `@dabrowskiego/application`, and `app/api/**` -> `src/**`
 - Coordinator notes: none yet
-- Review result: not reviewed yet
-- Reviewer: unassigned
-- Review tests run: none yet
-- Merge status: not ready
-- Architecture note: none yet
-- Coordinator notes review: none yet
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - `cd apps/web && npm run typecheck`
+  - `cd apps/web && npm run lint -- --no-cache`
+  - targeted `npx eslint --no-cache --stdin --stdin-filename ...` probes covering allowed `app -> view`, allowed non-API `app -> @dabrowskiego/auth`, forbidden `app -> widget`, forbidden existing widget -> sibling widget, forbidden non-API `app -> @dabrowskiego/application`, forbidden `src/** -> @dabrowskiego/application`, and forbidden `app/api/** -> src/**`
+- Merge status: `ready`
+- Architecture note:
+  - acceptable and aligned after one bounded review fix. The lint config now keeps the non-API Next.js app shell thin with the same backend-package guardrail already enforced under `src/**`, while still allowing route-level auth/session guards from `@dabrowskiego/auth` in `app/(app)/layout.tsx`.
+- Coordinator notes review: none
 - Coordinator final review: none yet
 - Actions taken: none yet
 - Actions ignored: none yet
-- Next handoff note: start a reviewer chat on `codex/T40-import-boundary-lint-rules` and say `reviewer T40`.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.

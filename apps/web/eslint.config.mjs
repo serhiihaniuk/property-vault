@@ -147,6 +147,31 @@ const srcWorkspacePackageRestrictions = [
   },
 ];
 
+// Non-API app shell can use auth/session guards, but it should not reach
+// backend/data packages directly instead of composing through views/shared.
+const nonApiAppWorkspacePackageRestrictions = [
+  {
+    group: ["@dabrowskiego/application", "@dabrowskiego/application/*"],
+    message:
+      "The app router shell should stay thin. Compose backend behavior through src/views and REST/contracts instead of importing application services directly.",
+  },
+  {
+    group: ["@dabrowskiego/db", "@dabrowskiego/db/*"],
+    message:
+      "The app router shell must not reach into the database package directly. Keep data access behind route handlers and shared clients.",
+  },
+  {
+    group: ["@dabrowskiego/sync", "@dabrowskiego/sync/*"],
+    message:
+      "The app router shell should not import sync internals directly. Surface sync state through application and contract layers.",
+  },
+  {
+    group: ["@dabrowskiego/vault", "@dabrowskiego/vault/*"],
+    message:
+      "The app router shell must not read local-first vault internals directly. Use app-facing contracts instead.",
+  },
+];
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -168,6 +193,18 @@ const eslintConfig = defineConfig([
         {
           basePath: projectRoot,
           zones: boundaryZones,
+        },
+      ],
+    },
+  },
+  {
+    files: ["app/**/*.{ts,tsx}"],
+    ignores: ["app/api/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: nonApiAppWorkspacePackageRestrictions,
         },
       ],
     },
