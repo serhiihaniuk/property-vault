@@ -96,6 +96,27 @@
   - Carry-forward from `T15`: sync freshness/status currently lives in `app.sync_state`, while append-only run history still lives in `vault.sync_runs`.
   - Why it matters: this task should decide whether the split remains the intended long-term boundary for operational status versus audit history, or whether sync metadata should be consolidated before the UI and application surfaces harden around it.
   - Expected outcome: `T41` should either keep the split explicitly and build on it, or migrate toward one canonical operational metadata location with the contract/application/UI surfaces updated consistently.
-- Next handoff note: start a reviewer chat on `codex/T41-sync-freshness-status` and say `reviewer T41`
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer on codex/T41-sync-freshness-status`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/contracts test`
+  - `npm run --workspace @dabrowskiego/application test`
+  - `node --test --experimental-strip-types apps/web/app/api/_lib/system-handlers.test.ts`
+  - `node --test --experimental-strip-types apps/web/src/shared/api/client.test.ts`
+  - `npm run --workspace @dabrowskiego/contracts build`
+  - `npm run --workspace @dabrowskiego/application typecheck`
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `npm run vault -- context`
+  - `npm run docker:db:up`
+  - `npm run db:migrate`
+  - live HTTP verification on `http://127.0.0.1:3000/api/health`
+  - live HTTP verification on `http://127.0.0.1:3000/api/sync-status`
+  - live HTTP verification on `http://127.0.0.1:3000/api/dashboard/month-breakdown`
+- Merge status: `merge ready`
+- Architecture note: acceptable and aligned. `T41` makes the sync metadata split explicit by keeping `app.sync_state` as the live operational source while leaving `vault.sync_runs` as append-only audit history, then exposes that choice through a dedicated system contract instead of leaking operational status into dashboard business payloads.
+- Coordinator notes review: confirmed. The carry-forward note from `T15` is resolved by explicit implementation choice rather than accident, and the resulting application, contract, route, and dashboard-shell surfaces stay consistent with that boundary.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`
 
 
