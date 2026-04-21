@@ -1,7 +1,7 @@
 # T40 — Import-boundary lint rules
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Enforce package and slice boundaries with lint rules.
 - Task type: `hardening/tooling`
 - Dependencies: `T20`, `T36`
