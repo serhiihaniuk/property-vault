@@ -1,11 +1,12 @@
 # T43 — Dev/bootstrap scripts
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T43-dev-bootstrap-scripts`
 - Goal: Make local developer bootstrap and run flows simple.
 - Task type: `docs/process`
 - Dependencies: `T16`, `T20`, `T21`, `T22`, `T23`
 - Write scope: root scripts, docs, and local setup helpers
+- Worker branch: `codex/T43-dev-bootstrap-scripts`
 - Recommended execution model: `gpt-5.4-mini / low`
 - Wave group: `hardening-d`
 - Required verification: `standard`
@@ -51,9 +52,26 @@
   - update bootstrap docs and any helper scripts so the documented path matches reality
   - run the standard gate by following the documented bootstrap path from scratch and confirming the web process receives the expected env
 - Completion signal: local bootstrap/run commands are documented and reproducible from clean `master`, including the web app env-loading path.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `.env.example`
+  - `README.md`
+  - `docs/implementation/tasks/T43-dev-bootstrap-scripts.md`
+  - `docs/local-docker-bootstrap.md`
+  - `package.json`
+  - `tools/dev.ts`
+- Contracts changed: none
+- Tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run docker:db:up`
+  - `npm run vault -- context`
+  - `docker compose exec -T postgres psql -U postgres -d postgres -c "DROP DATABASE IF EXISTS dabrowskiego_t43_verify WITH (FORCE);"`
+  - `docker compose exec -T postgres psql -U postgres -d postgres -c "CREATE DATABASE dabrowskiego_t43_verify;"`
+  - `$env:DATABASE_URL='postgres://postgres:postgres@localhost:5432/dabrowskiego_t43_verify'; npm run db:migrate`
+  - `docker compose exec -T postgres psql -U postgres -d dabrowskiego_t43_verify -c "select schema_name from information_schema.schemata where schema_name in ('app', 'auth', 'vault') order by schema_name;"`
+  - `node --env-file=.env` parent process spawning a child in `apps/web` confirmed inherited `DATABASE_URL` and `BETTER_AUTH_URL`
+  - `node --env-file=.env` parent process spawning a child in `apps/web` confirmed shell override `NEXT_PUBLIC_APP_ORIGIN=http://127.0.0.1:4010` survives root env loading
+  - `npm run dev` (confirmed root `.env` load plus inherited `apps/web` `predev` migration before exiting because another existing `next dev` process already held the repo dev lock)
 - Coordinator notes:
   - Observation: the current root `.env` alone was not sufficient for local web startup in the Turbo/Next dev flow; the live web process needed `apps/web/.env.local` or an equivalent explicit env-loading strategy before dashboard API routes could see `DATABASE_URL`.
   - Why it matters: the documented bootstrap path could look successful through Docker, migrations, and sync while the web app still failed at runtime with missing DB env in route execution.
@@ -67,6 +85,6 @@
   - Why it matters: that development convenience is now part of the real local startup behavior, so bootstrap ownership should live here instead of being remembered only from the `T42` task record.
   - Suggested follow-up: T43 should either codify or simplify the accepted local-only auth bootstrap path in scripts/docs so local startup remains explicit and debuggable from clean `master`.
   - Urgency: `soon`
-- Next handoff note: prefer boring explicit scripts over clever wrappers
+- Next handoff note: start a reviewer chat on `codex/T43-dev-bootstrap-scripts` and say `reviewer T43`
 
 

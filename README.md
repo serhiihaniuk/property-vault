@@ -32,9 +32,13 @@ app packages and the web shell:
 ```text
 Copy .env.example to .env
 npm run docker:db:up
-npm run db:migrate
 npm run dev
 ```
+
+`npm run dev` now loads the root `.env` for the web process and its `apps/web`
+`predev` migration step. If you want the app to render real local property
+data instead of an empty database, run `npm run vault -- sync --rebuild` after
+Postgres is up.
 
 The detailed step-by-step flow, including reset and shutdown commands, lives in
 `docs/local-docker-bootstrap.md`.

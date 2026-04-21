@@ -12,7 +12,7 @@
     "node": ">=22.6.0"
   },
   "scripts": {
-    "dev": "turbo dev --filter=@dabrowskiego/web",
+    "dev": "node --experimental-strip-types tools/dev.ts",
     "build": "npm run --workspace @dabrowskiego/contracts build && npm run --workspace @dabrowskiego/application build && npm run --workspace @dabrowskiego/sync build && turbo build --filter=@dabrowskiego/web",
     "lint": "turbo lint --filter=@dabrowskiego/web",
     "db:generate": "npm run --workspace @dabrowskiego/db db:generate",
