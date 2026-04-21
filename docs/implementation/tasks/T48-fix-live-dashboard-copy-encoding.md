@@ -1,12 +1,12 @@
 # T48 - Fix live dashboard copy and encoding drift
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T48-fix-live-dashboard-copy-encoding`
 - Goal: Remove mojibake and corrupted punctuation from the live dashboard without redesigning the dashboard shell.
 - Task type: `cleanup/refactor`
 - Dependencies: `T46`, `T47`
 - Write scope: live dashboard copy/formatting sources only
-- Worker branch: none yet
+- Worker branch: `codex/T48-fix-live-dashboard-copy-encoding`
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `hardening-c3`
 - Required verification: `standard`
@@ -55,10 +55,18 @@
   - verify the live dashboard still renders the same layout with corrected readable copy
   - run the standard gate and confirm no other active dashboard surfaces still show mojibake
 - Completion signal: live dashboard status/reconciliation/anomaly copy is readable and free of mojibake without changing the dashboard design.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
+- Files changed:
+  - `docs/implementation/tasks/T48-fix-live-dashboard-copy-encoding.md`
+- Contracts changed: none
+- Tests run:
+  - UTF-8 byte scan of the mounted live dashboard sources under `apps/web/src/views/dashboard/**` and the mounted `apps/web/src/widgets/dashboard-*/**` files for mojibake markers `\u00C2|\u00C3|\u00E2|\u00C5|\uFFFD` -> `clean`
+  - `npm run typecheck`
+  - `npm run lint`
 - Coordinator notes:
   - This task exists because `T47` removed mojibake-bearing orphaned widgets, but the reviewer confirmed that the live dashboard-integrated widgets still show corrupted punctuation/copy in mounted user-facing text.
   - Why it matters: the product path is now singular, so the remaining bad copy is easy to mistake for a deeper product/design issue unless we clean it up explicitly.
-- Next handoff note: fix the live mounted dashboard copy only; do not reopen dead widget paths.
+  - Observation: the mounted live dashboard sources are already UTF-8 clean; the apparent mojibake came from PowerShell `Get-Content` display, not from bad dashboard literals on disk.
+  - Why it matters: future copy-cleanup work can accidentally widen scope or "fix" already-correct strings unless workers verify actual file bytes or browser render first.
+  - Suggested follow-up: when dashboard copy looks encoded incorrectly in terminal output, confirm the on-disk UTF-8 bytes or browser render before patching mounted UI files.
+  - Urgency: `later`
+- Next handoff note: start a reviewer chat on `codex/T48-fix-live-dashboard-copy-encoding` and say `reviewer T48`; this task closed as verification-only because the mounted live dashboard sources are already UTF-8 clean.
