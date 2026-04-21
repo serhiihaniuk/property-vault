@@ -70,7 +70,11 @@
 - Architecture note:
   - acceptable and aligned after one bounded review fix. The lint config now keeps the non-API Next.js app shell thin with the same backend-package guardrail already enforced under `src/**`, while still allowing route-level auth/session guards from `@dabrowskiego/auth` in `app/(app)/layout.tsx`.
 - Coordinator notes review: none
-- Coordinator final review: none yet
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - `T40` is complete and acceptable for `master`. The lint rules now enforce meaningful package and FSD boundaries with targeted, actionable failures, and the bounded review fix correctly keeps the Next app shell thin without blocking legitimate auth/session guard usage.
+- Actions taken:
+  - fast-forward merged `codex/T40-import-boundary-lint-rules` into `master`
+  - marked `T40` `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored:
+  - none
+- Next handoff note: nothing right now.

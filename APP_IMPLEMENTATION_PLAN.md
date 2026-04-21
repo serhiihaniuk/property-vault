@@ -355,7 +355,7 @@ integration. Do not resume `T38` or `T39` until `T46` is complete.
 
 | ID | Title | Status | Dependencies | Write scope | Model | Wave group | Gate | Completion signal |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `T40` | Import-boundary lint rules | `claimed` | `T20`, `T36` | lint config and boundary rules only | `gpt-5.4-mini / medium` | `hardening-a` | `standard` | forbidden imports fail lint with useful messages, including redesign-related UI boundary rules |
+| `T40` | Import-boundary lint rules | `done` | `T20`, `T36` | lint config and boundary rules only | `gpt-5.4-mini / medium` | `hardening-a` | `standard` | forbidden imports fail lint with useful messages, including redesign-related UI boundary rules |
 | `T41` | Sync freshness and status surfaces | `todo` | `T15`, `T39`, `T46` | application, contracts, and UI surfaces for sync status only | `gpt-5.4 / high` | `hardening-b` | `strong` | app clearly shows last sync/freshness state inside the v0-integrated redesigned finance surfaces with tested behavior |
 | `T42` | Error, empty, and loading states | `todo` | `T33`, `T38`, `T39`, `T46` | slice UI states only | `gpt-5.4-mini / medium` | `hardening-c` | `standard` | primary redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path lands |
 | `T47` | Remove orphaned pre-v0 reconciliation/anomaly widgets | `todo` | `T39`, `T46` | legacy reconciliation/anomaly widget files and stale references only | `gpt-5.4-mini / medium` | `hardening-c2` | `standard` | only one authoritative reconciliation/anomaly UI path remains, with no orphaned pre-v0 widgets or mojibake-laden leftovers confusing future work |
