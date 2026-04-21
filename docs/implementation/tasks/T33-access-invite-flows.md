@@ -120,6 +120,13 @@
   - Reviewer made two bounded fixes while preserving the task shape: moved sign-in query-param reading back to the route entrypoint so the Next.js build remains valid, and stopped trimming accepted passwords so stored credentials match the user's exact input.
 - Coordinator notes review:
   - Confirmed. This branch now includes real Postgres-backed invite coverage in `packages/auth/src/access.integration.test.ts`, and the reviewer reran that path successfully against local Docker Postgres instead of relying only on `pg-mem`.
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - `T33` is complete and acceptable for `master`. The invite-only flow now uses the intended `packages/auth` boundary, the web access screens stay inside the redesign system, and the highest-risk auth path received real Postgres-backed verification instead of `pg-mem`-only coverage.
+- Actions taken:
+  - fast-forward merged `codex/T33-access-invite-flows` into `master`
+  - marked `T33` `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored:
+  - none
+- Next handoff note: nothing right now.
 
 
