@@ -69,6 +69,8 @@ answers.
 - `ARCHITECTURE.md` contains the approved app/system architecture.
 - `APP_IMPLEMENTATION_PLAN.md` contains the detailed app build backlog.
 - `docs/implementation/AGENT_PROTOCOL.md` contains the task-first execution workflow.
+- `docs/implementation/tasks/README.md` explains the live task-file surface.
+- `docs/implementation/archive/tasks/` contains completed task records kept only for historical reference.
 - `docs/implementation/roles/` contains the short role guides for coordinator,
   implementer, and reviewer chats.
 - `docs/implementation/WORKTREE_GUIDE.md` is an optional short compatibility note for the branch-only worker/reviewer flow.

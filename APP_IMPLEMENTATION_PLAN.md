@@ -31,6 +31,10 @@ for extraction history or ad hoc notes.
   visibility on `master`.
 - Coordinator also records final review decisions and merges reviewed work back
   into `master`.
+- Active task files live under `docs/implementation/tasks/`.
+- Completed task records are archived under
+  `docs/implementation/archive/tasks/` and are not part of the default startup
+  read path.
 - Foundational package tasks may also touch minimal root metadata when needed
   to make the new package trackable and installable, such as `.gitignore`,
   `package-lock.json`, and workspace-level package-manager metadata.

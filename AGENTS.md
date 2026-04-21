@@ -33,6 +33,8 @@ The repo currently has:
 - an approved target architecture in `ARCHITECTURE.md`,
 - a detailed app backlog in `APP_IMPLEMENTATION_PLAN.md`,
 - an agent workflow in `docs/implementation/AGENT_PROTOCOL.md`,
+- active task files only in `docs/implementation/tasks/`,
+- archived completed task records in `docs/implementation/archive/tasks/`,
 - repo-native redesign references under `docs/design/property-vault-mvp/` and
   a production UI target in `docs/implementation/UI_REDESIGN_SPEC.md`,
   both kept as durable background references rather than universal default
@@ -60,6 +62,8 @@ The repo currently has:
    - `APP_IMPLEMENTATION_PLAN.md`
 5. If implementing or reviewing one task, read the assigned task file under
    `docs/implementation/tasks/` next.
+   - completed task records under `docs/implementation/archive/tasks/` are
+     historical only and not part of the default read path
 6. Treat the assigned task file as the execution contract.
    - task-local instructions beat generic redesign defaults
    - the task file should name its own `Primary authorities`,

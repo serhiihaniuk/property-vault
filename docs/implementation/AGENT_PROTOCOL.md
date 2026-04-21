@@ -17,6 +17,10 @@ assigned task file carry task-local intent.
    - only the docs listed under that task file's `Primary authorities` and
      `Secondary context`
 
+Archived completed task records under `docs/implementation/archive/tasks/` are
+historical references only. Do not load them by default unless a live task or
+the user explicitly asks for historical context.
+
 ## Authority Hierarchy
 
 For execution and review, use this order:
