@@ -31,14 +31,13 @@ app packages and the web shell:
 
 ```text
 Copy .env.example to .env
-npm run docker:db:up
 npm run dev
 ```
 
-`npm run dev` now loads the root `.env` for the web process and its `apps/web`
-`predev` migration step. If you want the app to render real local property
-data instead of an empty database, run `npm run vault -- sync --rebuild` after
-Postgres is up.
+`npm run dev` is now the one-command local startup path. It loads the root
+`.env`, starts Docker Postgres, runs migrations, syncs the canonical vault
+into Postgres, and then starts the web app. If Docker Desktop is not running
+or a required env var is missing, it fails fast with the real bootstrap error.
 
 The detailed step-by-step flow, including reset and shutdown commands, lives in
 `docs/local-docker-bootstrap.md`.

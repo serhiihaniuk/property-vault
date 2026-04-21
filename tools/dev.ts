@@ -8,6 +8,7 @@ import { getDatabaseUrl } from '../packages/db/src/config.ts';
 const ROOT_ENV_PATH = path.resolve('.env');
 const TURBO_BIN_PATH = path.resolve('node_modules', 'turbo', 'bin', 'turbo');
 const WEB_FILTER = '@dabrowskiego/web';
+const SKIP_WEB_PREDEV_ENV_VAR = 'PROPERTY_VAULT_SKIP_WEB_PREDEV';
 
 function loadRootEnvFile(): void {
   if (!existsSync(ROOT_ENV_PATH)) {
@@ -57,11 +58,63 @@ function resolveTurboEntryPoint(): string {
   return TURBO_BIN_PATH;
 }
 
+function runBootstrapStep(
+  label: string,
+  args: string[],
+  failureHint?: string,
+): void {
+  console.log(`\n==> ${label}`);
+
+  const child =
+    process.platform === 'win32'
+      ? spawnSync('cmd.exe', ['/d', '/s', '/c', ['npm', ...args].join(' ')], {
+          cwd: process.cwd(),
+          env: process.env,
+          stdio: 'inherit',
+        })
+      : spawnSync('npm', args, {
+          cwd: process.cwd(),
+          env: process.env,
+          stdio: 'inherit',
+        });
+
+  if (child.error) {
+    if ((child.error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new Error('npm is not available in PATH. Install repo dependencies before running npm run dev.');
+    }
+
+    throw child.error;
+  }
+
+  if (child.status === 0) {
+    return;
+  }
+
+  const message = failureHint ? `${label} failed. ${failureHint}` : `${label} failed.`;
+  throw new Error(message);
+}
+
+function bootstrapLocalDev(): void {
+  runBootstrapStep(
+    'Starting local Postgres in Docker',
+    ['run', 'docker:db:up'],
+    'Make sure Docker Desktop is running and docker compose is available.',
+  );
+  runBootstrapStep('Applying database migrations', ['run', 'db:migrate']);
+  runBootstrapStep(
+    'Syncing canonical vault data into Postgres',
+    ['run', 'vault', '--', 'sync'],
+    'Fix the reported sync error before starting local web development.',
+  );
+}
+
 function main(): void {
   loadRootEnvFile();
   validateLocalDevEnv();
+  bootstrapLocalDev();
 
   const turboEntryPoint = resolveTurboEntryPoint();
+  process.env[SKIP_WEB_PREDEV_ENV_VAR] = '1';
   const child = spawnSync(
     process.execPath,
     [turboEntryPoint, 'dev', `--filter=${WEB_FILTER}`, ...process.argv.slice(2)],

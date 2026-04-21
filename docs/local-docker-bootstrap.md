@@ -4,9 +4,9 @@ This flow keeps local app startup boring and explicit:
 
 - one Postgres container,
 - one root `.env`,
-- a root `npm run dev` entrypoint that loads the root `.env` for the web
-  process,
-- Drizzle migrations against a blank database,
+- a root `npm run dev` entrypoint that loads the root `.env`, starts Docker
+  Postgres, runs migrations, syncs canonical vault data, and then starts the
+  web process,
 - the existing Next.js app shell on `http://localhost:3000`.
 
 ## Prerequisites
@@ -31,14 +31,26 @@ Important values in `.env`:
 - `npm run dev` reads this root `.env` before it starts the web workspace, so
   local web startup no longer depends on an ignored `apps/web/.env.local`.
 
-## 2. Start Postgres in Docker
+## 2. Start the full local stack
 
 ```powershell
-npm run docker:db:up
+npm run dev
 ```
 
-The command waits for the Postgres healthcheck to report ready before it
-returns, so the next migration step can run immediately after startup.
+The root `dev` script now runs the local prerequisites in this order:
+
+- loads the root `.env`,
+- validates `DATABASE_URL`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL`,
+- starts Docker Postgres with `docker compose up -d --wait postgres`,
+- applies Drizzle migrations,
+- runs `npm run vault -- sync`,
+- starts the Next.js dev server.
+
+If Docker Desktop is not running, Docker is not installed, or a required env
+var is missing, the command stops at the real failure point and prints that
+error instead of relying on hidden local setup knowledge.
+
+Open `http://localhost:3000` after the web server is ready.
 
 Useful companion commands:
 
@@ -65,36 +77,7 @@ This exercises the generated Drizzle SQL against an empty containerized
 Postgres database and catches missing schema bootstrap statements such as
 `CREATE SCHEMA IF NOT EXISTS`.
 
-## 4. Start the web app from the root scripts
-
-```powershell
-npm run dev
-```
-
-Open `http://localhost:3000`.
-
-This root entrypoint now does two explicit things before the Next.js dev server
-comes up:
-
-- it loads the root `.env` into the web process environment,
-- it lets the existing `apps/web` `predev` hook rerun `npm run db:migrate`.
-
-If the required web env vars are missing, `npm run dev` now fails fast with a
-repo-owned message instead of depending on hidden local setup knowledge.
-
-## 5. Load real local property data when live verification matters
-
-The web app reads Postgres, not `vault/` files directly. After migrations, load
-the local derived data when you want meaningful dashboard/document verification:
-
-```powershell
-npm run vault -- sync --rebuild
-```
-
-Use plain `npm run vault -- sync` on incremental runs when you do not need to
-rebuild the derived `vault` schema from scratch.
-
-## 6. Shut everything down
+## 4. Shut everything down
 
 When you are done:
 

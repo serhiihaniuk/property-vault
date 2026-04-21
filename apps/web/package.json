@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "predev": "npm --prefix ../.. run db:migrate",
+    "predev": "node --experimental-strip-types ../../tools/web-predev.ts",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",

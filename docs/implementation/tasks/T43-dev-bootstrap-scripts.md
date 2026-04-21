@@ -54,11 +54,14 @@
 - Completion signal: local bootstrap/run commands are documented and reproducible from clean `master`, including the web app env-loading path.
 - Files changed:
   - `.env.example`
+  - `apps/web/package.json`
   - `README.md`
   - `docs/implementation/tasks/T43-dev-bootstrap-scripts.md`
   - `docs/local-docker-bootstrap.md`
   - `package.json`
   - `tools/dev.ts`
+  - `tools/web-predev.ts`
+  - `turbo.json`
 - Contracts changed: none
 - Tests run:
   - `npm run typecheck`
@@ -71,7 +74,7 @@
   - `docker compose exec -T postgres psql -U postgres -d dabrowskiego_t43_verify -c "select schema_name from information_schema.schemata where schema_name in ('app', 'auth', 'vault') order by schema_name;"`
   - `node --env-file=.env` parent process spawning a child in `apps/web` confirmed inherited `DATABASE_URL` and `BETTER_AUTH_URL`
   - `node --env-file=.env` parent process spawning a child in `apps/web` confirmed shell override `NEXT_PUBLIC_APP_ORIGIN=http://127.0.0.1:4010` survives root env loading
-  - `npm run dev` (confirmed root `.env` load plus inherited `apps/web` `predev` migration before exiting because another existing `next dev` process already held the repo dev lock)
+  - `npm run dev` (confirmed root `.env` load, `docker:db:up`, `db:migrate`, `vault sync`, Turbo env pass-through, and `apps/web` predev skip before exiting because another existing `next dev` process already held the repo dev lock)
 - Coordinator notes:
   - Observation: the current root `.env` alone was not sufficient for local web startup in the Turbo/Next dev flow; the live web process needed `apps/web/.env.local` or an equivalent explicit env-loading strategy before dashboard API routes could see `DATABASE_URL`.
   - Why it matters: the documented bootstrap path could look successful through Docker, migrations, and sync while the web app still failed at runtime with missing DB env in route execution.
