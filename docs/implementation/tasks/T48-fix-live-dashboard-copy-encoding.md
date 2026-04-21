@@ -1,0 +1,64 @@
+# T48 - Fix live dashboard copy and encoding drift
+
+- Status: `todo`
+- Owner: `unassigned`
+- Goal: Remove mojibake and corrupted punctuation from the live dashboard without redesigning the dashboard shell.
+- Task type: `cleanup/refactor`
+- Dependencies: `T46`, `T47`
+- Write scope: live dashboard copy/formatting sources only
+- Worker branch: none yet
+- Recommended execution model: `gpt-5.4-mini / medium`
+- Wave group: `hardening-c3`
+- Required verification: `standard`
+- Success criteria: the live dashboard no longer shows corrupted punctuation, currency copy, or separator text in status/reconciliation/anomaly copy, while preserving the current v0-integrated layout and behavior.
+- Primary authorities:
+  - this task file
+  - `ARCHITECTURE.md`
+  - `docs/implementation/UI_PLAYBOOK.md`
+  - the completed `T46` dashboard-integrated implementation
+  - the completed `T47` orphaned-widget cleanup
+- Secondary context:
+  - `APP_IMPLEMENTATION_PLAN.md`
+  - `docs/implementation/tasks/T39-reconciliation-anomalies-redesign.md`
+  - `docs/implementation/tasks/T47-remove-orphaned-pre-v0-widgets.md`
+- Not authoritative:
+  - deleted pre-v0 widget files
+  - broader dashboard redesign ideas
+  - copy changes that alter information hierarchy instead of fixing encoding/copy drift
+- Must do:
+  - fix mojibake and corrupted punctuation in the live dashboard-integrated status/reconciliation/anomaly copy
+  - preserve the existing dashboard shell, layout, and interaction model
+  - update any shared formatter or helper source that feeds the bad copy so the fix is durable
+- Must not do:
+  - do not redesign the dashboard
+  - do not reopen the deleted pre-v0 widget path
+  - do not widen this into copywriting or information-architecture changes
+- Expected ownership shape:
+  - live dashboard widgets remain the authoritative surface
+  - any shared punctuation/copy formatter source still lives in `src/shared/**`
+  - fixes should move downward into shared helpers when the bad text originates there
+- Non-goals:
+  - no new data/contract work
+  - no dashboard shell redesign
+  - no unrelated wording polish outside the affected live dashboard surfaces
+- Known traps:
+  - fixing strings in dead files instead of the mounted dashboard path
+  - changing layout/density while trying to fix copy
+  - leaving shared formatter sources untouched so mojibake reappears elsewhere
+- Review focus:
+  - live dashboard copy is clean and readable
+  - no regression to the current dashboard-integrated reconciliation/anomaly surfaces
+  - no redesign drift
+- Implementation outline:
+  - identify the mounted live dashboard widgets and any shared helper/formatter sources that produce corrupted copy
+  - fix the encoding/punctuation at the true source instead of patching dead or duplicate files
+  - verify the live dashboard still renders the same layout with corrected readable copy
+  - run the standard gate and confirm no other active dashboard surfaces still show mojibake
+- Completion signal: live dashboard status/reconciliation/anomaly copy is readable and free of mojibake without changing the dashboard design.
+- Files changed: none yet
+- Contracts changed: none yet
+- Tests run: none yet
+- Coordinator notes:
+  - This task exists because `T47` removed mojibake-bearing orphaned widgets, but the reviewer confirmed that the live dashboard-integrated widgets still show corrupted punctuation/copy in mounted user-facing text.
+  - Why it matters: the product path is now singular, so the remaining bad copy is easy to mistake for a deeper product/design issue unless we clean it up explicitly.
+- Next handoff note: fix the live mounted dashboard copy only; do not reopen dead widget paths.

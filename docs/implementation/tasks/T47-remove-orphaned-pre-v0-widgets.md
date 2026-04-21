@@ -79,4 +79,12 @@
 - Merge status: `ready`
 - Architecture note: acceptable and aligned. The cleanup removes the orphaned pre-v0 widget slices and leaves reconciliation/anomaly ownership on the live dashboard-integrated path established by `T46` and confirmed by `T39`, without changing contracts, routes, or shared boundaries.
 - Coordinator notes review: confirmed. The deleted files were truly orphaned, no app code still imports them, and the remaining mentions are historical task records rather than active implementation paths. The mojibake/copy follow-up note is valid but separate from this cleanup scope.
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - `T47` is complete and acceptable for `master`. The dead pre-v0 reconciliation/anomaly widget path is gone, leaving the dashboard-integrated implementation as the single active path for future work.
+- Actions taken:
+  - fast-forward merged `codex/T47-remove-orphaned-pre-v0-widgets` into `master`
+  - marked `T47` `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - created `T48` to clean the remaining mojibake/copy drift from the live dashboard-integrated widgets
+- Actions ignored:
+  - none
+- Next handoff note: nothing right now.
