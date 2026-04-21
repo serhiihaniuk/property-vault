@@ -52,8 +52,13 @@ export function getRuntimePropertyVaultAuth(): PropertyVaultAuth {
 }
 
 export async function getReadyRuntimePropertyVaultAuth(): Promise<PropertyVaultAuth> {
-  globalThis.__propertyVaultRuntimeAuthReady ??=
-    prepareRuntimePropertyVaultAuth();
+  if (!globalThis.__propertyVaultRuntimeAuthReady) {
+    globalThis.__propertyVaultRuntimeAuthReady =
+      prepareRuntimePropertyVaultAuth().catch((error) => {
+        globalThis.__propertyVaultRuntimeAuthReady = undefined;
+        throw error;
+      });
+  }
 
   return globalThis.__propertyVaultRuntimeAuthReady;
 }

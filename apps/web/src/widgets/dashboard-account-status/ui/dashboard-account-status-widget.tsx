@@ -28,6 +28,7 @@ export function DashboardAccountStatusWidget({
   state,
   unavailableReason,
 }: DashboardAccountStatusWidgetProps) {
+  const hasOperationalData = state === "ready"
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const criticalCount = openAnomalies.filter(
     (anomaly) => anomaly.severity === "critical"
@@ -67,7 +68,7 @@ export function DashboardAccountStatusWidget({
           </h3>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              {criticalCount > 0 ? (
+              {hasOperationalData && criticalCount > 0 ? (
                 <Badge
                   className="border-rose-400/30 px-1.5 py-0 text-xs"
                   variant="outline"
@@ -76,7 +77,7 @@ export function DashboardAccountStatusWidget({
                   <span className="text-rose-400">{criticalCount}</span>
                 </Badge>
               ) : null}
-              {warningCount > 0 ? (
+              {hasOperationalData && warningCount > 0 ? (
                 <Badge
                   className="border-amber-400/30 px-1.5 py-0 text-xs"
                   variant="outline"
@@ -85,7 +86,7 @@ export function DashboardAccountStatusWidget({
                   <span className="text-amber-400">{warningCount}</span>
                 </Badge>
               ) : null}
-              {infoCount > 0 ? (
+              {hasOperationalData && infoCount > 0 ? (
                 <Badge
                   className="border-blue-400/30 px-1.5 py-0 text-xs"
                   variant="outline"
@@ -94,7 +95,7 @@ export function DashboardAccountStatusWidget({
                   <span className="text-blue-400">{infoCount}</span>
                 </Badge>
               ) : null}
-              {openAnomalies.length === 0 ? (
+              {hasOperationalData && openAnomalies.length === 0 ? (
                 <Badge
                   className="border-emerald-400/30 px-1.5 py-0 text-xs"
                   variant="outline"
@@ -105,7 +106,13 @@ export function DashboardAccountStatusWidget({
               ) : null}
             </div>
             <span className="text-xs text-muted-foreground">
-              {openAnomalies.length} open anomalies
+              {state === "loading"
+                ? "Loading anomalies"
+                : state === "error"
+                  ? "Anomalies unavailable"
+                  : state === "empty"
+                    ? "Awaiting anomaly data"
+                    : `${openAnomalies.length} open anomalies`}
             </span>
           </div>
         </div>

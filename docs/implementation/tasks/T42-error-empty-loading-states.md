@@ -55,6 +55,10 @@
 - Completion signal: major redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path lands.
 - Files changed:
   - `docs/implementation/tasks/T42-error-empty-loading-states.md`
+  - `apps/web/app/(app)/layout.tsx`
+  - `apps/web/app/api/_lib/access-handlers.ts`
+  - `apps/web/app/api/auth/[...all]/route.ts`
+  - `apps/web/package.json`
   - `apps/web/src/shared/lib/dashboard-v0.ts`
   - `apps/web/src/shared/ui/index.ts`
   - `apps/web/src/views/dashboard/lib/dashboard-v0-adapter.ts`
@@ -72,19 +76,33 @@
   - `apps/web/src/widgets/document-record/ui/document-record-widget.tsx`
   - `apps/web/src/widgets/invite-acceptance/ui/invite-acceptance-widget.tsx`
   - `apps/web/src/widgets/sign-in/ui/sign-in-widget.tsx`
+  - `packages/auth/src/runtime.ts`
 - Contracts changed: none
 - Tests run:
   - `npm run --workspace @dabrowskiego/web typecheck`
   - `npm run --workspace @dabrowskiego/web lint`
   - `npm run --workspace @dabrowskiego/web build`
-- Coordinator notes: none.
-- Review result: pending review
-- Reviewer: not yet assigned
-- Review tests run: none yet
-- Merge status: pending review
-- Architecture note: pending review
-- Coordinator notes review: pending review
+- Coordinator notes:
+  - Observation: this branch also carries the local-only dev auth bootstrap and `apps/web` predev migration wiring outside the original T42 UI-state write scope.
+  - Why it matters: the change is intentional for local development, but the task ledger needs to reflect that extra setup surface so later setup/debug ownership stays traceable.
+  - Suggested follow-up: when finalizing T42, either explicitly accept this local-only bootstrap here or promote it into `T43` or setup docs so the behavior has a durable home.
+  - Urgency: `soon`
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer on codex/T42-error-empty-loading-states`
+- Review tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+  - `npm run --workspace @dabrowskiego/auth typecheck`
+  - `npm run --workspace @dabrowskiego/auth test`
+- Merge status: `merge ready`
+- Architecture note:
+  - Acceptable and aligned. T42 keeps the redesigned slices on shared loading/empty/error primitives while preserving widget-owned shell/layout, and reviewer fixed the account-status card so missing anomaly data no longer renders a false "All clear" state.
+  - The branch also keeps the local-only dev auth bootstrap requested by Serhii, and reviewer hardened it so a transient bootstrap failure does not poison the runtime auth cache for the rest of the dev session.
+- Coordinator notes review:
+  - Confirmed. The extra local-only bootstrap scope is real and now documented, but it is non-blocking for merge because Serhii explicitly requested that development convenience.
+  - Reviewer also tightened the bootstrap path by allowing auth initialization to retry after transient failures instead of caching a rejected promise indefinitely.
 - Coordinator final review: pending review
 - Actions taken: first introduced a shared top-level `StateSurface` wrapper, then removed it after user review showed unacceptable loading blink and layout shift; the affected widgets now keep their own shell/layout in place and use local loading, empty, and error bodies so async transitions stay footprint-stable.
 - Actions ignored: none yet
-- Next handoff note: start a reviewer chat on `codex/T42-error-empty-loading-states` and say `reviewer T42`.
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
