@@ -1,11 +1,12 @@
-# T40 — Import-boundary lint rules
+# T40 - Import boundary lint rules
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T40-import-boundary-lint-rules`
 - Goal: Enforce package and slice boundaries with lint rules.
 - Task type: `hardening/tooling`
 - Dependencies: `T20`, `T36`
 - Write scope: lint config and boundary rules only
+- Worker branch: `codex/T40-import-boundary-lint-rules`
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `hardening-a`
 - Required verification: `standard`
@@ -50,9 +51,22 @@
   - add redesign-related UI boundaries only where the structure is already settled
   - run the standard gate and confirm both valid imports and representative invalid imports behave as intended
 - Completion signal: forbidden imports fail lint with useful messages, including redesign-related UI boundary rules.
-- Files changed: none yet
+- Files changed:
+  - `apps/web/eslint.config.mjs`
+  - `docs/implementation/tasks/T40-import-boundary-lint-rules.md`
 - Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: enforce only meaningful boundaries; avoid noisy brittle rules
-
-
+- Tests run:
+  - `npm run typecheck`
+  - `npm run lint`
+  - targeted `npx eslint --stdin --stdin-filename ...` checks in `apps/web` covering one allowed import plus representative forbidden imports for widget -> view, widget -> sibling widget, `src/**` -> `@dabrowskiego/application`, and `app/api/**` -> `src/**`
+- Coordinator notes: none yet
+- Review result: not reviewed yet
+- Reviewer: unassigned
+- Review tests run: none yet
+- Merge status: not ready
+- Architecture note: none yet
+- Coordinator notes review: none yet
+- Coordinator final review: none yet
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: start a reviewer chat on `codex/T40-import-boundary-lint-rules` and say `reviewer T40`.
