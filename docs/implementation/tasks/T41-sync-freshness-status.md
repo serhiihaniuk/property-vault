@@ -1,7 +1,7 @@
 # T41 — Sync freshness and status surfaces
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Surface data freshness and sync status in the app.
 - Task type: `standard slice`
 - Dependencies: `T15`, `T39`, `T46`
