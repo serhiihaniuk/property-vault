@@ -13,7 +13,7 @@ import {
   type ReconciliationSummary,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge, EmptyState, StateSurface } from "@/src/shared/ui"
+import { Badge, EmptyState, ErrorState, LoadingState } from "@/src/shared/ui"
 
 interface DashboardOpenItemsWidgetProps {
   anomalies: Anomaly[]
@@ -64,52 +64,23 @@ export function DashboardOpenItemsWidget({
   state,
   unavailableReason,
 }: DashboardOpenItemsWidgetProps) {
-  if (state === "loading") {
-    return (
-      <StateSurface
-        description="Loading dated issues, unresolved reconciliation lines, and other investigation leads."
-        label="Loading open items and anomalies"
-        rows={6}
-        title="Open items and anomalies"
-        variant="loading"
-      />
-    )
-  }
-
-  if (state === "error") {
-    return (
-      <StateSurface
-        description="Open issues could not be loaded from anomalies and reconciliation data."
-        stateDescription={unavailableReason ?? undefined}
-        stateTitle="Open items unavailable"
-        title="Open items and anomalies unavailable"
-        variant="error"
-      />
-    )
-  }
-
-  if (state === "empty") {
-    return (
-      <StateSurface
-        description="Investigation queues appear here after anomaly and reconciliation data has been indexed."
-        stateDescription={
-          unavailableReason ??
-          "Sync anomaly and reconciliation data to populate this queue."
-        }
-        stateTitle="No open items yet"
-        title="Open items and anomalies"
-        variant="empty"
-      />
-    )
-  }
-
+  const isLoading = state === "loading"
+  const isError = state === "error"
+  const isEmpty = state === "empty"
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const withDates = openAnomalies.filter((anomaly) => anomaly.date)
   const withoutDates = openAnomalies.filter((anomaly) => !anomaly.date)
   const isAllClear =
+    state === "ready" &&
     openAnomalies.length === 0 &&
     (reconciliationSummary?.openLineCount ?? 0) === 0 &&
     !unavailableReason
+  const errorMessage =
+    unavailableReason ??
+    "Open issues could not be loaded from anomalies and reconciliation data."
+  const emptyMessage =
+    unavailableReason ??
+    "Sync anomaly and reconciliation data to populate this queue."
 
   return (
     <div className="rounded-lg border border-border bg-card">
@@ -140,13 +111,70 @@ export function DashboardOpenItemsWidget({
         </div>
       </div>
 
-      {unavailableReason ? (
+      {state === "ready" && unavailableReason ? (
         <div className="px-5 pt-3 text-xs text-muted-foreground">
           {unavailableReason}
         </div>
       ) : null}
 
-      {isAllClear ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
+          <OpenItemsSection
+            icon={<Bell className="h-3.5 w-3.5 text-muted-foreground" />}
+            title="Time-sensitive"
+          >
+            <LoadingState
+              className="rounded-md border border-dashed border-border/70 bg-background/30 p-4"
+              label="Loading time-sensitive anomalies"
+              rows={4}
+              showHeader={false}
+            />
+          </OpenItemsSection>
+          <OpenItemsSection
+            icon={<FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+            title="Other anomalies"
+          >
+            <LoadingState
+              className="rounded-md border border-dashed border-border/70 bg-background/30 p-4"
+              label="Loading other anomalies"
+              rows={4}
+              showHeader={false}
+            />
+          </OpenItemsSection>
+        </div>
+      ) : isError ? (
+        <div className="p-5">
+          <ErrorState
+            title="Open items unavailable"
+            description={errorMessage}
+          />
+        </div>
+      ) : isEmpty ? (
+        <div className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
+          <OpenItemsSection
+            icon={<Bell className="h-3.5 w-3.5 text-muted-foreground" />}
+            title="Time-sensitive"
+          >
+            <EmptyState
+              className="px-3 py-4"
+              icon={Bell}
+              title="No time-sensitive queue yet"
+              description={emptyMessage}
+            />
+          </OpenItemsSection>
+          <OpenItemsSection
+            icon={<FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+            title="Other anomalies"
+          >
+            <EmptyState
+              className="px-3 py-4"
+              icon={FileText}
+              title="No general review queue yet"
+              description={emptyMessage}
+            />
+          </OpenItemsSection>
+        </div>
+      ) : isAllClear ? (
         <div className="p-5">
           <EmptyState
             className="border-status-success/25 bg-status-success-bg/40"
@@ -157,13 +185,10 @@ export function DashboardOpenItemsWidget({
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <Bell className="h-3.5 w-3.5 text-muted-foreground" />
-              <h3 className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                Time-sensitive
-              </h3>
-            </div>
+          <OpenItemsSection
+            icon={<Bell className="h-3.5 w-3.5 text-muted-foreground" />}
+            title="Time-sensitive"
+          >
             <div className="space-y-2">
               {withDates.length === 0 ? (
                 <EmptyState
@@ -220,15 +245,12 @@ export function DashboardOpenItemsWidget({
                 })
               )}
             </div>
-          </div>
+          </OpenItemsSection>
 
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-              <h3 className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                Other anomalies
-              </h3>
-            </div>
+          <OpenItemsSection
+            icon={<FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+            title="Other anomalies"
+          >
             <div className="space-y-2">
               {withoutDates.length === 0 ? (
                 <EmptyState
@@ -278,9 +300,31 @@ export function DashboardOpenItemsWidget({
                 ))
               )}
             </div>
-          </div>
+          </OpenItemsSection>
         </div>
       )}
+    </div>
+  )
+}
+
+function OpenItemsSection({
+  children,
+  icon,
+  title,
+}: {
+  children: React.ReactNode
+  icon: React.ReactNode
+  title: string
+}) {
+  return (
+    <div>
+      <div className="mb-3 flex items-center gap-2">
+        {icon}
+        <h3 className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+          {title}
+        </h3>
+      </div>
+      {children}
     </div>
   )
 }

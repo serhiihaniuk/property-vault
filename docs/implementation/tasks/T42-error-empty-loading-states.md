@@ -57,7 +57,6 @@
   - `docs/implementation/tasks/T42-error-empty-loading-states.md`
   - `apps/web/src/shared/lib/dashboard-v0.ts`
   - `apps/web/src/shared/ui/index.ts`
-  - `apps/web/src/shared/ui/state-surface.tsx`
   - `apps/web/src/views/dashboard/lib/dashboard-v0-adapter.ts`
   - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
   - `apps/web/src/widgets/access-management/ui/access-management-widget.tsx`
@@ -86,6 +85,6 @@
 - Architecture note: pending review
 - Coordinator notes review: pending review
 - Coordinator final review: pending review
-- Actions taken: extracted a shared `StateSurface` wrapper for top-level loading, error, and empty shells, then reused it across the redesigned dashboard, document, and access entry surfaces to address review feedback about repeated state layout markup.
+- Actions taken: first introduced a shared top-level `StateSurface` wrapper, then removed it after user review showed unacceptable loading blink and layout shift; the affected widgets now keep their own shell/layout in place and use local loading, empty, and error bodies so async transitions stay footprint-stable.
 - Actions ignored: none yet
 - Next handoff note: start a reviewer chat on `codex/T42-error-empty-loading-states` and say `reviewer T42`.

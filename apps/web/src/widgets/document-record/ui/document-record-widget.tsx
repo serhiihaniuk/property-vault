@@ -10,11 +10,12 @@ import {
   Badge,
   DenseCard,
   EmptyState,
+  ErrorState,
   KeyValueGrid,
   KeyValueRow,
+  LoadingState,
   MetricLabel,
   MetricValue,
-  StateSurface,
   StatusBadge,
   Surface,
   SurfaceActions,
@@ -36,43 +37,9 @@ export function DocumentRecordWidget({
   errorMessage,
   isLoading,
 }: DocumentRecordWidgetProps) {
-  if (isLoading) {
-    return (
-      <StateSurface
-        description="Loading indexed metadata, extracted facts, and review context."
-        label="Loading document record"
-        rows={7}
-        title="Extracted record"
-        variant="loading"
-      />
-    )
-  }
-
-  if (errorMessage) {
-    return (
-      <StateSurface
-        description="Indexed metadata and extracted facts could not be loaded."
-        stateDescription={errorMessage}
-        stateTitle="Document detail unavailable"
-        title="Extracted record unavailable"
-        variant="error"
-      />
-    )
-  }
-
-  if (!data) {
-    return (
-      <StateSurface
-        description="No document detail is available yet."
-        stateDescription="Open a catalog entry to inspect extracted facts, metadata, and provenance."
-        stateTitle="No document record"
-        title="Extracted record"
-        variant="empty"
-      />
-    )
-  }
-
-  const flagCount = data.questionsForUser.length + data.warnings.length
+  const flagCount = data
+    ? data.questionsForUser.length + data.warnings.length
+    : 0
 
   return (
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)]">
@@ -85,66 +52,88 @@ export function DocumentRecordWidget({
               evidence record.
             </SurfaceDescription>
           </SurfaceHeading>
-          <SurfaceActions>
-            <Badge variant="outline" className="font-mono">
-              {data.keyFacts.length} facts
-            </Badge>
-          </SurfaceActions>
+          {data ? (
+            <SurfaceActions>
+              <Badge variant="outline" className="font-mono">
+                {data.keyFacts.length} facts
+              </Badge>
+            </SurfaceActions>
+          ) : null}
         </SurfaceHeader>
         <SurfaceBody className="gap-4">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <SummaryCard
-              detail="Indexed extraction confidence"
-              label="Confidence"
-              value={formatDocumentConfidence(data.document.confidence)}
+          {isLoading ? (
+            <LoadingState
+              label="Loading document record"
+              rows={7}
+              showHeader={false}
             />
-            <SummaryCard
-              detail="Normalized monetary rows"
-              label="Financial rows"
-              value={String(data.financialRows.length)}
+          ) : errorMessage ? (
+            <ErrorState
+              title="Document detail unavailable"
+              description={errorMessage}
             />
-            <SummaryCard
-              detail="Source sightings captured"
-              label="Source observations"
-              value={String(data.sourceObservations.length)}
+          ) : !data ? (
+            <EmptyState
+              title="No document record"
+              description="Open a catalog entry to inspect extracted facts, metadata, and provenance."
             />
-            <SummaryCard
-              detail="Questions plus warnings"
-              label="Flags"
-              tone={flagCount > 0 ? "warning" : "default"}
-              value={String(flagCount)}
-            />
-          </div>
-
-          <Surface density="compact" tone="muted">
-            <SurfaceHeader>
-              <SurfaceHeading>
-                <SurfaceTitle>Key facts</SurfaceTitle>
-                <SurfaceDescription>
-                  Short extracted facts intended to speed up first review.
-                </SurfaceDescription>
-              </SurfaceHeading>
-            </SurfaceHeader>
-            <SurfaceBody>
-              {data.keyFacts.length === 0 ? (
-                <EmptyState
-                  title="No extracted facts"
-                  description="This record does not expose a short fact summary yet."
+          ) : (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <SummaryCard
+                  detail="Indexed extraction confidence"
+                  label="Confidence"
+                  value={formatDocumentConfidence(data.document.confidence)}
                 />
-              ) : (
-                <div className="grid gap-3 md:grid-cols-2">
-                  {data.keyFacts.map((fact) => (
-                    <DenseCard key={`${fact.label}:${fact.value}`} tone="muted">
-                      <MetricLabel>{fact.label}</MetricLabel>
-                      <p className="text-[13.5px] text-fg-primary">
-                        {fact.value}
-                      </p>
-                    </DenseCard>
-                  ))}
-                </div>
-              )}
-            </SurfaceBody>
-          </Surface>
+                <SummaryCard
+                  detail="Normalized monetary rows"
+                  label="Financial rows"
+                  value={String(data.financialRows.length)}
+                />
+                <SummaryCard
+                  detail="Source sightings captured"
+                  label="Source observations"
+                  value={String(data.sourceObservations.length)}
+                />
+                <SummaryCard
+                  detail="Questions plus warnings"
+                  label="Flags"
+                  tone={flagCount > 0 ? "warning" : "default"}
+                  value={String(flagCount)}
+                />
+              </div>
+
+              <Surface density="compact" tone="muted">
+                <SurfaceHeader>
+                  <SurfaceHeading>
+                    <SurfaceTitle>Key facts</SurfaceTitle>
+                    <SurfaceDescription>
+                      Short extracted facts intended to speed up first review.
+                    </SurfaceDescription>
+                  </SurfaceHeading>
+                </SurfaceHeader>
+                <SurfaceBody>
+                  {data.keyFacts.length === 0 ? (
+                    <EmptyState
+                      title="No extracted facts"
+                      description="This record does not expose a short fact summary yet."
+                    />
+                  ) : (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {data.keyFacts.map((fact) => (
+                        <DenseCard key={`${fact.label}:${fact.value}`} tone="muted">
+                          <MetricLabel>{fact.label}</MetricLabel>
+                          <p className="text-[13.5px] text-fg-primary">
+                            {fact.value}
+                          </p>
+                        </DenseCard>
+                      ))}
+                    </div>
+                  )}
+                </SurfaceBody>
+              </Surface>
+            </>
+          )}
         </SurfaceBody>
       </Surface>
 
@@ -160,37 +149,55 @@ export function DocumentRecordWidget({
             </SurfaceHeading>
           </SurfaceHeader>
           <SurfaceBody>
-            <KeyValueGrid divider="dashed">
-              <KeyValueRow
-                label="Document date"
-                value={formatDocumentDate(data.document.documentDate)}
+            {isLoading ? (
+              <LoadingState
+                label="Loading document metadata"
+                rows={6}
+                showHeader={false}
               />
-              <KeyValueRow
-                label="Reporting period"
-                value={getDocumentPeriodLabel(data.document.period)}
+            ) : errorMessage ? (
+              <ErrorState
+                title="Document metadata unavailable"
+                description={errorMessage}
               />
-              <KeyValueRow
-                label="Pages"
-                value={
-                  data.document.pageCount
-                    ? String(data.document.pageCount)
-                    : "n/a"
-                }
+            ) : !data ? (
+              <EmptyState
+                title="No metadata yet"
+                description="Select an indexed document to inspect its metadata."
               />
-              <KeyValueRow label="MIME" value={data.document.mime} />
-              <KeyValueRow
-                label="Asset tag"
-                value={data.document.assetTag ?? "n/a"}
-              />
-              <KeyValueRow
-                label="OCR"
-                value={data.document.needsOcr ? "Needed" : "Not needed"}
-              />
-              <KeyValueRow
-                label="Supporting note"
-                value={data.document.noteAvailable ? "Available" : "Missing"}
-              />
-            </KeyValueGrid>
+            ) : (
+              <KeyValueGrid divider="dashed">
+                <KeyValueRow
+                  label="Document date"
+                  value={formatDocumentDate(data.document.documentDate)}
+                />
+                <KeyValueRow
+                  label="Reporting period"
+                  value={getDocumentPeriodLabel(data.document.period)}
+                />
+                <KeyValueRow
+                  label="Pages"
+                  value={
+                    data.document.pageCount
+                      ? String(data.document.pageCount)
+                      : "n/a"
+                  }
+                />
+                <KeyValueRow label="MIME" value={data.document.mime} />
+                <KeyValueRow
+                  label="Asset tag"
+                  value={data.document.assetTag ?? "n/a"}
+                />
+                <KeyValueRow
+                  label="OCR"
+                  value={data.document.needsOcr ? "Needed" : "Not needed"}
+                />
+                <KeyValueRow
+                  label="Supporting note"
+                  value={data.document.noteAvailable ? "Available" : "Missing"}
+                />
+              </KeyValueGrid>
+            )}
           </SurfaceBody>
         </Surface>
 
@@ -205,42 +212,64 @@ export function DocumentRecordWidget({
             </SurfaceHeading>
           </SurfaceHeader>
           <SurfaceBody>
-            <KeyValueGrid divider="dashed">
-              <KeyValueRow
-                label="Ingested"
-                value={formatDocumentDateTime(data.document.ingestedAt)}
+            {isLoading ? (
+              <LoadingState
+                label="Loading extraction trace"
+                rows={5}
+                showHeader={false}
               />
-              <KeyValueRow
-                label="Extracted"
-                value={formatDocumentDateTime(data.document.extractedAt)}
+            ) : errorMessage ? (
+              <ErrorState
+                title="Extraction trace unavailable"
+                description={errorMessage}
               />
-              <KeyValueRow
-                label="Extracted by"
-                value={data.document.extractedBy}
+            ) : !data ? (
+              <EmptyState
+                title="No extraction trace"
+                description="Select an indexed document to inspect ingestion and extraction timing."
               />
-              <KeyValueRow
-                label="Extractor version"
-                value={data.document.extractorVersion}
-              />
-              <KeyValueRow
-                label="View generated"
-                value={formatDocumentDateTime(data.generatedAt)}
-              />
-            </KeyValueGrid>
+            ) : (
+              <KeyValueGrid divider="dashed">
+                <KeyValueRow
+                  label="Ingested"
+                  value={formatDocumentDateTime(data.document.ingestedAt)}
+                />
+                <KeyValueRow
+                  label="Extracted"
+                  value={formatDocumentDateTime(data.document.extractedAt)}
+                />
+                <KeyValueRow
+                  label="Extracted by"
+                  value={data.document.extractedBy}
+                />
+                <KeyValueRow
+                  label="Extractor version"
+                  value={data.document.extractorVersion}
+                />
+                <KeyValueRow
+                  label="View generated"
+                  value={formatDocumentDateTime(data.generatedAt)}
+                />
+              </KeyValueGrid>
+            )}
           </SurfaceBody>
         </Surface>
 
         <MessageSurface
           description="Items that still need a human answer or a follow-up in the source evidence."
           emptyTitle="No open questions"
-          items={data.questionsForUser}
+          errorMessage={errorMessage}
+          isLoading={isLoading}
+          items={data?.questionsForUser ?? []}
           title="Questions for user"
         />
 
         <MessageSurface
           description="Warnings recorded during extraction, review, or normalization."
           emptyTitle="No warnings"
-          items={data.warnings}
+          errorMessage={errorMessage}
+          isLoading={isLoading}
+          items={data?.warnings ?? []}
           title="Warnings"
           tone="warning"
         />
@@ -277,12 +306,16 @@ function SummaryCard({
 function MessageSurface({
   description,
   emptyTitle,
+  errorMessage,
+  isLoading,
   items,
   title,
   tone = "neutral",
 }: {
   description: string
   emptyTitle: string
+  errorMessage?: string | null
+  isLoading: boolean
   items: string[]
   title: string
   tone?: "neutral" | "warning"
@@ -307,7 +340,18 @@ function MessageSurface({
         </SurfaceActions>
       </SurfaceHeader>
       <SurfaceBody>
-        {items.length === 0 ? (
+        {isLoading ? (
+          <LoadingState
+            label={`Loading ${title.toLowerCase()}`}
+            rows={3}
+            showHeader={false}
+          />
+        ) : errorMessage ? (
+          <ErrorState
+            title={`${title} unavailable`}
+            description={errorMessage}
+          />
+        ) : items.length === 0 ? (
           <EmptyState title={emptyTitle} description={description} />
         ) : (
           <div className="flex flex-col gap-2">

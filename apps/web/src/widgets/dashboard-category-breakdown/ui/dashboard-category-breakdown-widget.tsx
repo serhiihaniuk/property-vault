@@ -2,7 +2,7 @@ import {
   type CategoryBreakdown,
   type DashboardSurfaceStateKind,
 } from "@/src/shared/lib/dashboard-v0"
-import { StateSurface } from "@/src/shared/ui"
+import { Skeleton } from "@/src/shared/ui"
 
 import { CategoryCard } from "./category-card"
 
@@ -25,44 +25,15 @@ export function DashboardCategoryBreakdownWidget({
   state,
   unavailableReason,
 }: DashboardCategoryBreakdownWidgetProps) {
-  if (state === "loading") {
-    return (
-      <StateSurface
-        description="Loading this month versus last month category totals and document-backed comparison context."
-        label="Loading category breakdown"
-        rows={8}
-        title="Breakdown by category"
-        variant="loading"
-      />
-    )
-  }
-
-  if (state === "error") {
-    return (
-      <StateSurface
-        description="Category-level month-over-month comparison could not be loaded."
-        stateDescription={unavailableReason ?? undefined}
-        stateTitle="Category breakdown unavailable"
-        title="Breakdown by category unavailable"
-        variant="error"
-      />
-    )
-  }
-
-  if (state === "empty") {
-    return (
-      <StateSurface
-        description="Category cards appear here once indexed monthly charge rows are available."
-        stateDescription={
-          unavailableReason ??
+  const isLoading = state === "loading"
+  const stateMessage =
+    state === "error"
+      ? unavailableReason ??
+        "Category-level month-over-month comparison could not be loaded."
+      : state === "empty"
+        ? unavailableReason ??
           "Sync the latest dashboard month to populate category comparison cards."
-        }
-        stateTitle="No category breakdown yet"
-        title="Breakdown by category"
-        variant="empty"
-      />
-    )
-  }
+        : unavailableReason
 
   return (
     <>
@@ -82,16 +53,70 @@ export function DashboardCategoryBreakdownWidget({
             : "period unavailable"}
         </div>
       </div>
-      {unavailableReason ? (
+      {stateMessage ? (
         <div className="mb-4 text-xs text-muted-foreground">
-          {unavailableReason}
+          {stateMessage}
         </div>
       ) : null}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
-        {categories.slice(0, 8).map((category) => (
-          <CategoryCard key={category.category} category={category} />
-        ))}
+        {isLoading ? (
+          Array.from({ length: 8 }).map((_, index) => (
+            <CategoryCardPlaceholder key={index} />
+          ))
+        ) : categories.length > 0 ? (
+          categories
+            .slice(0, 8)
+            .map((category) => (
+              <CategoryCard key={category.category} category={category} />
+            ))
+        ) : (
+          <div className="col-span-full rounded-lg border border-dashed border-border bg-card p-6 text-sm text-muted-foreground">
+            No category breakdown is available yet.
+          </div>
+        )}
       </div>
     </>
+  )
+}
+
+function CategoryCardPlaceholder() {
+  return (
+    <div className="flex h-full flex-col rounded-lg border border-border bg-card p-4">
+      <div className="mb-2 flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-2 w-2 rounded-sm" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="ml-auto h-4 w-12" />
+          </div>
+          <Skeleton className="h-3 w-20" />
+        </div>
+      </div>
+
+      <div className="mb-3 flex items-baseline gap-2">
+        <Skeleton className="h-8 w-20" />
+        <Skeleton className="h-4 w-8" />
+        <Skeleton className="ml-auto h-4 w-12" />
+      </div>
+
+      <Skeleton className="mb-2 h-14 w-full rounded-md" />
+
+      <div className="mb-2 flex items-center gap-3 border-b border-border/50 pb-2">
+        <Skeleton className="h-3 w-10" />
+        <Skeleton className="h-3 w-10" />
+        <Skeleton className="h-3 w-10" />
+      </div>
+
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-5/6" />
+      </div>
+
+      <div className="mt-2 flex items-center justify-between border-t border-border/50 pt-2">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-4 w-14" />
+      </div>
+    </div>
   )
 }

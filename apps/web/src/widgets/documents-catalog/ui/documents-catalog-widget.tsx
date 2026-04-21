@@ -6,9 +6,9 @@ import {
   formatDocumentConfidence,
   formatDocumentDate,
   formatDocumentDateTime,
+  formatDocumentStatus,
   getDocumentPeriodLabel,
   getDocumentStatusTone,
-  formatDocumentStatus,
 } from "@/src/shared/lib/document-format"
 import { cn } from "@/src/shared/lib/utils"
 import {
@@ -22,10 +22,11 @@ import {
   DataTableRow,
   DenseCard,
   EmptyState,
+  ErrorState,
   HashChip,
   MetricLabel,
   MetricValue,
-  StateSurface,
+  Skeleton,
   StatusBadge,
   Surface,
   SurfaceActions,
@@ -48,49 +49,10 @@ export function DocumentsCatalogWidget({
   errorMessage,
   isLoading,
 }: DocumentsCatalogWidgetProps) {
-  if (isLoading) {
-    return (
-      <StateSurface
-        description="Loading indexed evidence records, extraction status, and available filters."
-        label="Loading document catalog"
-        rows={8}
-        title="Indexed catalog"
-        variant="loading"
-      />
-    )
-  }
-
-  if (errorMessage) {
-    return (
-      <StateSurface
-        description="The evidence catalog could not be loaded from the indexed app data."
-        stateDescription={errorMessage}
-        stateTitle="Document catalog unavailable"
-        title="Indexed catalog unavailable"
-        variant="error"
-      />
-    )
-  }
-
-  if (!data) {
-    return (
-      <StateSurface
-        description="Document records appear here after canonical evidence is synced into Postgres."
-        stateDescription="Sync the local evidence vault to populate the catalog, document detail, and provenance surfaces."
-        stateTitle="No indexed evidence yet"
-        title="Indexed catalog"
-        variant="empty"
-      />
-    )
-  }
-
-  const totalIndexed = data.availableTypes.reduce(
-    (sum, item) => sum + item.count,
-    0
-  )
-  const needsAttentionCount = data.documents.filter(
-    (document) => document.status !== "ok"
-  ).length
+  const totalIndexed =
+    data?.availableTypes.reduce((sum, item) => sum + item.count, 0) ?? 0
+  const needsAttentionCount =
+    data?.documents.filter((document) => document.status !== "ok").length ?? 0
 
   return (
     <div className="flex flex-col gap-4">
@@ -103,67 +65,101 @@ export function DocumentsCatalogWidget({
               and provenance-ready detail links.
             </SurfaceDescription>
           </SurfaceHeading>
-          <SurfaceActions>
-            <Badge variant="outline" className="font-mono">
-              {formatDocumentDateTime(data.generatedAt)}
-            </Badge>
-          </SurfaceActions>
+          {data ? (
+            <SurfaceActions>
+              <Badge variant="outline" className="font-mono">
+                {formatDocumentDateTime(data.generatedAt)}
+              </Badge>
+            </SurfaceActions>
+          ) : null}
         </SurfaceHeader>
         <SurfaceBody className="gap-4">
-          <div className="grid gap-3 md:grid-cols-3">
-            <CatalogStatCard
-              detail={`${data.availableTypes.length} indexed types`}
-              label="Indexed records"
-              value={String(totalIndexed)}
+          {isLoading ? (
+            <>
+              <div className="grid gap-3 md:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <DenseCard key={index} tone="muted">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-3 w-full" />
+                  </DenseCard>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton key={index} className="h-8 w-28" />
+                ))}
+              </div>
+            </>
+          ) : errorMessage ? (
+            <ErrorState
+              title="Document catalog unavailable"
+              description={errorMessage}
             />
-            <CatalogStatCard
-              detail={
-                data.selectedDocumentType
-                  ? "Filtered result set"
-                  : "Current catalog view"
-              }
-              label="Shown"
-              tone="info"
-              value={String(data.documents.length)}
+          ) : !data ? (
+            <EmptyState
+              title="No indexed evidence yet"
+              description="Sync the local evidence vault to populate the catalog, document detail, and provenance surfaces."
             />
-            <CatalogStatCard
-              detail={
-                needsAttentionCount > 0
-                  ? "Failed or needs review"
-                  : "All visible records extracted cleanly"
-              }
-              label="Needs attention"
-              tone={needsAttentionCount > 0 ? "warning" : "default"}
-              value={String(needsAttentionCount)}
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <FilterLink
-              href="/documents"
-              isSelected={!data.selectedDocumentType}
-            >
-              <span>All types</span>
-              <span className="font-mono text-[11px] text-fg-subtle">
-                {totalIndexed}
-              </span>
-            </FilterLink>
-            {data.availableTypes.map((type) => {
-              const isSelected = type.documentType === data.selectedDocumentType
-
-              return (
+          ) : (
+            <>
+              <div className="grid gap-3 md:grid-cols-3">
+                <CatalogStatCard
+                  detail={`${data.availableTypes.length} indexed types`}
+                  label="Indexed records"
+                  value={String(totalIndexed)}
+                />
+                <CatalogStatCard
+                  detail={
+                    data.selectedDocumentType
+                      ? "Filtered result set"
+                      : "Current catalog view"
+                  }
+                  label="Shown"
+                  tone="info"
+                  value={String(data.documents.length)}
+                />
+                <CatalogStatCard
+                  detail={
+                    needsAttentionCount > 0
+                      ? "Failed or needs review"
+                      : "All visible records extracted cleanly"
+                  }
+                  label="Needs attention"
+                  tone={needsAttentionCount > 0 ? "warning" : "default"}
+                  value={String(needsAttentionCount)}
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
                 <FilterLink
-                  key={type.documentType}
-                  href={`/documents?type=${encodeURIComponent(type.documentType)}`}
-                  isSelected={isSelected}
+                  href="/documents"
+                  isSelected={!data.selectedDocumentType}
                 >
-                  <span>{type.label}</span>
+                  <span>All types</span>
                   <span className="font-mono text-[11px] text-fg-subtle">
-                    {type.count}
+                    {totalIndexed}
                   </span>
                 </FilterLink>
-              )
-            })}
-          </div>
+                {data.availableTypes.map((type) => {
+                  const isSelected =
+                    type.documentType === data.selectedDocumentType
+
+                  return (
+                    <FilterLink
+                      key={type.documentType}
+                      href={`/documents?type=${encodeURIComponent(type.documentType)}`}
+                      isSelected={isSelected}
+                    >
+                      <span>{type.label}</span>
+                      <span className="font-mono text-[11px] text-fg-subtle">
+                        {type.count}
+                      </span>
+                    </FilterLink>
+                  )
+                })}
+              </div>
+            </>
+          )}
         </SurfaceBody>
       </Surface>
 
@@ -178,7 +174,20 @@ export function DocumentsCatalogWidget({
           </SurfaceHeading>
         </SurfaceHeader>
         <SurfaceBody>
-          {data.documents.length === 0 ? (
+          {isLoading ? (
+            <DocumentsCatalogTablePlaceholder />
+          ) : errorMessage ? (
+            <ErrorState
+              title="Catalog table unavailable"
+              description={errorMessage}
+            />
+          ) : !data ? (
+            <EmptyState
+              icon={FileText}
+              title="No indexed evidence yet"
+              description="Sync the local evidence vault to populate the catalog."
+            />
+          ) : data.documents.length === 0 ? (
             <EmptyState
               icon={FileText}
               title="No matching documents"
@@ -196,9 +205,7 @@ export function DocumentsCatalogWidget({
                     <DataTableHead className="w-[34%]">Document</DataTableHead>
                     <DataTableHead className="w-[15%]">Period</DataTableHead>
                     <DataTableHead className="w-[13%]">Evidence</DataTableHead>
-                    <DataTableHead className="w-[16%]">
-                      Extraction
-                    </DataTableHead>
+                    <DataTableHead className="w-[16%]">Extraction</DataTableHead>
                     <DataTableHead className="w-[12%]">Hash</DataTableHead>
                     <DataTableHead className="w-[10%] text-right">
                       Detail
@@ -241,8 +248,7 @@ export function DocumentsCatalogWidget({
                             {getDocumentPeriodLabel(document.period)}
                           </span>
                           <span className="text-fg-subtle">
-                            Document date{" "}
-                            {formatDocumentDate(document.documentDate)}
+                            Document date {formatDocumentDate(document.documentDate)}
                           </span>
                         </div>
                       </DataTableCell>
@@ -312,6 +318,67 @@ export function DocumentsCatalogWidget({
           )}
         </SurfaceBody>
       </Surface>
+    </div>
+  )
+}
+
+function DocumentsCatalogTablePlaceholder() {
+  return (
+    <div className="overflow-x-auto">
+      <DataTable className="w-full min-w-[1180px] table-fixed">
+        <DataTableHeader>
+          <TableRow>
+            <DataTableHead className="w-[34%]">Document</DataTableHead>
+            <DataTableHead className="w-[15%]">Period</DataTableHead>
+            <DataTableHead className="w-[13%]">Evidence</DataTableHead>
+            <DataTableHead className="w-[16%]">Extraction</DataTableHead>
+            <DataTableHead className="w-[12%]">Hash</DataTableHead>
+            <DataTableHead className="w-[10%] text-right">Detail</DataTableHead>
+          </TableRow>
+        </DataTableHeader>
+        <DataTableBody divider="dashed">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <DataTableRow key={index}>
+              <DataTableCell className="w-[34%] align-top">
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-full" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-20" />
+                  </div>
+                </div>
+              </DataTableCell>
+              <DataTableCell className="w-[15%] align-top">
+                <div className="grid gap-2">
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </DataTableCell>
+              <DataTableCell className="w-[13%] align-top">
+                <div className="grid gap-2">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </DataTableCell>
+              <DataTableCell className="w-[16%] align-top">
+                <div className="grid gap-2">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </DataTableCell>
+              <DataTableCell className="w-[12%] align-top">
+                <Skeleton className="h-6 w-28" />
+              </DataTableCell>
+              <DataTableCell className="w-[10%] text-right align-top">
+                <Skeleton className="ml-auto h-7 w-14" />
+              </DataTableCell>
+            </DataTableRow>
+          ))}
+        </DataTableBody>
+      </DataTable>
     </div>
   )
 }

@@ -9,7 +9,7 @@ import {
   type ReconciliationSummary,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge, StateSurface } from "@/src/shared/ui"
+import { Badge, LoadingInline } from "@/src/shared/ui"
 
 interface DashboardAccountStatusWidgetProps {
   anomalies: Anomaly[]
@@ -28,45 +28,6 @@ export function DashboardAccountStatusWidget({
   state,
   unavailableReason,
 }: DashboardAccountStatusWidgetProps) {
-  if (state === "loading") {
-    return (
-      <StateSurface
-        description="Loading open anomalies, reconciliation coverage, and current balance state."
-        label="Loading operational status"
-        rows={5}
-        title="Operational status"
-        variant="loading"
-      />
-    )
-  }
-
-  if (state === "error") {
-    return (
-      <StateSurface
-        description="Open anomalies and yearly reconciliation status could not be loaded."
-        stateDescription={unavailableReason ?? undefined}
-        stateTitle="Operational status unavailable"
-        title="Operational status unavailable"
-        variant="error"
-      />
-    )
-  }
-
-  if (state === "empty") {
-    return (
-      <StateSurface
-        description="Anomalies, balance status, and reconciliation coverage appear here after the relevant data is indexed."
-        stateDescription={
-          unavailableReason ??
-          "Sync dashboard, anomaly, and reconciliation data to populate this surface."
-        }
-        stateTitle="No operational status yet"
-        title="Operational status"
-        variant="empty"
-      />
-    )
-  }
-
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const criticalCount = openAnomalies.filter(
     (anomaly) => anomaly.severity === "critical"
@@ -83,7 +44,19 @@ export function DashboardAccountStatusWidget({
   const isPositive = netBalance === null ? null : netBalance >= 0
   const snapshotLabel = generatedAt
     ? `snapshot ${extractTime(generatedAt)}`
-    : "snapshot pending"
+    : state === "loading"
+      ? "snapshot loading"
+      : state === "error"
+        ? "snapshot unavailable"
+        : "snapshot pending"
+  const statusMessage =
+    state === "error"
+      ? unavailableReason ??
+        "Open anomalies and yearly reconciliation status could not be loaded."
+      : state === "empty"
+        ? unavailableReason ??
+          "Sync dashboard, anomaly, and reconciliation data to populate this surface."
+        : unavailableReason
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
@@ -225,9 +198,13 @@ export function DashboardAccountStatusWidget({
 
         <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-3 text-xs">
           <span className="text-muted-foreground">
-            {reconciliationSummary
-              ? `${reconciliationSummary.settledLineCount} settled · ${reconciliationSummary.openLineCount} open lines`
-              : "Reconciliation unavailable"}
+            {state === "loading" ? (
+              <LoadingInline label="Loading operational status" />
+            ) : reconciliationSummary ? (
+              `${reconciliationSummary.settledLineCount} settled · ${reconciliationSummary.openLineCount} open lines`
+            ) : (
+              "Reconciliation unavailable"
+            )}
           </span>
           <span className="font-mono text-muted-foreground">
             {reconciliationCoverage?.throughMonth
@@ -236,9 +213,9 @@ export function DashboardAccountStatusWidget({
           </span>
         </div>
 
-        {unavailableReason ? (
+        {statusMessage ? (
           <div className="mt-3 text-xs text-muted-foreground">
-            {unavailableReason}
+            {statusMessage}
           </div>
         ) : null}
       </div>

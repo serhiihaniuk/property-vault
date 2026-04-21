@@ -21,8 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/shared/ui/select"
-import { EmptyState, ErrorState } from "@/src/shared/ui/state-message"
-import { StateSurface } from "@/src/shared/ui"
+import { EmptyState, ErrorState, LoadingState } from "@/src/shared/ui"
 import {
   Surface,
   SurfaceBody,
@@ -128,34 +127,14 @@ export function AccessManagementWidget() {
     )
   }
 
-  if (overviewQuery.isPending) {
-    return (
-      <StateSurface
-        description="Loading current members, pending invitations, and the invite-only access ledger."
-        label="Loading access overview"
-        rows={8}
-        title="Access overview"
-        variant="loading"
-      />
-    )
-  }
-
-  if (overviewQuery.error) {
-    return (
-      <StateSurface
-        description="Members and invitation records could not be loaded from the auth-backed app data."
-        stateDescription={getApiErrorMessage(overviewQuery.error)}
-        stateTitle="Access data could not be loaded"
-        title="Access overview unavailable"
-        variant="error"
-      />
-    )
-  }
-
+  const isLoading = overviewQuery.isPending
+  const overviewErrorMessage = overviewQuery.error
+    ? getApiErrorMessage(overviewQuery.error)
+    : null
   const data = overviewQuery.data
-  const pendingInvitations = data.invitations.filter(
+  const pendingInvitations = data?.invitations.filter(
     (invitation) => invitation.status === "pending"
-  )
+  ) ?? []
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)]">
@@ -269,14 +248,25 @@ export function AccessManagementWidget() {
               </SurfaceDescription>
             </SurfaceHeading>
           </SurfaceHeader>
-          <SurfaceBody>
-            {removeMemberMutation.error ? (
+        <SurfaceBody>
+          {removeMemberMutation.error ? (
               <ErrorState
                 description={getApiErrorMessage(removeMemberMutation.error)}
                 title="Member could not be removed"
               />
-            ) : null}
-            {data.members.length === 0 ? (
+          ) : null}
+          {isLoading ? (
+            <LoadingState
+              label="Loading current members"
+              rows={5}
+              showHeader={false}
+            />
+          ) : overviewErrorMessage ? (
+            <ErrorState
+              description={overviewErrorMessage}
+              title="Members could not be loaded"
+            />
+          ) : data && data.members.length === 0 ? (
               <EmptyState
                 description="No members have been created yet."
                 title="No access members"
@@ -304,7 +294,7 @@ export function AccessManagementWidget() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.members.map((member) => (
+                    {data?.members.map((member) => (
                       <TableRow
                         key={member.id}
                         className="bg-surface-card hover:bg-surface-card"
@@ -370,7 +360,18 @@ export function AccessManagementWidget() {
             </SurfaceHeading>
           </SurfaceHeader>
           <SurfaceBody>
-            {data.invitations.length === 0 ? (
+            {isLoading ? (
+              <LoadingState
+                label="Loading invitation ledger"
+                rows={6}
+                showHeader={false}
+              />
+            ) : overviewErrorMessage ? (
+              <ErrorState
+                description={overviewErrorMessage}
+                title="Invitation records could not be loaded"
+              />
+            ) : data && data.invitations.length === 0 ? (
               <EmptyState
                 description="No invitation records exist yet."
                 title="No invitations"
@@ -414,7 +415,7 @@ export function AccessManagementWidget() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.invitations.map((invitation) => (
+                      {data?.invitations.map((invitation) => (
                         <TableRow
                           key={invitation.id}
                           className="bg-surface-card hover:bg-surface-card"

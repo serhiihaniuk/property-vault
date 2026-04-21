@@ -8,7 +8,7 @@ import {
   type Period,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge, StateSurface } from "@/src/shared/ui"
+import { Badge, LoadingInline } from "@/src/shared/ui"
 
 interface DashboardPrimarySummaryWidgetProps {
   currentMonthData: MonthData | null
@@ -27,45 +27,7 @@ export function DashboardPrimarySummaryWidget({
   summary,
   unavailableReason,
 }: DashboardPrimarySummaryWidgetProps) {
-  if (state === "loading") {
-    return (
-      <StateSurface
-        description="Loading the latest monthly charge snapshot, comparison context, and supporting references."
-        label="Loading current month snapshot"
-        rows={6}
-        title="Current month snapshot"
-        variant="loading"
-      />
-    )
-  }
-
-  if (state === "error") {
-    return (
-      <StateSurface
-        description="The latest monthly charge summary could not be loaded from the indexed app data."
-        stateDescription={unavailableReason ?? undefined}
-        stateTitle="Monthly snapshot unavailable"
-        title="Current month snapshot unavailable"
-        variant="error"
-      />
-    )
-  }
-
-  if (state === "empty") {
-    return (
-      <StateSurface
-        description="The latest monthly charge summary appears here once charge evidence has been indexed."
-        stateDescription={
-          unavailableReason ??
-          "Sync a monthly charge document to populate the current snapshot."
-        }
-        stateTitle="No monthly charge data"
-        title="Current month snapshot"
-        variant="empty"
-      />
-    )
-  }
-
+  const isLoading = state === "loading"
   const totalCharge = summary ? formatAmountShort(summary.totalCharges) : null
   const previousTotal = summary?.previousTotalCharges
     ? formatAmountShort(summary.previousTotalCharges)
@@ -93,6 +55,13 @@ export function DashboardPrimarySummaryWidget({
           minimumFractionDigits: 2,
         })
   const [wholePart = "—", decimalPart = "—"] = totalFormatted?.split(",") ?? []
+  const inlineStatusMessage =
+    state === "error"
+      ? unavailableReason ?? "Monthly snapshot unavailable."
+      : state === "empty"
+        ? unavailableReason ??
+          "Sync a monthly charge document to populate the current snapshot."
+        : unavailableReason ?? "No previous month comparison available."
 
   return (
     <div className="rounded-lg border border-border bg-card p-5">
@@ -124,17 +93,29 @@ export function DashboardPrimarySummaryWidget({
 
       <div className="mb-5">
         <div className="flex items-baseline gap-1">
-          <span className="font-mono text-5xl font-semibold tracking-tight tabular-nums">
+          <span
+            className={cn(
+              "font-mono text-5xl font-semibold tracking-tight tabular-nums",
+              isLoading && "text-muted-foreground/60"
+            )}
+          >
             {wholePart}
           </span>
-          <span className="font-mono text-2xl text-muted-foreground">
-            {totalCharge === null ? "" : `,${decimalPart} zł`}
+          <span
+            className={cn(
+              "font-mono text-2xl text-muted-foreground",
+              isLoading && "text-muted-foreground/60"
+            )}
+          >
+            {totalCharge === null ? ",— zł" : `,${decimalPart} zł`}
           </span>
         </div>
-        <div className="mt-2 flex items-center gap-2 text-sm">
-          {deltaPercent === null ? (
+        <div className="mt-2 flex min-h-5 items-center gap-2 text-sm">
+          {isLoading ? (
+            <LoadingInline label="Loading current month snapshot" />
+          ) : deltaPercent === null ? (
             <span className="text-muted-foreground">
-              {unavailableReason ?? "No previous month comparison available."}
+              {inlineStatusMessage}
             </span>
           ) : (
             <>
@@ -252,7 +233,7 @@ export function DashboardPrimarySummaryWidget({
         </div>
       </div>
 
-      {unavailableReason ? (
+      {state === "ready" && unavailableReason ? (
         <div className="mt-4 border-t border-border pt-4 text-xs text-muted-foreground">
           {unavailableReason}
         </div>

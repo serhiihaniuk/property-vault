@@ -6,13 +6,14 @@ import {
 import {
   Badge,
   EmptyState,
+  ErrorState,
   KeyValueGrid,
   KeyValueRow,
+  LoadingState,
   Money,
   ProvenanceBlock,
   ProvenanceHeader,
   ProvenanceItem,
-  StateSurface,
   Surface,
   SurfaceActions,
   SurfaceBody,
@@ -33,42 +34,6 @@ export function DocumentProvenanceWidget({
   errorMessage,
   isLoading,
 }: DocumentProvenanceWidgetProps) {
-  if (isLoading) {
-    return (
-      <StateSurface
-        description="Loading source observations and normalized financial evidence."
-        label="Loading provenance and evidence"
-        rows={8}
-        title="Provenance and evidence"
-        variant="loading"
-      />
-    )
-  }
-
-  if (errorMessage) {
-    return (
-      <StateSurface
-        description="Source observations and financial rows could not be loaded."
-        stateDescription={errorMessage}
-        stateTitle="Provenance unavailable"
-        title="Provenance and evidence unavailable"
-        variant="error"
-      />
-    )
-  }
-
-  if (!data) {
-    return (
-      <StateSurface
-        description="No provenance detail is available yet."
-        stateDescription="Source observations and normalized financial rows appear here when available."
-        stateTitle="No provenance detail"
-        title="Provenance and evidence"
-        variant="empty"
-      />
-    )
-  }
-
   return (
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
       <Surface density="comfortable" tone="elevated">
@@ -80,12 +45,30 @@ export function DocumentProvenanceWidget({
               and supporting note where available.
             </SurfaceDescription>
           </SurfaceHeading>
-          <SurfaceActions>
-            <Badge variant="secondary">{data.financialRows.length} rows</Badge>
-          </SurfaceActions>
+          {data ? (
+            <SurfaceActions>
+              <Badge variant="secondary">{data.financialRows.length} rows</Badge>
+            </SurfaceActions>
+          ) : null}
         </SurfaceHeader>
         <SurfaceBody className="gap-3">
-          {data.financialRows.length === 0 ? (
+          {isLoading ? (
+            <LoadingState
+              label="Loading financial evidence"
+              rows={7}
+              showHeader={false}
+            />
+          ) : errorMessage ? (
+            <ErrorState
+              title="Financial evidence unavailable"
+              description={errorMessage}
+            />
+          ) : !data ? (
+            <EmptyState
+              title="No financial evidence yet"
+              description="Source observations and normalized financial rows appear here when available."
+            />
+          ) : data.financialRows.length === 0 ? (
             <EmptyState
               title="No normalized financial rows"
               description="This document does not expose extracted financial evidence yet."
@@ -170,14 +153,32 @@ export function DocumentProvenanceWidget({
               into the app index.
             </SurfaceDescription>
           </SurfaceHeading>
-          <SurfaceActions>
-            <Badge variant="outline">
-              {data.sourceObservations.length} sources
-            </Badge>
-          </SurfaceActions>
+          {data ? (
+            <SurfaceActions>
+              <Badge variant="outline">
+                {data.sourceObservations.length} sources
+              </Badge>
+            </SurfaceActions>
+          ) : null}
         </SurfaceHeader>
         <SurfaceBody className="gap-3">
-          {data.sourceObservations.length === 0 ? (
+          {isLoading ? (
+            <LoadingState
+              label="Loading source observations"
+              rows={6}
+              showHeader={false}
+            />
+          ) : errorMessage ? (
+            <ErrorState
+              title="Source observations unavailable"
+              description={errorMessage}
+            />
+          ) : !data ? (
+            <EmptyState
+              title="No provenance detail"
+              description="Source observations and normalized financial rows appear here when available."
+            />
+          ) : data.sourceObservations.length === 0 ? (
             <EmptyState
               title="No source observations"
               description="The app has not stored any upstream sightings for this document yet."

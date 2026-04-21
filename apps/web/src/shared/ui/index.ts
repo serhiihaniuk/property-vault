@@ -83,7 +83,6 @@ export {
   LoadingInline,
   LoadingState,
 } from "@/src/shared/ui/state-message"
-export { StateSurface } from "@/src/shared/ui/state-surface"
 export { StatusBadge, type StatusKind } from "@/src/shared/ui/status-badge"
 export {
   DenseCard,

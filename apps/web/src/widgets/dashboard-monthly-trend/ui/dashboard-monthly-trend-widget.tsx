@@ -21,7 +21,7 @@ import {
   type MonthlyTrendData,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { LoadingState, StateSurface } from "@/src/shared/ui"
+import { LoadingState, Skeleton } from "@/src/shared/ui"
 
 interface DashboardMonthlyTrendWidgetProps {
   categories: CategoryBreakdown[]
@@ -178,6 +178,8 @@ export function DashboardMonthlyTrendWidget({
 }: DashboardMonthlyTrendWidgetProps) {
   const clientReady = useClientReady()
   const [hoveredMonth, setHoveredMonth] = useState<string | null>(null)
+  const isLoading = state === "loading"
+  const isError = state === "error"
   const hasTrendData = data.length > 0 && categories.length > 0
   const avgTotal = useMemo(() => {
     if (!hasTrendData) {
@@ -244,45 +246,11 @@ export function DashboardMonthlyTrendWidget({
       ),
     [categories]
   )
-
-  if (state === "loading") {
-    return (
-      <StateSurface
-        description="Loading historical monthly totals, category history, and anomaly markers."
-        label="Loading monthly trend"
-        rows={7}
-        title="Monthly trend"
-        variant="loading"
-      />
-    )
-  }
-
-  if (state === "error") {
-    return (
-      <StateSurface
-        description="Historical monthly totals could not be loaded for the selected range."
-        stateDescription={unavailableReason ?? undefined}
-        stateTitle="Monthly trend unavailable"
-        title="Monthly trend unavailable"
-        variant="error"
-      />
-    )
-  }
-
-  if (state === "empty") {
-    return (
-      <StateSurface
-        description="Historical category totals appear here once more than one month is available."
-        stateDescription={
-          unavailableReason ??
-          "Sync additional dashboard months to populate the trend view."
-        }
-        stateTitle="No monthly history yet"
-        title="Monthly trend"
-        variant="empty"
-      />
-    )
-  }
+  const chartMessage = isError
+    ? unavailableReason ??
+      "Historical monthly totals could not be loaded for the selected range."
+    : unavailableReason ??
+      "Sync additional dashboard months to populate the trend view."
 
   return (
     <div className="rounded-lg border border-border bg-card">
@@ -292,7 +260,8 @@ export function DashboardMonthlyTrendWidget({
             Monthly Trend
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {rangeLabel} · avg {hasTrendData ? avgTotal.toFixed(0) : "—"} zł
+            {rangeLabel} · avg{" "}
+            {!isLoading && hasTrendData ? avgTotal.toFixed(0) : "—"} zł
           </p>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -309,7 +278,7 @@ export function DashboardMonthlyTrendWidget({
 
       <div className="flex gap-4 p-4 pt-2">
         <div className="min-w-0 flex-1" style={{ height: 340, minHeight: 340 }}>
-          {hasTrendData && clientReady ? (
+          {!isLoading && hasTrendData && clientReady ? (
             <ResponsiveContainer height={340} width="100%">
               <ComposedChart
                 data={chartData}
@@ -403,13 +372,17 @@ export function DashboardMonthlyTrendWidget({
                 )}
               </ComposedChart>
             </ResponsiveContainer>
-          ) : (
+          ) : isLoading || !clientReady ? (
             <LoadingState
               className="h-full justify-center rounded-md border border-dashed border-border/70 bg-background/30 p-4"
               label="Loading trend chart"
               rows={5}
               showHeader={false}
             />
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border/70 bg-background/30 p-4 text-center text-sm text-muted-foreground">
+              {chartMessage}
+            </div>
           )}
         </div>
 
@@ -417,7 +390,21 @@ export function DashboardMonthlyTrendWidget({
           <span className="mb-1 text-[10px] tracking-wider text-muted-foreground/50 uppercase">
             By Category
           </span>
-          {hasTrendData ? (
+          {isLoading ? (
+            <>
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div className="flex items-center gap-2" key={index}>
+                  <Skeleton className="h-2.5 w-2.5 rounded-sm" />
+                  <Skeleton className="h-3 w-20 flex-1" />
+                  <Skeleton className="h-3 w-8" />
+                </div>
+              ))}
+              <div className="mt-3 space-y-2 border-t border-border/50 pt-3">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            </>
+          ) : hasTrendData ? (
             <>
               {sortedCategories.slice(0, 8).map((category) => {
                 const color = getCategoryColor(category.category)
@@ -467,7 +454,7 @@ export function DashboardMonthlyTrendWidget({
             </>
           ) : (
             <div className="rounded-md border border-dashed border-border/70 bg-background/30 p-3 text-[11px] text-muted-foreground">
-              Category history unavailable
+              {chartMessage}
             </div>
           )}
         </div>
