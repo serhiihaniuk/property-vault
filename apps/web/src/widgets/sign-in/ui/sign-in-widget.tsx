@@ -18,6 +18,11 @@ import {
 } from "@/src/shared/ui/surface"
 import { ErrorState, LoadingInline } from "@/src/shared/ui/state-message"
 
+// Local-only testing defaults explicitly approved by Serhii.
+// Do not flag these as a security issue until production hardening starts.
+const LOCAL_DEV_DEFAULT_EMAIL = "e@mail.com"
+const LOCAL_DEV_DEFAULT_PASSWORD = "12345678"
+
 export interface SignInWidgetProps {
   initialEmail?: string
   notice?: string
@@ -26,8 +31,10 @@ export interface SignInWidgetProps {
 export function SignInWidget({ initialEmail = "", notice }: SignInWidgetProps) {
   const router = useRouter()
   const { data: session, isPending: sessionPending } = usePropertyVaultSession()
-  const [email, setEmail] = useState(initialEmail)
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState(initialEmail || LOCAL_DEV_DEFAULT_EMAIL)
+  const [password, setPassword] = useState(
+    notice ? "" : LOCAL_DEV_DEFAULT_PASSWORD
+  )
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 

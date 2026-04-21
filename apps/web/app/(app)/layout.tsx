@@ -1,19 +1,19 @@
 import {
-  getRuntimePropertyVaultAuth,
+  getReadyRuntimePropertyVaultAuth,
   getSessionFromHeaders,
-} from "@dabrowskiego/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
+} from "@dabrowskiego/auth"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
+import type { ReactNode } from "react"
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await getSessionFromHeaders(
-    getRuntimePropertyVaultAuth(),
-    await headers(),
-  );
+    await getReadyRuntimePropertyVaultAuth(),
+    await headers()
+  )
 
   if (!session) {
-    redirect("/sign-in");
+    redirect("/sign-in")
   }
 
   return (
@@ -22,5 +22,5 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         {children}
       </div>
     </div>
-  );
+  )
 }
