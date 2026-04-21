@@ -105,6 +105,13 @@
   - Confirmed the worker's main risk. Review reproduced that the initial Turbo setup only forwarded `PROPERTY_VAULT_SKIP_WEB_PREDEV`, because a timed root launch ignored `PORT=4010` and still targeted the default Next.js port.
   - Reviewer fix: expanded `turbo.json` `dev.passThroughEnv` to include the web/runtime env surface used by the app and local startup (`DATABASE_URL`, auth vars, public base-path vars, and `PORT`).
   - Result: the root bootstrap now reaches the web task with the expected env, so the documented root `.env` flow is explicit and reproducible even when local `apps/web/.env.local` exists.
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`
+- Coordinator final review:
+  - `T43` is complete and acceptable for `master`. The local bootstrap path is now explicit in repo scripts/docs, the web runtime env surface is passed through intentionally, and the documented `npm run dev` flow is no longer relying on app-local env folklore or coordinator memory.
+- Actions taken:
+  - fast-forward merged `codex/T43-dev-bootstrap-scripts` into `master`
+  - marked `T43` `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored:
+  - none
+- Next handoff note: nothing right now.
 
 
