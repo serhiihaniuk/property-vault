@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
-import { usePropertyVaultSession } from "@/src/shared/auth/auth-client-provider";
-import { Alert, AlertDescription, AlertTitle } from "@/src/shared/ui/alert";
-import { Button } from "@/src/shared/ui/button";
-import { Input } from "@/src/shared/ui/input";
-import { Label } from "@/src/shared/ui/label";
+import { usePropertyVaultSession } from "@/src/shared/auth/auth-client-provider"
+import { Alert, AlertDescription, AlertTitle } from "@/src/shared/ui/alert"
+import { Button } from "@/src/shared/ui/button"
+import { Input } from "@/src/shared/ui/input"
+import { Label } from "@/src/shared/ui/label"
 import {
   Surface,
   SurfaceBody,
@@ -15,33 +15,33 @@ import {
   SurfaceHeader,
   SurfaceHeading,
   SurfaceTitle,
-} from "@/src/shared/ui/surface";
-import { LoadingInline } from "@/src/shared/ui/state-message";
+} from "@/src/shared/ui/surface"
+import { ErrorState, LoadingInline } from "@/src/shared/ui/state-message"
 
 export interface SignInWidgetProps {
-  initialEmail?: string;
-  notice?: string;
+  initialEmail?: string
+  notice?: string
 }
 
 export function SignInWidget({ initialEmail = "", notice }: SignInWidgetProps) {
-  const router = useRouter();
-  const { data: session, isPending: sessionPending } = usePropertyVaultSession();
-  const [email, setEmail] = useState(initialEmail);
-  const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter()
+  const { data: session, isPending: sessionPending } = usePropertyVaultSession()
+  const [email, setEmail] = useState(initialEmail)
+  const [password, setPassword] = useState("")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (!sessionPending && session) {
-      router.replace("/");
-      router.refresh();
+      router.replace("/")
+      router.refresh()
     }
-  }, [router, session, sessionPending]);
+  }, [router, session, sessionPending])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setErrorMessage(null);
-    setIsSubmitting(true);
+    event.preventDefault()
+    setErrorMessage(null)
+    setIsSubmitting(true)
 
     try {
       const response = await fetch("/api/auth/sign-in/email", {
@@ -56,18 +56,18 @@ export function SignInWidget({ initialEmail = "", notice }: SignInWidgetProps) {
           "content-type": "application/json",
         },
         method: "POST",
-      });
-      const payload = await response.json().catch(() => null);
+      })
+      const payload = await response.json().catch(() => null)
 
       if (!response.ok) {
-        setErrorMessage(resolveAuthErrorMessage(payload, response.statusText));
-        return;
+        setErrorMessage(resolveAuthErrorMessage(payload, response.statusText))
+        return
       }
 
-      router.push(resolveCallbackUrl(payload));
-      router.refresh();
+      router.push(resolveCallbackUrl(payload))
+      router.refresh()
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
@@ -77,7 +77,8 @@ export function SignInWidget({ initialEmail = "", notice }: SignInWidgetProps) {
         <SurfaceHeading>
           <SurfaceTitle>Sign in to Property Vault</SurfaceTitle>
           <SurfaceDescription>
-            This workspace is private and invite-only. Use the credentials linked to your invitation.
+            This workspace is private and invite-only. Use the credentials
+            linked to your invitation.
           </SurfaceDescription>
         </SurfaceHeading>
       </SurfaceHeader>
@@ -114,10 +115,7 @@ export function SignInWidget({ initialEmail = "", notice }: SignInWidgetProps) {
           />
 
           {errorMessage ? (
-            <Alert variant="destructive">
-              <AlertTitle>Sign-in failed</AlertTitle>
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
+            <ErrorState title="Sign-in failed" description={errorMessage} />
           ) : null}
 
           <div className="flex items-center gap-2 pt-1">
@@ -128,30 +126,30 @@ export function SignInWidget({ initialEmail = "", notice }: SignInWidgetProps) {
         </form>
       </SurfaceBody>
     </Surface>
-  );
+  )
 }
 
 function resolveAuthErrorMessage(payload: unknown, fallback: string) {
   if (payload && typeof payload === "object") {
     const candidate = payload as {
-      error?: { message?: string };
-      message?: string;
-    };
+      error?: { message?: string }
+      message?: string
+    }
 
-    return candidate.error?.message ?? candidate.message ?? fallback;
+    return candidate.error?.message ?? candidate.message ?? fallback
   }
 
-  return fallback || "The provided credentials were rejected.";
+  return fallback || "The provided credentials were rejected."
 }
 
 function resolveCallbackUrl(payload: unknown) {
   if (payload && typeof payload === "object") {
-    const candidate = payload as { url?: string };
+    const candidate = payload as { url?: string }
 
     if (candidate.url) {
-      return candidate.url;
+      return candidate.url
     }
   }
 
-  return "/";
+  return "/"
 }

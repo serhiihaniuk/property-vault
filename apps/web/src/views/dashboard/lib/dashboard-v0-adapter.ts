@@ -9,6 +9,7 @@ import type {
   Anomaly,
   CategoryBreakdown,
   DashboardSummary,
+  DashboardSurfaceStateKind,
   DocumentListItem,
   MonthData,
   MonthlyTrendData,
@@ -24,6 +25,7 @@ export interface PrimarySummaryVM {
   currentMonthData: MonthData | null
   previousMonth: Period | null
   selectedMonth: Period | null
+  state: DashboardSurfaceStateKind
   summary: DashboardSummary | null
   unavailableReason: string | null
 }
@@ -33,6 +35,7 @@ export interface AccountStatusVM {
   generatedAt: string | null
   reconciliationCoverage: ReconciliationCoverage | null
   reconciliationSummary: ReconciliationSummary | null
+  state: DashboardSurfaceStateKind
   unavailableReason: string | null
 }
 
@@ -40,6 +43,7 @@ export interface MonthlyTrendVM {
   categories: CategoryBreakdown[]
   data: MonthlyTrendData[]
   rangeLabel: string
+  state: DashboardSurfaceStateKind
   unavailableReason: string | null
 }
 
@@ -49,17 +53,20 @@ export interface CategoryBreakdownVM {
   changedCategoryCount: number
   previousMonthValue: string | null
   selectedMonthValue: string | null
+  state: DashboardSurfaceStateKind
   unavailableReason: string | null
 }
 
 export interface OpenItemsVM {
   anomalies: Anomaly[]
   reconciliationSummary: ReconciliationSummary | null
+  state: DashboardSurfaceStateKind
   unavailableReason: string | null
 }
 
 export interface DocumentsTableVM {
   documents: DocumentListItem[]
+  state: DashboardSurfaceStateKind
   unavailableReason: string | null
 }
 
@@ -229,15 +236,63 @@ export function buildDashboardV0ViewModel({
   const mappedReconciliationSummary = mapReconciliationSummary(
     reconciliation?.summary ?? null
   )
+  const documentTableDocuments = buildDocumentTableDocuments({
+    anomalies: normalizedAnomalies,
+    dashboard,
+    documents,
+    reconciliation,
+  })
   const primarySummary: PrimarySummaryVM = {
     currentMonthData: selectedMonthHistory
       ? mapMonthData(selectedMonthHistory)
       : null,
     previousMonth,
     selectedMonth,
+    state: resolveSurfaceState({
+      errorMessage: dashboardError,
+      hasData: Boolean(selectedMonthHistory && dashboard?.summary),
+      isLoading: dashboardLoading,
+    }),
     summary: mapDashboardSummary(dashboard?.summary ?? null),
     unavailableReason: primarySummaryUnavailableReason,
   }
+  const accountStatusUnavailableReason = mergeUnavailableReasons([
+    anomalyUnavailableReason,
+    reconciliationUnavailableReason,
+  ])
+  const accountStatusState = resolveSurfaceState({
+    errorMessage: mergeUnavailableReasons([
+      anomaliesError,
+      reconciliationError,
+    ]),
+    hasData: Boolean(
+      anomalies || mappedReconciliationCoverage || mappedReconciliationSummary
+    ),
+    isLoading: anomaliesLoading || reconciliationLoading,
+  })
+  const openItemsState = resolveSurfaceState({
+    errorMessage: mergeUnavailableReasons([
+      anomaliesError,
+      reconciliationError,
+    ]),
+    hasData: Boolean(anomalies || mappedReconciliationSummary),
+    isLoading: anomaliesLoading || reconciliationLoading,
+  })
+  const categoryBreakdownState = resolveSurfaceState({
+    errorMessage: dashboardError,
+    hasData: trendCategories.length > 0,
+    isLoading: dashboardLoading,
+  })
+  const monthlyTrendState = resolveSurfaceState({
+    errorMessage: mergeUnavailableReasons([dashboardError, historyError]),
+    hasData: monthlyTrendData.length > 0 && trendCategories.length > 0,
+    isLoading: dashboardLoading || historyLoading,
+  })
+  const documentsTableState = resolveSurfaceState({
+    errorMessage: documentsError,
+    hasData: documentTableDocuments.length > 0,
+    isLoading: documentsLoading,
+  })
 
   return {
     accountStatus: {
@@ -249,10 +304,8 @@ export function buildDashboardV0ViewModel({
       ]),
       reconciliationCoverage: mappedReconciliationCoverage,
       reconciliationSummary: mappedReconciliationSummary,
-      unavailableReason: mergeUnavailableReasons([
-        anomalyUnavailableReason,
-        reconciliationUnavailableReason,
-      ]),
+      state: accountStatusState,
+      unavailableReason: accountStatusUnavailableReason,
     },
     categoryBreakdown: {
       categories: trendCategories,
@@ -262,15 +315,12 @@ export function buildDashboardV0ViewModel({
         breakdownItems.filter((item) => item.changeStatus !== "flat").length,
       previousMonthValue: dashboard?.previousMonth?.value ?? null,
       selectedMonthValue: dashboard?.selectedMonth?.value ?? null,
+      state: categoryBreakdownState,
       unavailableReason: primarySummaryUnavailableReason,
     },
     documentsTable: {
-      documents: buildDocumentTableDocuments({
-        anomalies: normalizedAnomalies,
-        dashboard,
-        documents,
-        reconciliation,
-      }),
+      documents: documentTableDocuments,
+      state: documentsTableState,
       unavailableReason: documentsUnavailableReason,
     },
     generatedAt: pickLatestGeneratedAt([
@@ -283,15 +333,14 @@ export function buildDashboardV0ViewModel({
       categories: trendCategories,
       data: monthlyTrendData,
       rangeLabel: buildTrendRangeLabel(timeRange),
+      state: monthlyTrendState,
       unavailableReason: historyUnavailableReason,
     },
     openItems: {
       anomalies: normalizedAnomalies,
       reconciliationSummary: mappedReconciliationSummary,
-      unavailableReason: mergeUnavailableReasons([
-        anomalyUnavailableReason,
-        reconciliationUnavailableReason,
-      ]),
+      state: openItemsState,
+      unavailableReason: accountStatusUnavailableReason,
     },
     primarySummary,
     subtitle: buildDashboardSubtitle({
@@ -366,6 +415,30 @@ function mergeUnavailableReasons(reasons: Array<string | null>) {
   }
 
   return present.join(" ")
+}
+
+function resolveSurfaceState({
+  errorMessage,
+  hasData,
+  isLoading,
+}: {
+  errorMessage: string | null
+  hasData: boolean
+  isLoading: boolean
+}): DashboardSurfaceStateKind {
+  if (hasData) {
+    return "ready"
+  }
+
+  if (isLoading) {
+    return "loading"
+  }
+
+  if (errorMessage) {
+    return "error"
+  }
+
+  return "empty"
 }
 
 function resolveReconciliationUnavailableReason({

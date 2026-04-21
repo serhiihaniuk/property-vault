@@ -1,8 +1,22 @@
 import { ExternalLink, FileText } from "lucide-react"
 
-import { type DocumentListItem } from "@/src/shared/lib/dashboard-v0"
+import {
+  type DashboardSurfaceStateKind,
+  type DocumentListItem,
+} from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge } from "@/src/shared/ui/badge"
+import {
+  Badge,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  Surface,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+} from "@/src/shared/ui"
 import {
   Table,
   TableBody,
@@ -14,6 +28,7 @@ import {
 
 interface DashboardDocumentsTableWidgetProps {
   documents: DocumentListItem[]
+  state: DashboardSurfaceStateKind
   unavailableReason?: string | null
 }
 
@@ -70,7 +85,7 @@ function ExtractionStatusBadge({
     <div className={cn("flex items-center gap-1.5 text-xs", state.color)}>
       <span className={cn("h-1.5 w-1.5 rounded-full", state.dot)} />
       {status === "ok"
-        ? `extracted · ${confidence.toFixed(2)}`
+        ? `extracted - ${confidence.toFixed(2)}`
         : status.replace("_", " ")}
     </div>
   )
@@ -78,8 +93,80 @@ function ExtractionStatusBadge({
 
 export function DashboardDocumentsTableWidget({
   documents,
+  state,
   unavailableReason,
 }: DashboardDocumentsTableWidgetProps) {
+  if (state === "loading") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Recent source documents</SurfaceTitle>
+            <SurfaceDescription>
+              Loading recent evidence and supporting source records tied to the
+              live dashboard state.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState
+            label="Loading recent source documents"
+            rows={6}
+            showHeader={false}
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "error") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Recent source documents unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              Supporting documents for the live dashboard state could not be
+              loaded.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState
+            description={unavailableReason}
+            title="Recent source documents unavailable"
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "empty") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Recent source documents</SurfaceTitle>
+            <SurfaceDescription>
+              Recent evidence records appear here once the relevant catalog data
+              is available.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <EmptyState
+            icon={FileText}
+            title="No recent source documents"
+            description={
+              unavailableReason ??
+              "Index documents to surface the evidence supporting the live dashboard state."
+            }
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
   return (
     <div className="rounded-lg border border-border bg-card">
       <div className="border-b border-border px-4 py-3">
@@ -115,50 +202,37 @@ export function DashboardDocumentsTableWidget({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {documents.length > 0 ? (
-            documents.map((document) => (
-              <TableRow className="group cursor-pointer" key={document.hash}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">
-                      {document.title}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <DocumentTypeBadge type={document.documentType} />
-                </TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {document.documentDate ?? "—"}
-                </TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {document.hash}
-                </TableCell>
-                <TableCell>
-                  <ExtractionStatusBadge
-                    confidence={document.confidence}
-                    status={document.status}
-                  />
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {document.period?.label ?? "—"}
-                </TableCell>
-                <TableCell>
-                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell
-                className="py-6 text-center text-sm text-muted-foreground"
-                colSpan={7}
-              >
-                No source documents available yet.
+          {documents.map((document) => (
+            <TableRow className="group cursor-pointer" key={document.hash}>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{document.title}</span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <DocumentTypeBadge type={document.documentType} />
+              </TableCell>
+              <TableCell className="font-mono text-xs text-muted-foreground">
+                {document.documentDate ?? "-"}
+              </TableCell>
+              <TableCell className="font-mono text-xs text-muted-foreground">
+                {document.hash}
+              </TableCell>
+              <TableCell>
+                <ExtractionStatusBadge
+                  confidence={document.confidence}
+                  status={document.status}
+                />
+              </TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {document.period?.label ?? "-"}
+              </TableCell>
+              <TableCell>
+                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
               </TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>

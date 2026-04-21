@@ -35,6 +35,7 @@ export function DashboardPage() {
             previousMonth={viewModel.primarySummary.previousMonth}
             selectedMonth={viewModel.primarySummary.selectedMonth}
             summary={viewModel.primarySummary.summary}
+            state={viewModel.primarySummary.state}
             unavailableReason={viewModel.primarySummary.unavailableReason}
           />
           <DashboardAccountStatusWidget
@@ -46,6 +47,7 @@ export function DashboardPage() {
             reconciliationSummary={
               viewModel.accountStatus.reconciliationSummary
             }
+            state={viewModel.accountStatus.state}
             unavailableReason={viewModel.accountStatus.unavailableReason}
           />
         </section>
@@ -55,6 +57,7 @@ export function DashboardPage() {
             categories={viewModel.monthlyTrend.categories}
             data={viewModel.monthlyTrend.data}
             rangeLabel={viewModel.monthlyTrend.rangeLabel}
+            state={viewModel.monthlyTrend.state}
             unavailableReason={viewModel.monthlyTrend.unavailableReason}
           />
         </section>
@@ -68,6 +71,7 @@ export function DashboardPage() {
             }
             previousMonthValue={viewModel.categoryBreakdown.previousMonthValue}
             selectedMonthValue={viewModel.categoryBreakdown.selectedMonthValue}
+            state={viewModel.categoryBreakdown.state}
             unavailableReason={viewModel.categoryBreakdown.unavailableReason}
           />
         </section>
@@ -76,6 +80,7 @@ export function DashboardPage() {
           <DashboardOpenItemsWidget
             anomalies={viewModel.openItems.anomalies}
             reconciliationSummary={viewModel.openItems.reconciliationSummary}
+            state={viewModel.openItems.state}
             unavailableReason={viewModel.openItems.unavailableReason}
           />
         </section>
@@ -83,6 +88,7 @@ export function DashboardPage() {
         <section>
           <DashboardDocumentsTableWidget
             documents={viewModel.documentsTable.documents}
+            state={viewModel.documentsTable.state}
             unavailableReason={viewModel.documentsTable.unavailableReason}
           />
         </section>

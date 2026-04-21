@@ -1,18 +1,18 @@
-"use client";
+"use client"
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ban, Copy, Link as LinkIcon, Mail, UserMinus } from "lucide-react";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Ban, Copy, Link as LinkIcon, Mail, UserMinus } from "lucide-react"
+import { useState } from "react"
 
-import { usePropertyVaultApiClient } from "@/src/shared/api/api-client-provider";
-import { usePropertyVaultSession } from "@/src/shared/auth/auth-client-provider";
+import { usePropertyVaultApiClient } from "@/src/shared/api/api-client-provider"
+import { usePropertyVaultSession } from "@/src/shared/auth/auth-client-provider"
 import {
   PropertyVaultApiError,
   type CreateAccessInvitationData,
-} from "@/src/shared/api/client";
-import { Button } from "@/src/shared/ui/button";
-import { Input } from "@/src/shared/ui/input";
-import { Label } from "@/src/shared/ui/label";
+} from "@/src/shared/api/client"
+import { Button } from "@/src/shared/ui/button"
+import { Input } from "@/src/shared/ui/input"
+import { Label } from "@/src/shared/ui/label"
 import {
   Select,
   SelectContent,
@@ -20,8 +20,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/shared/ui/select";
-import { EmptyState, ErrorState, LoadingState } from "@/src/shared/ui/state-message";
+} from "@/src/shared/ui/select"
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/src/shared/ui/state-message"
 import {
   Surface,
   SurfaceBody,
@@ -29,8 +33,8 @@ import {
   SurfaceHeader,
   SurfaceHeading,
   SurfaceTitle,
-} from "@/src/shared/ui/surface";
-import { StatusBadge } from "@/src/shared/ui/status-badge";
+} from "@/src/shared/ui/surface"
+import { StatusBadge } from "@/src/shared/ui/status-badge"
 import {
   Table,
   TableBody,
@@ -38,27 +42,29 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/src/shared/ui/table";
+} from "@/src/shared/ui/table"
 
 const roleOptions = [
   { label: "Viewer", value: "viewer" },
   { label: "Editor", value: "editor" },
   { label: "Owner", value: "owner" },
-] as const;
+] as const
 
 export function AccessManagementWidget() {
-  const apiClient = usePropertyVaultApiClient();
-  const queryClient = useQueryClient();
-  const { data: session } = usePropertyVaultSession();
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState<(typeof roleOptions)[number]["value"]>("viewer");
-  const [latestInvite, setLatestInvite] = useState<CreateAccessInvitationData | null>(null);
-  const currentUserId = session?.user.id;
+  const apiClient = usePropertyVaultApiClient()
+  const queryClient = useQueryClient()
+  const { data: session } = usePropertyVaultSession()
+  const [email, setEmail] = useState("")
+  const [role, setRole] =
+    useState<(typeof roleOptions)[number]["value"]>("viewer")
+  const [latestInvite, setLatestInvite] =
+    useState<CreateAccessInvitationData | null>(null)
+  const currentUserId = session?.user.id
 
   const overviewQuery = useQuery({
     queryFn: () => apiClient.getAccessOverview(),
     queryKey: ["access", "overview"],
-  });
+  })
   const inviteMutation = useMutation({
     mutationFn: () =>
       apiClient.createAccessInvitation({
@@ -68,11 +74,11 @@ export function AccessManagementWidget() {
         },
       }),
     onSuccess: (result) => {
-      setEmail("");
-      setLatestInvite(result);
-      queryClient.invalidateQueries({ queryKey: ["access", "overview"] });
+      setEmail("")
+      setLatestInvite(result)
+      queryClient.invalidateQueries({ queryKey: ["access", "overview"] })
     },
-  });
+  })
   const revokeMutation = useMutation({
     mutationFn: (invitationId: string) =>
       apiClient.revokeAccessInvitation({
@@ -82,11 +88,11 @@ export function AccessManagementWidget() {
       }),
     onSuccess: (_result, invitationId) => {
       setLatestInvite((current) =>
-        current?.invitation.id === invitationId ? null : current,
-      );
-      queryClient.invalidateQueries({ queryKey: ["access", "overview"] });
+        current?.invitation.id === invitationId ? null : current
+      )
+      queryClient.invalidateQueries({ queryKey: ["access", "overview"] })
     },
-  });
+  })
   const removeMemberMutation = useMutation({
     mutationFn: (memberId: string) =>
       apiClient.removeAccessMember({
@@ -95,51 +101,85 @@ export function AccessManagementWidget() {
         },
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["access", "overview"] });
+      queryClient.invalidateQueries({ queryKey: ["access", "overview"] })
     },
-  });
+  })
 
   async function handleInviteSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    inviteMutation.reset();
-    await inviteMutation.mutateAsync();
+    event.preventDefault()
+    inviteMutation.reset()
+    await inviteMutation.mutateAsync()
   }
 
   async function handleRevokeInvitation(invitationId: string) {
-    revokeMutation.reset();
-    await revokeMutation.mutateAsync(invitationId);
+    revokeMutation.reset()
+    await revokeMutation.mutateAsync(invitationId)
   }
 
   async function handleRemoveMember(memberId: string) {
-    removeMemberMutation.reset();
-    await removeMemberMutation.mutateAsync(memberId);
+    removeMemberMutation.reset()
+    await removeMemberMutation.mutateAsync(memberId)
   }
 
   async function copyLatestInvitePath() {
     if (!latestInvite || typeof window === "undefined") {
-      return;
+      return
     }
 
-    await navigator.clipboard.writeText(`${window.location.origin}${latestInvite.invitePath}`);
+    await navigator.clipboard.writeText(
+      `${window.location.origin}${latestInvite.invitePath}`
+    )
   }
 
   if (overviewQuery.isPending) {
-    return <LoadingState rows={8} />;
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Access overview</SurfaceTitle>
+            <SurfaceDescription>
+              Loading current members, pending invitations, and the invite-only
+              access ledger.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState
+            rows={8}
+            label="Loading access overview"
+            showHeader={false}
+          />
+        </SurfaceBody>
+      </Surface>
+    )
   }
 
   if (overviewQuery.error) {
     return (
-      <ErrorState
-        description={getApiErrorMessage(overviewQuery.error)}
-        title="Access data could not be loaded"
-      />
-    );
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Access overview unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              Members and invitation records could not be loaded from the
+              auth-backed app data.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState
+            description={getApiErrorMessage(overviewQuery.error)}
+            title="Access data could not be loaded"
+          />
+        </SurfaceBody>
+      </Surface>
+    )
   }
 
-  const data = overviewQuery.data;
+  const data = overviewQuery.data
   const pendingInvitations = data.invitations.filter(
-    (invitation) => invitation.status === "pending",
-  );
+    (invitation) => invitation.status === "pending"
+  )
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)]">
@@ -148,7 +188,8 @@ export function AccessManagementWidget() {
           <SurfaceHeading>
             <SurfaceTitle>Create invitation</SurfaceTitle>
             <SurfaceDescription>
-              Generate a one-time invite link for a named role. Existing active invites for the same email are revoked automatically.
+              Generate a one-time invite link for a named role. Existing active
+              invites for the same email are revoked automatically.
             </SurfaceDescription>
           </SurfaceHeading>
         </SurfaceHeader>
@@ -207,7 +248,8 @@ export function AccessManagementWidget() {
                 <SurfaceHeading>
                   <SurfaceTitle>Latest invite</SurfaceTitle>
                   <SurfaceDescription>
-                    Copy and share this private link directly with the invited user.
+                    Copy and share this private link directly with the invited
+                    user.
                   </SurfaceDescription>
                 </SurfaceHeading>
               </SurfaceHeader>
@@ -215,14 +257,21 @@ export function AccessManagementWidget() {
                 <div className="rounded-md border border-border-default bg-surface-app px-3 py-2">
                   <div className="flex items-center gap-2 text-sm text-fg-primary">
                     <LinkIcon className="size-4 text-fg-subtle" />
-                    <span className="font-mono text-[12px]">{latestInvite.invitePath}</span>
+                    <span className="font-mono text-[12px]">
+                      {latestInvite.invitePath}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge dot status="pending">
                     {latestInvite.invitation.role}
                   </StatusBadge>
-                  <Button onClick={copyLatestInvitePath} size="sm" type="button" variant="outline">
+                  <Button
+                    onClick={copyLatestInvitePath}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
                     <Copy className="size-4" />
                     Copy link
                   </Button>
@@ -239,7 +288,8 @@ export function AccessManagementWidget() {
             <SurfaceHeading>
               <SurfaceTitle>Current members</SurfaceTitle>
               <SurfaceDescription>
-                Accounts that can sign in to the private workspace right now. Non-owner members can be removed here.
+                Accounts that can sign in to the private workspace right now.
+                Non-owner members can be removed here.
               </SurfaceDescription>
             </SurfaceHeading>
           </SurfaceHeader>
@@ -260,32 +310,42 @@ export function AccessManagementWidget() {
                 <Table>
                   <TableHeader className="bg-surface-subtle/60">
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                      <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                         Name
                       </TableHead>
-                      <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                      <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                         Email
                       </TableHead>
-                      <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                      <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                         Role
                       </TableHead>
-                      <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                      <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                         Created
                       </TableHead>
-                      <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                      <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                         Actions
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {data.members.map((member) => (
-                      <TableRow key={member.id} className="bg-surface-card hover:bg-surface-card">
-                        <TableCell className="px-3 py-2 text-fg-primary">{member.name}</TableCell>
+                      <TableRow
+                        key={member.id}
+                        className="bg-surface-card hover:bg-surface-card"
+                      >
+                        <TableCell className="px-3 py-2 text-fg-primary">
+                          {member.name}
+                        </TableCell>
                         <TableCell className="px-3 py-2 font-mono text-[12px] text-fg-subtle">
                           {member.email}
                         </TableCell>
                         <TableCell className="px-3 py-2">
-                          <StatusBadge dot status={member.role === "owner" ? "info" : "neutral"}>
+                          <StatusBadge
+                            dot
+                            status={
+                              member.role === "owner" ? "info" : "neutral"
+                            }
+                          >
                             {member.role}
                           </StatusBadge>
                         </TableCell>
@@ -293,7 +353,8 @@ export function AccessManagementWidget() {
                           {formatDateTime(member.createdAt)}
                         </TableCell>
                         <TableCell className="px-3 py-2">
-                          {member.role !== "owner" && member.id !== currentUserId ? (
+                          {member.role !== "owner" &&
+                          member.id !== currentUserId ? (
                             <Button
                               disabled={removeMemberMutation.isPending}
                               onClick={() => void handleRemoveMember(member.id)}
@@ -308,7 +369,9 @@ export function AccessManagementWidget() {
                                 : "Remove"}
                             </Button>
                           ) : (
-                            <span className="text-[12px] text-fg-subtle">Protected</span>
+                            <span className="text-[12px] text-fg-subtle">
+                              Protected
+                            </span>
                           )}
                         </TableCell>
                       </TableRow>
@@ -325,7 +388,8 @@ export function AccessManagementWidget() {
             <SurfaceHeading>
               <SurfaceTitle>Invitation ledger</SurfaceTitle>
               <SurfaceDescription>
-                Pending and historical invites kept in the auth schema for auditability. Pending invites can be revoked here.
+                Pending and historical invites kept in the auth schema for
+                auditability. Pending invites can be revoked here.
               </SurfaceDescription>
             </SurfaceHeading>
           </SurfaceHeader>
@@ -356,26 +420,29 @@ export function AccessManagementWidget() {
                   <Table>
                     <TableHeader className="bg-surface-subtle/60">
                       <TableRow className="hover:bg-transparent">
-                        <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                        <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                           Email
                         </TableHead>
-                        <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                        <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                           Role
                         </TableHead>
-                        <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                        <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                           Status
                         </TableHead>
-                        <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                        <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                           Expires
                         </TableHead>
-                        <TableHead className="px-3 py-2 text-[11px] uppercase tracking-[0.08em] text-fg-subtle">
+                        <TableHead className="px-3 py-2 text-[11px] tracking-[0.08em] text-fg-subtle uppercase">
                           Actions
                         </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.invitations.map((invitation) => (
-                        <TableRow key={invitation.id} className="bg-surface-card hover:bg-surface-card">
+                        <TableRow
+                          key={invitation.id}
+                          className="bg-surface-card hover:bg-surface-card"
+                        >
                           <TableCell className="px-3 py-2 font-mono text-[12px] text-fg-primary">
                             {invitation.email}
                           </TableCell>
@@ -383,7 +450,10 @@ export function AccessManagementWidget() {
                             {invitation.role}
                           </TableCell>
                           <TableCell className="px-3 py-2">
-                            <StatusBadge dot status={mapInvitationStatus(invitation.status)}>
+                            <StatusBadge
+                              dot
+                              status={mapInvitationStatus(invitation.status)}
+                            >
                               {invitation.status}
                             </StatusBadge>
                           </TableCell>
@@ -394,7 +464,9 @@ export function AccessManagementWidget() {
                             {invitation.status === "pending" ? (
                               <Button
                                 disabled={revokeMutation.isPending}
-                                onClick={() => void handleRevokeInvitation(invitation.id)}
+                                onClick={() =>
+                                  void handleRevokeInvitation(invitation.id)
+                                }
                                 size="sm"
                                 type="button"
                                 variant="outline"
@@ -406,7 +478,9 @@ export function AccessManagementWidget() {
                                   : "Revoke"}
                               </Button>
                             ) : (
-                              <span className="text-[12px] text-fg-subtle">No actions</span>
+                              <span className="text-[12px] text-fg-subtle">
+                                No actions
+                              </span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -420,39 +494,39 @@ export function AccessManagementWidget() {
         </Surface>
       </div>
     </div>
-  );
+  )
 }
 
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  }).format(new Date(value))
 }
 
 function getApiErrorMessage(error: unknown): string {
   if (error instanceof PropertyVaultApiError) {
-    return error.problem?.detail ?? error.problem?.title ?? error.message;
+    return error.problem?.detail ?? error.problem?.title ?? error.message
   }
 
   if (error instanceof Error) {
-    return error.message;
+    return error.message
   }
 
-  return "The request could not be completed.";
+  return "The request could not be completed."
 }
 
 function mapInvitationStatus(status: string) {
   switch (status) {
     case "accepted":
-      return "success" as const;
+      return "success" as const
     case "expired":
-      return "warning" as const;
+      return "warning" as const
     case "pending":
-      return "pending" as const;
+      return "pending" as const
     case "revoked":
-      return "danger" as const;
+      return "danger" as const
     default:
-      return "neutral" as const;
+      return "neutral" as const
   }
 }

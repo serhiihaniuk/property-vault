@@ -1,6 +1,7 @@
 import { AlertCircle, AlertTriangle, CheckCircle2, Info } from "lucide-react"
 
 import {
+  type DashboardSurfaceStateKind,
   extractTime,
   formatAmountShort,
   type Anomaly,
@@ -8,13 +9,25 @@ import {
   type ReconciliationSummary,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge } from "@/src/shared/ui/badge"
+import {
+  Badge,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  Surface,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+} from "@/src/shared/ui"
 
 interface DashboardAccountStatusWidgetProps {
   anomalies: Anomaly[]
   generatedAt: string | null
   reconciliationCoverage: ReconciliationCoverage | null
   reconciliationSummary: ReconciliationSummary | null
+  state: DashboardSurfaceStateKind
   unavailableReason?: string | null
 }
 
@@ -23,8 +36,79 @@ export function DashboardAccountStatusWidget({
   generatedAt,
   reconciliationCoverage,
   reconciliationSummary,
+  state,
   unavailableReason,
 }: DashboardAccountStatusWidgetProps) {
+  if (state === "loading") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Operational status</SurfaceTitle>
+            <SurfaceDescription>
+              Loading open anomalies, reconciliation coverage, and current
+              balance state.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState
+            label="Loading operational status"
+            rows={5}
+            showHeader={false}
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "error") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Operational status unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              Open anomalies and yearly reconciliation status could not be
+              loaded.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState
+            description={unavailableReason}
+            title="Operational status unavailable"
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "empty") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Operational status</SurfaceTitle>
+            <SurfaceDescription>
+              Anomalies, balance status, and reconciliation coverage appear here
+              after the relevant data is indexed.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <EmptyState
+            title="No operational status yet"
+            description={
+              unavailableReason ??
+              "Sync dashboard, anomaly, and reconciliation data to populate this surface."
+            }
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const criticalCount = openAnomalies.filter(
     (anomaly) => anomaly.severity === "critical"

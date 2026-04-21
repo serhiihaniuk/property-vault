@@ -1,15 +1,35 @@
-import { AlertCircle, AlertTriangle, Bell, FileText, Info } from "lucide-react"
+import {
+  AlertCircle,
+  AlertTriangle,
+  Bell,
+  CheckCircle2,
+  FileText,
+  Info,
+} from "lucide-react"
 
 import {
   type Anomaly,
+  type DashboardSurfaceStateKind,
   type ReconciliationSummary,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge } from "@/src/shared/ui/badge"
+import {
+  Badge,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  Surface,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+} from "@/src/shared/ui"
 
 interface DashboardOpenItemsWidgetProps {
   anomalies: Anomaly[]
   reconciliationSummary: ReconciliationSummary | null
+  state: DashboardSurfaceStateKind
   unavailableReason?: string | null
 }
 
@@ -52,8 +72,79 @@ function SeverityIcon({ severity }: { severity: Anomaly["severity"] }) {
 export function DashboardOpenItemsWidget({
   anomalies,
   reconciliationSummary,
+  state,
   unavailableReason,
 }: DashboardOpenItemsWidgetProps) {
+  if (state === "loading") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Open items and anomalies</SurfaceTitle>
+            <SurfaceDescription>
+              Loading dated issues, unresolved reconciliation lines, and other
+              investigation leads.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState
+            label="Loading open items and anomalies"
+            rows={6}
+            showHeader={false}
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "error") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Open items and anomalies unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              Open issues could not be loaded from anomalies and reconciliation
+              data.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState
+            description={unavailableReason}
+            title="Open items unavailable"
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "empty") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Open items and anomalies</SurfaceTitle>
+            <SurfaceDescription>
+              Investigation queues appear here after anomaly and reconciliation
+              data has been indexed.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <EmptyState
+            title="No open items yet"
+            description={
+              unavailableReason ??
+              "Sync anomaly and reconciliation data to populate this queue."
+            }
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
   const openAnomalies = anomalies.filter((anomaly) => anomaly.status === "open")
   const withDates = openAnomalies.filter((anomaly) => anomaly.date)
   const withoutDates = openAnomalies.filter((anomaly) => !anomaly.date)
@@ -98,28 +189,13 @@ export function DashboardOpenItemsWidget({
       ) : null}
 
       {isAllClear ? (
-        <div className="flex flex-col items-center justify-center p-8 text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-400/10">
-            <svg
-              className="h-6 w-6 text-emerald-400/80"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M5 13l4 4L19 7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <h3 className="mb-1 text-sm font-medium text-foreground">
-            All clear
-          </h3>
-          <p className="max-w-[240px] text-xs text-muted-foreground">
-            No anomalies detected and all reconciliation lines are resolved.
-          </p>
+        <div className="p-5">
+          <EmptyState
+            className="border-status-success/25 bg-status-success-bg/40"
+            icon={CheckCircle2}
+            title="All clear"
+            description="No anomalies detected and all reconciliation lines are resolved."
+          />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-2">
@@ -132,9 +208,12 @@ export function DashboardOpenItemsWidget({
             </div>
             <div className="space-y-2">
               {withDates.length === 0 ? (
-                <div className="py-4 text-center text-sm text-muted-foreground">
-                  No time-sensitive anomalies
-                </div>
+                <EmptyState
+                  className="px-3 py-4"
+                  icon={Bell}
+                  title="No time-sensitive anomalies"
+                  description="Dated issues will appear here when action is tied to a specific month or deadline."
+                />
               ) : (
                 withDates.map((anomaly) => {
                   const [day, month] = new Date(anomaly.date ?? "")
@@ -194,9 +273,12 @@ export function DashboardOpenItemsWidget({
             </div>
             <div className="space-y-2">
               {withoutDates.length === 0 ? (
-                <div className="py-4 text-center text-sm text-muted-foreground">
-                  No other anomalies
-                </div>
+                <EmptyState
+                  className="px-3 py-4"
+                  icon={FileText}
+                  title="No other anomalies"
+                  description="General review items without a specific date will appear here."
+                />
               ) : (
                 withoutDates.map((anomaly) => (
                   <div

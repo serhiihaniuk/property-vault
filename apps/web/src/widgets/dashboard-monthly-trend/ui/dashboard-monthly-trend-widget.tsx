@@ -17,14 +17,27 @@ import { useClientReady } from "@/src/shared/hooks/use-client-ready"
 import { getCategoryColor } from "@/src/shared/lib/dashboard-category-colors"
 import {
   type CategoryBreakdown,
+  type DashboardSurfaceStateKind,
   type MonthlyTrendData,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  Surface,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+} from "@/src/shared/ui"
 
 interface DashboardMonthlyTrendWidgetProps {
   categories: CategoryBreakdown[]
   data: MonthlyTrendData[]
   rangeLabel: string
+  state: DashboardSurfaceStateKind
   unavailableReason?: string | null
 }
 
@@ -170,6 +183,7 @@ export function DashboardMonthlyTrendWidget({
   categories,
   data,
   rangeLabel,
+  state,
   unavailableReason,
 }: DashboardMonthlyTrendWidgetProps) {
   const clientReady = useClientReady()
@@ -240,6 +254,76 @@ export function DashboardMonthlyTrendWidget({
       ),
     [categories]
   )
+
+  if (state === "loading") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Monthly trend</SurfaceTitle>
+            <SurfaceDescription>
+              Loading historical monthly totals, category history, and anomaly
+              markers.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState
+            label="Loading monthly trend"
+            rows={7}
+            showHeader={false}
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "error") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Monthly trend unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              Historical monthly totals could not be loaded for the selected
+              range.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState
+            description={unavailableReason}
+            title="Monthly trend unavailable"
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "empty") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Monthly trend</SurfaceTitle>
+            <SurfaceDescription>
+              Historical category totals appear here once more than one month is
+              available.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <EmptyState
+            title="No monthly history yet"
+            description={
+              unavailableReason ??
+              "Sync additional dashboard months to populate the trend view."
+            }
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
 
   return (
     <div className="rounded-lg border border-border bg-card">
@@ -361,10 +445,12 @@ export function DashboardMonthlyTrendWidget({
               </ComposedChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border/70 bg-background/30 p-4 text-center text-sm text-muted-foreground">
-              {unavailableReason ??
-                "Monthly category history will appear after live breakdown data is available."}
-            </div>
+            <LoadingState
+              className="h-full justify-center rounded-md border border-dashed border-border/70 bg-background/30 p-4"
+              label="Loading trend chart"
+              rows={5}
+              showHeader={false}
+            />
           )}
         </div>
 

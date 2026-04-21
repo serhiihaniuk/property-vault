@@ -1,18 +1,31 @@
 import { FileText, FolderOpen, Layers, TrendingUp } from "lucide-react"
 
 import {
+  type DashboardSurfaceStateKind,
   formatAmountShort,
   type DashboardSummary,
   type MonthData,
   type Period,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import { Badge } from "@/src/shared/ui/badge"
+import {
+  Badge,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  Surface,
+  SurfaceBody,
+  SurfaceDescription,
+  SurfaceHeader,
+  SurfaceHeading,
+  SurfaceTitle,
+} from "@/src/shared/ui"
 
 interface DashboardPrimarySummaryWidgetProps {
   currentMonthData: MonthData | null
   previousMonth: Period | null
   selectedMonth: Period | null
+  state: DashboardSurfaceStateKind
   summary: DashboardSummary | null
   unavailableReason?: string | null
 }
@@ -21,9 +34,80 @@ export function DashboardPrimarySummaryWidget({
   currentMonthData,
   previousMonth,
   selectedMonth,
+  state,
   summary,
   unavailableReason,
 }: DashboardPrimarySummaryWidgetProps) {
+  if (state === "loading") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Current month snapshot</SurfaceTitle>
+            <SurfaceDescription>
+              Loading the latest monthly charge snapshot, comparison context,
+              and supporting references.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState
+            label="Loading current month snapshot"
+            rows={6}
+            showHeader={false}
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "error") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Current month snapshot unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              The latest monthly charge summary could not be loaded from the
+              indexed app data.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState
+            description={unavailableReason}
+            title="Monthly snapshot unavailable"
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
+  if (state === "empty") {
+    return (
+      <Surface density="comfortable" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Current month snapshot</SurfaceTitle>
+            <SurfaceDescription>
+              The latest monthly charge summary appears here once charge
+              evidence has been indexed.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <EmptyState
+            title="No monthly charge data"
+            description={
+              unavailableReason ??
+              "Sync a monthly charge document to populate the current snapshot."
+            }
+          />
+        </SurfaceBody>
+      </Surface>
+    )
+  }
+
   const totalCharge = summary ? formatAmountShort(summary.totalCharges) : null
   const previousTotal = summary?.previousTotalCharges
     ? formatAmountShort(summary.previousTotalCharges)

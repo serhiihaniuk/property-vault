@@ -1,13 +1,14 @@
 # T42 — Error, empty, and loading states
 
-- Status: `claimed`
-- Owner: `coordinator`
+- Status: `done`
+- Owner: `codex/T42-error-empty-loading-states`
 - Goal: Add consistent non-happy-path UI states to the first product slices.
 - Task type: `redesign`
 - Dependencies: `T33`, `T38`, `T39`, `T46`
 - Write scope: slice UI states only
 - Recommended execution model: `gpt-5.4-mini / medium`
 - Wave group: `hardening-c`
+- Worker branch: `codex/T42-error-empty-loading-states`
 - Required verification: `standard`
 - Success criteria: primary redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path, using shared primitives instead of ad hoc markup.
 - Primary authorities:
@@ -52,9 +53,36 @@
   - implement the shared state treatments first, then wire them into the target screens
   - run the standard gate and confirm the resulting states feel like part of one product rather than per-page patches
 - Completion signal: major redesigned screens handle loading, empty, and error states consistently after the v0 dashboard integration path lands.
-- Files changed: none yet
-- Contracts changed: none yet
-- Tests run: none yet
-- Next handoff note: use existing design primitives before custom markup
+- Files changed:
+  - `docs/implementation/tasks/T42-error-empty-loading-states.md`
+  - `apps/web/src/shared/lib/dashboard-v0.ts`
+  - `apps/web/src/views/dashboard/lib/dashboard-v0-adapter.ts`
+  - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
+  - `apps/web/src/widgets/access-management/ui/access-management-widget.tsx`
+  - `apps/web/src/widgets/dashboard-account-status/ui/dashboard-account-status-widget.tsx`
+  - `apps/web/src/widgets/dashboard-category-breakdown/ui/category-card.tsx`
+  - `apps/web/src/widgets/dashboard-category-breakdown/ui/dashboard-category-breakdown-widget.tsx`
+  - `apps/web/src/widgets/dashboard-documents-table/ui/dashboard-documents-table-widget.tsx`
+  - `apps/web/src/widgets/dashboard-monthly-trend/ui/dashboard-monthly-trend-widget.tsx`
+  - `apps/web/src/widgets/dashboard-open-items/ui/dashboard-open-items-widget.tsx`
+  - `apps/web/src/widgets/dashboard-primary-summary/ui/dashboard-primary-summary-widget.tsx`
+  - `apps/web/src/widgets/invite-acceptance/ui/invite-acceptance-widget.tsx`
+  - `apps/web/src/widgets/sign-in/ui/sign-in-widget.tsx`
+- Contracts changed: none
+- Tests run:
+  - `npm run --workspace @dabrowskiego/web typecheck`
+  - `npm run --workspace @dabrowskiego/web lint`
+  - `npm run --workspace @dabrowskiego/web build`
+- Coordinator notes: none.
+- Review result: pending review
+- Reviewer: not yet assigned
+- Review tests run: none yet
+- Merge status: pending review
+- Architecture note: pending review
+- Coordinator notes review: pending review
+- Coordinator final review: pending review
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: start a reviewer chat on `codex/T42-error-empty-loading-states` and say `reviewer T42`.
 
 

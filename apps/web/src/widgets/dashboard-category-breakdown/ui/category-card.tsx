@@ -15,6 +15,7 @@ import { getCategoryColor } from "@/src/shared/lib/dashboard-category-colors"
 import { type CategoryBreakdown } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
 import { Badge } from "@/src/shared/ui/badge"
+import { Skeleton } from "@/src/shared/ui/skeleton"
 
 interface CategoryCardProps {
   category: CategoryBreakdown
@@ -203,7 +204,9 @@ export function CategoryCard({ category }: CategoryCardProps) {
                 />
               </AreaChart>
             </ResponsiveContainer>
-          ) : null}
+          ) : (
+            <Skeleton className="h-full w-full rounded-md bg-surface-elevated" />
+          )}
         </div>
       ) : null}
 

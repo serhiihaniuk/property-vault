@@ -11,6 +11,8 @@ export interface Period {
   endDate?: string
 }
 
+export type DashboardSurfaceStateKind = "ready" | "loading" | "error" | "empty"
+
 export interface SourceDocument {
   hash: string
   title: string

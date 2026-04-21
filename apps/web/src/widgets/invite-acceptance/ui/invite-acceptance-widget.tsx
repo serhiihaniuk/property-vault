@@ -1,16 +1,15 @@
-"use client";
+"use client"
 
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
-import { usePropertyVaultApiClient } from "@/src/shared/api/api-client-provider";
-import { PropertyVaultApiError } from "@/src/shared/api/client";
-import { Alert, AlertDescription, AlertTitle } from "@/src/shared/ui/alert";
-import { Button } from "@/src/shared/ui/button";
-import { Input } from "@/src/shared/ui/input";
-import { Label } from "@/src/shared/ui/label";
-import { ErrorState, LoadingState } from "@/src/shared/ui/state-message";
+import { usePropertyVaultApiClient } from "@/src/shared/api/api-client-provider"
+import { PropertyVaultApiError } from "@/src/shared/api/client"
+import { Button } from "@/src/shared/ui/button"
+import { Input } from "@/src/shared/ui/input"
+import { Label } from "@/src/shared/ui/label"
+import { ErrorState, LoadingState } from "@/src/shared/ui/state-message"
 import {
   Surface,
   SurfaceBody,
@@ -18,23 +17,23 @@ import {
   SurfaceHeader,
   SurfaceHeading,
   SurfaceTitle,
-} from "@/src/shared/ui/surface";
-import { StatusBadge } from "@/src/shared/ui/status-badge";
+} from "@/src/shared/ui/surface"
+import { StatusBadge } from "@/src/shared/ui/status-badge"
 
 export interface InviteAcceptanceWidgetProps {
-  token: string;
+  token: string
 }
 
 export function InviteAcceptanceWidget({ token }: InviteAcceptanceWidgetProps) {
-  const apiClient = usePropertyVaultApiClient();
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
+  const apiClient = usePropertyVaultApiClient()
+  const router = useRouter()
+  const [name, setName] = useState("")
+  const [password, setPassword] = useState("")
 
   const invitationQuery = useQuery({
     queryFn: () => apiClient.getAccessInvitation({ pathParams: { token } }),
     queryKey: ["access", "invitation", token],
-  });
+  })
   const acceptMutation = useMutation({
     mutationFn: () =>
       apiClient.acceptAccessInvitation({
@@ -45,31 +44,63 @@ export function InviteAcceptanceWidget({ token }: InviteAcceptanceWidgetProps) {
         pathParams: { token },
       }),
     onSuccess: (result) => {
-      router.push(result.redirectTo);
-      router.refresh();
+      router.push(result.redirectTo)
+      router.refresh()
     },
-  });
+  })
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    acceptMutation.reset();
-    await acceptMutation.mutateAsync();
+    event.preventDefault()
+    acceptMutation.reset()
+    await acceptMutation.mutateAsync()
   }
 
   if (invitationQuery.isPending) {
-    return <LoadingState rows={6} />;
+    return (
+      <Surface className="w-full max-w-xl" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Accept invitation</SurfaceTitle>
+            <SurfaceDescription>
+              Loading invitation details so you can create your password and
+              activate access.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <LoadingState
+            rows={6}
+            label="Loading invitation"
+            showHeader={false}
+          />
+        </SurfaceBody>
+      </Surface>
+    )
   }
 
   if (invitationQuery.error) {
     return (
-      <ErrorState
-        description={getApiErrorMessage(invitationQuery.error)}
-        title="Invitation could not be loaded"
-      />
-    );
+      <Surface className="w-full max-w-xl" tone="elevated">
+        <SurfaceHeader>
+          <SurfaceHeading>
+            <SurfaceTitle>Invitation unavailable</SurfaceTitle>
+            <SurfaceDescription>
+              The invitation details could not be loaded, so access cannot be
+              activated yet.
+            </SurfaceDescription>
+          </SurfaceHeading>
+        </SurfaceHeader>
+        <SurfaceBody>
+          <ErrorState
+            description={getApiErrorMessage(invitationQuery.error)}
+            title="Invitation could not be loaded"
+          />
+        </SurfaceBody>
+      </Surface>
+    )
   }
 
-  const invitation = invitationQuery.data;
+  const invitation = invitationQuery.data
 
   return (
     <Surface className="w-full max-w-xl" tone="elevated">
@@ -77,7 +108,8 @@ export function InviteAcceptanceWidget({ token }: InviteAcceptanceWidgetProps) {
         <SurfaceHeading>
           <SurfaceTitle>Accept invitation</SurfaceTitle>
           <SurfaceDescription>
-            Create your password to activate access for <span className="font-mono">{invitation.email}</span>.
+            Create your password to activate access for{" "}
+            <span className="font-mono">{invitation.email}</span>.
           </SurfaceDescription>
         </SurfaceHeading>
         <StatusBadge dot status={mapInvitationStatus(invitation.status)}>
@@ -90,17 +122,18 @@ export function InviteAcceptanceWidget({ token }: InviteAcceptanceWidgetProps) {
             Role: <span className="text-fg-primary">{invitation.role}</span>
           </span>
           <span>
-            Expires: <span className="text-fg-primary">{formatDateTime(invitation.expiresAt)}</span>
+            Expires:{" "}
+            <span className="text-fg-primary">
+              {formatDateTime(invitation.expiresAt)}
+            </span>
           </span>
         </div>
 
         {!invitation.canAccept ? (
-          <Alert variant="destructive">
-            <AlertTitle>Invitation unavailable</AlertTitle>
-            <AlertDescription>
-              This invite is no longer active. Ask the owner to create a fresh invitation if you still need access.
-            </AlertDescription>
-          </Alert>
+          <ErrorState
+            title="Invitation unavailable"
+            description="This invite is no longer active. Ask the owner to create a fresh invitation if you still need access."
+          />
         ) : (
           <form className="grid gap-3" onSubmit={handleSubmit}>
             <Label htmlFor="invite-name">Name</Label>
@@ -125,56 +158,56 @@ export function InviteAcceptanceWidget({ token }: InviteAcceptanceWidgetProps) {
             />
 
             {acceptMutation.error ? (
-              <Alert variant="destructive">
-                <AlertTitle>Invitation could not be accepted</AlertTitle>
-                <AlertDescription>
-                  {getApiErrorMessage(acceptMutation.error)}
-                </AlertDescription>
-              </Alert>
+              <ErrorState
+                title="Invitation could not be accepted"
+                description={getApiErrorMessage(acceptMutation.error)}
+              />
             ) : null}
 
             <div className="flex items-center gap-2 pt-1">
               <Button disabled={acceptMutation.isPending} type="submit">
-                {acceptMutation.isPending ? "Creating account" : "Accept invitation"}
+                {acceptMutation.isPending
+                  ? "Creating account"
+                  : "Accept invitation"}
               </Button>
             </div>
           </form>
         )}
       </SurfaceBody>
     </Surface>
-  );
+  )
 }
 
 function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  }).format(new Date(value))
 }
 
 function getApiErrorMessage(error: unknown): string {
   if (error instanceof PropertyVaultApiError) {
-    return error.problem?.detail ?? error.problem?.title ?? error.message;
+    return error.problem?.detail ?? error.problem?.title ?? error.message
   }
 
   if (error instanceof Error) {
-    return error.message;
+    return error.message
   }
 
-  return "The invitation request failed.";
+  return "The invitation request failed."
 }
 
 function mapInvitationStatus(status: string) {
   switch (status) {
     case "accepted":
-      return "success" as const;
+      return "success" as const
     case "expired":
-      return "warning" as const;
+      return "warning" as const
     case "pending":
-      return "pending" as const;
+      return "pending" as const
     case "revoked":
-      return "danger" as const;
+      return "danger" as const
     default:
-      return "neutral" as const;
+      return "neutral" as const
   }
 }
