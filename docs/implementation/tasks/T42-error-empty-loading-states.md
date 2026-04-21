@@ -1,7 +1,7 @@
 # T42 — Error, empty, and loading states
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Add consistent non-happy-path UI states to the first product slices.
 - Task type: `redesign`
 - Dependencies: `T33`, `T38`, `T39`, `T46`
