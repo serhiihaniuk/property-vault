@@ -69,4 +69,17 @@
   - Why it matters: future copy-cleanup work can accidentally widen scope or "fix" already-correct strings unless workers verify actual file bytes or browser render first.
   - Suggested follow-up: when dashboard copy looks encoded incorrectly in terminal output, confirm the on-disk UTF-8 bytes or browser render before patching mounted UI files.
   - Urgency: `later`
-- Next handoff note: start a reviewer chat on `codex/T48-fix-live-dashboard-copy-encoding` and say `reviewer T48`; this task closed as verification-only because the mounted live dashboard sources are already UTF-8 clean.
+- Review result: `merge ready`
+- Reviewer: `Codex reviewer`
+- Review tests run:
+  - UTF-8-aware scan of mounted live dashboard sources under `apps/web/src/views/dashboard/**`, mounted `apps/web/src/widgets/dashboard-*/**`, and `apps/web/src/shared/lib/dashboard-v0.ts` for mojibake markers `\u00C2|\u00C3|\u00E2|\u00C5|\uFFFD` -> `clean`
+  - UTF-8 vs Windows PowerShell default-decoding spot checks on the previously suspicious separator/currency lines in `dashboard-account-status-widget.tsx` and `dashboard-open-items-widget.tsx`
+  - `npm run typecheck`
+  - `npm run lint`
+- Merge status: `ready`
+- Architecture note: acceptable and aligned. No live dashboard code changes were needed because the mounted dashboard copy sources are already UTF-8 clean on disk; closing the task as verification-only preserves the current dashboard-integrated ownership and avoids unnecessary redesign or helper churn.
+- Coordinator notes review: confirmed. The apparent mojibake that triggered `T48` was caused by Windows PowerShell `Get-Content` mis-decoding UTF-8 bytes during terminal inspection, not by corrupted literals in the mounted dashboard path. The task's verification-only closeout is appropriate and should prevent future copy-fix tasks from widening scope based on terminal-only artifacts.
+- Coordinator final review: pending coordinator review
+- Actions taken: none yet
+- Actions ignored: none yet
+- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
