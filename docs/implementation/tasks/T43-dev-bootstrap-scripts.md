@@ -1,7 +1,7 @@
 # T43 — Dev/bootstrap scripts
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Make local developer bootstrap and run flows simple.
 - Task type: `docs/process`
 - Dependencies: `T16`, `T20`, `T21`, `T22`, `T23`

@@ -79,7 +79,11 @@
 - Merge status: `ready`
 - Architecture note: acceptable and aligned. No live dashboard code changes were needed because the mounted dashboard copy sources are already UTF-8 clean on disk; closing the task as verification-only preserves the current dashboard-integrated ownership and avoids unnecessary redesign or helper churn.
 - Coordinator notes review: confirmed. The apparent mojibake that triggered `T48` was caused by Windows PowerShell `Get-Content` mis-decoding UTF-8 bytes during terminal inspection, not by corrupted literals in the mounted dashboard path. The task's verification-only closeout is appropriate and should prevent future copy-fix tasks from widening scope based on terminal-only artifacts.
-- Coordinator final review: pending coordinator review
-- Actions taken: none yet
-- Actions ignored: none yet
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - `T48` is complete and acceptable for `master`. The task verified that the mounted dashboard copy is already UTF-8 clean on disk and that the apparent mojibake was a terminal-decoding artifact, so no live dashboard code changes were needed.
+- Actions taken:
+  - fast-forward merged `codex/T48-fix-live-dashboard-copy-encoding` into `master`
+  - marked `T48` `done` in `APP_IMPLEMENTATION_PLAN.md`
+- Actions ignored:
+  - none
+- Next handoff note: nothing right now.
