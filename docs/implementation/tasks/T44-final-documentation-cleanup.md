@@ -1,7 +1,7 @@
 # T44 — Final documentation cleanup
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Reconcile architecture, package docs, and usage docs with implemented reality.
 - Task type: `docs/process`
 - Dependencies: `T33`, `T35`, `T36`, `T37`, `T38`, `T39`, `T40`, `T41`, `T42`, `T43`, `T45`, `T46`, `T47`, `T48`

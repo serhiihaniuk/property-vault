@@ -361,7 +361,7 @@ integration. Do not resume `T38` or `T39` until `T46` is complete.
 | `T47` | Remove orphaned pre-v0 reconciliation/anomaly widgets | `done` | `T39`, `T46` | legacy reconciliation/anomaly widget files and stale references only | `gpt-5.4-mini / medium` | `hardening-c2` | `standard` | only one authoritative reconciliation/anomaly UI path remains, with no orphaned pre-v0 widgets or mojibake-laden leftovers confusing future work |
 | `T48` | Fix live dashboard copy and encoding drift | `done` | `T46`, `T47` | live dashboard copy/formatting sources only | `gpt-5.4-mini / medium` | `hardening-c3` | `standard` | live dashboard status/copy no longer shows mojibake or corrupted punctuation, without redesigning the dashboard shell |
 | `T43` | Dev/bootstrap scripts | `done` | `T16`, `T20`-`T23` | root scripts, docs, local setup helpers | `gpt-5.4-mini / low` | `hardening-d` | `standard` | repo bootstrap and local run flows are simple and documented |
-| `T44` | Final documentation cleanup | `todo` | `T33`, `T35`-`T43`, `T45`, `T46`, `T47`, `T48` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
+| `T44` | Final documentation cleanup | `claimed` | `T33`, `T35`-`T43`, `T45`, `T46`, `T47`, `T48` | root/package docs only | `gpt-5.4-mini / low` | `hardening-e` | `light` | architecture, package docs, redesign guidance, and task docs reflect reality |
 
 ## 10. Reviewer Workflow
 
