@@ -1,7 +1,7 @@
 # T47 - Remove orphaned pre-v0 reconciliation/anomaly widgets
 
-- Status: `todo`
-- Owner: `unassigned`
+- Status: `claimed`
+- Owner: `coordinator`
 - Goal: Remove the dead pre-v0 reconciliation/anomaly widget path so future UI work sees only one authoritative implementation.
 - Task type: `cleanup/refactor`
 - Dependencies: `T39`, `T46`

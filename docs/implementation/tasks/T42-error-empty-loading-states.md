@@ -102,7 +102,13 @@
 - Coordinator notes review:
   - Confirmed. The extra local-only bootstrap scope is real and now documented, but it is non-blocking for merge because Serhii explicitly requested that development convenience.
   - Reviewer also tightened the bootstrap path by allowing auth initialization to retry after transient failures instead of caching a rejected promise indefinitely.
-- Coordinator final review: pending review
-- Actions taken: first introduced a shared top-level `StateSurface` wrapper, then removed it after user review showed unacceptable loading blink and layout shift; the affected widgets now keep their own shell/layout in place and use local loading, empty, and error bodies so async transitions stay footprint-stable.
-- Actions ignored: none yet
-- Next handoff note: return to the coordinator and say `merge latest reviewed task`.
+- Coordinator final review:
+  - `T42` is complete and acceptable for `master`. The final shape keeps non-happy-path states consistent through shared primitives and shared semantics, while preserving each widget's existing shell/layout so loading and error transitions do not introduce visible blink or layout shift.
+  - The extra local-only dev auth bootstrap scope is accepted for now because it was explicitly requested and the reviewer hardened it against transient initialization failures.
+- Actions taken:
+  - fast-forward merged `codex/T42-error-empty-loading-states` into `master`
+  - marked `T42` `done` in `APP_IMPLEMENTATION_PLAN.md`
+  - promoted the accepted local-only auth bootstrap/setup follow-up into `T43`
+- Actions ignored:
+  - none
+- Next handoff note: nothing right now.

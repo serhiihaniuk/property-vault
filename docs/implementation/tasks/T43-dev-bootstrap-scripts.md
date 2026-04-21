@@ -63,6 +63,10 @@
   - Why it matters: the app shell can boot and still mask real-data verification behind fallback states or failing API routes if Docker Desktop/local Postgres is not running.
   - Suggested follow-up: T43 should document and script the exact prerequisite order for live verification (`docker:db:up`, migrations, then app startup) so future review and support runs do not rely on coordinator memory.
   - Urgency: `soon`
+  - Observation: `T42` also introduced local-only dev auth bootstrap and `apps/web` predev migration wiring outside pure UI-state work.
+  - Why it matters: that development convenience is now part of the real local startup behavior, so bootstrap ownership should live here instead of being remembered only from the `T42` task record.
+  - Suggested follow-up: T43 should either codify or simplify the accepted local-only auth bootstrap path in scripts/docs so local startup remains explicit and debuggable from clean `master`.
+  - Urgency: `soon`
 - Next handoff note: prefer boring explicit scripts over clever wrappers
 
 
