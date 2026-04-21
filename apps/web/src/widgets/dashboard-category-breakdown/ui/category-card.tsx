@@ -21,6 +21,8 @@ interface CategoryCardProps {
   category: CategoryBreakdown
 }
 
+const CATEGORY_CARD_CHART_HEIGHT = 56
+
 export function CategoryCard({ category }: CategoryCardProps) {
   const clientReady = useClientReady()
   const categoryColor = getCategoryColor(category.category)
@@ -153,13 +155,10 @@ export function CategoryCard({ category }: CategoryCardProps) {
         )}
       </div>
 
-      {category.history && category.history.length > 0 ? (
-        <div
-          className="-mx-1 mb-2 w-full min-w-0"
-          style={{ height: 56, minHeight: 56, minWidth: 100 }}
-        >
-          {clientReady ? (
-            <ResponsiveContainer height={56} width="100%">
+      <CategoryCardChartSlot>
+        {category.history && category.history.length > 0 ? (
+          clientReady ? (
+            <ResponsiveContainer height={CATEGORY_CARD_CHART_HEIGHT} width="100%">
               <AreaChart
                 data={category.history}
                 margin={{ bottom: 4, left: 0, right: 0, top: 4 }}
@@ -205,10 +204,12 @@ export function CategoryCard({ category }: CategoryCardProps) {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <Skeleton className="h-full w-full rounded-md bg-surface-elevated" />
-          )}
-        </div>
-      ) : null}
+            <CategoryCardChartSkeleton />
+          )
+        ) : (
+          <CategoryCardChartEmpty />
+        )}
+      </CategoryCardChartSlot>
 
       <div className="mb-2 flex items-center gap-3 border-b border-border/50 pb-2 text-[10px] opacity-50 transition-opacity hover:opacity-80">
         <div className="flex items-center gap-1">
@@ -276,6 +277,37 @@ export function CategoryCard({ category }: CategoryCardProps) {
           {category.sourceDocuments.length} doc(s)
         </Badge>
       </div>
+    </div>
+  )
+}
+
+export function CategoryCardChartSlot({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      className="-mx-1 mb-2 w-full min-w-0"
+      style={{
+        height: CATEGORY_CARD_CHART_HEIGHT,
+        minHeight: CATEGORY_CARD_CHART_HEIGHT,
+        minWidth: 100,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+export function CategoryCardChartSkeleton() {
+  return <Skeleton className="h-full w-full rounded-md bg-surface-elevated" />
+}
+
+function CategoryCardChartEmpty() {
+  return (
+    <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border/60 bg-background/20 px-2 text-[10px] text-muted-foreground">
+      No chart data
     </div>
   )
 }

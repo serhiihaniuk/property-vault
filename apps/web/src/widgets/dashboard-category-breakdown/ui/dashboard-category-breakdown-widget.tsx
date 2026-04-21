@@ -4,7 +4,11 @@ import {
 } from "@/src/shared/lib/dashboard-v0"
 import { Skeleton } from "@/src/shared/ui"
 
-import { CategoryCard } from "./category-card"
+import {
+  CategoryCard,
+  CategoryCardChartSkeleton,
+  CategoryCardChartSlot,
+} from "./category-card"
 
 interface DashboardCategoryBreakdownWidgetProps {
   categories: CategoryBreakdown[]
@@ -27,7 +31,9 @@ export function DashboardCategoryBreakdownWidget({
 }: DashboardCategoryBreakdownWidgetProps) {
   const isLoading = state === "loading"
   const stateMessage =
-    state === "error"
+    isLoading
+      ? null
+      : state === "error"
       ? unavailableReason ??
         "Category-level month-over-month comparison could not be loaded."
       : state === "empty"
@@ -99,7 +105,9 @@ function CategoryCardPlaceholder() {
         <Skeleton className="ml-auto h-4 w-12" />
       </div>
 
-      <Skeleton className="mb-2 h-14 w-full rounded-md" />
+      <CategoryCardChartSlot>
+        <CategoryCardChartSkeleton />
+      </CategoryCardChartSlot>
 
       <div className="mb-2 flex items-center gap-3 border-b border-border/50 pb-2">
         <Skeleton className="h-3 w-10" />
