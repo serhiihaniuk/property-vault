@@ -21,17 +21,7 @@ import {
   type MonthlyTrendData,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import {
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Surface,
-  SurfaceBody,
-  SurfaceDescription,
-  SurfaceHeader,
-  SurfaceHeading,
-  SurfaceTitle,
-} from "@/src/shared/ui"
+import { LoadingState, StateSurface } from "@/src/shared/ui"
 
 interface DashboardMonthlyTrendWidgetProps {
   categories: CategoryBreakdown[]
@@ -257,71 +247,40 @@ export function DashboardMonthlyTrendWidget({
 
   if (state === "loading") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Monthly trend</SurfaceTitle>
-            <SurfaceDescription>
-              Loading historical monthly totals, category history, and anomaly
-              markers.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState
-            label="Loading monthly trend"
-            rows={7}
-            showHeader={false}
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Loading historical monthly totals, category history, and anomaly markers."
+        label="Loading monthly trend"
+        rows={7}
+        title="Monthly trend"
+        variant="loading"
+      />
     )
   }
 
   if (state === "error") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Monthly trend unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              Historical monthly totals could not be loaded for the selected
-              range.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState
-            description={unavailableReason}
-            title="Monthly trend unavailable"
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Historical monthly totals could not be loaded for the selected range."
+        stateDescription={unavailableReason ?? undefined}
+        stateTitle="Monthly trend unavailable"
+        title="Monthly trend unavailable"
+        variant="error"
+      />
     )
   }
 
   if (state === "empty") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Monthly trend</SurfaceTitle>
-            <SurfaceDescription>
-              Historical category totals appear here once more than one month is
-              available.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <EmptyState
-            title="No monthly history yet"
-            description={
-              unavailableReason ??
-              "Sync additional dashboard months to populate the trend view."
-            }
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Historical category totals appear here once more than one month is available."
+        stateDescription={
+          unavailableReason ??
+          "Sync additional dashboard months to populate the trend view."
+        }
+        stateTitle="No monthly history yet"
+        title="Monthly trend"
+        variant="empty"
+      />
     )
   }
 

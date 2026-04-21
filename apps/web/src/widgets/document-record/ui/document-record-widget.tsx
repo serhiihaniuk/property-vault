@@ -1,21 +1,20 @@
-import type { DocumentDetailData } from "@/src/shared/api/client";
+import type { DocumentDetailData } from "@/src/shared/api/client"
 import {
   formatDocumentConfidence,
   formatDocumentDate,
   formatDocumentDateTime,
   getDocumentPeriodLabel,
-} from "@/src/shared/lib/document-format";
-import { cn } from "@/src/shared/lib/utils";
+} from "@/src/shared/lib/document-format"
+import { cn } from "@/src/shared/lib/utils"
 import {
   Badge,
   DenseCard,
   EmptyState,
-  ErrorState,
   KeyValueGrid,
   KeyValueRow,
-  LoadingState,
   MetricLabel,
   MetricValue,
+  StateSurface,
   StatusBadge,
   Surface,
   SurfaceActions,
@@ -24,12 +23,12 @@ import {
   SurfaceHeader,
   SurfaceHeading,
   SurfaceTitle,
-} from "@/src/shared/ui";
+} from "@/src/shared/ui"
 
 export interface DocumentRecordWidgetProps {
-  data?: DocumentDetailData;
-  errorMessage?: string | null;
-  isLoading: boolean;
+  data?: DocumentDetailData
+  errorMessage?: string | null
+  isLoading: boolean
 }
 
 export function DocumentRecordWidget({
@@ -39,63 +38,41 @@ export function DocumentRecordWidget({
 }: DocumentRecordWidgetProps) {
   if (isLoading) {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Extracted record</SurfaceTitle>
-            <SurfaceDescription>
-              Loading indexed metadata, extracted facts, and review context.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState label="Loading document record" rows={7} />
-        </SurfaceBody>
-      </Surface>
-    );
+      <StateSurface
+        description="Loading indexed metadata, extracted facts, and review context."
+        label="Loading document record"
+        rows={7}
+        title="Extracted record"
+        variant="loading"
+      />
+    )
   }
 
   if (errorMessage) {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Extracted record unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              Indexed metadata and extracted facts could not be loaded.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState
-            title="Document detail unavailable"
-            description={errorMessage}
-          />
-        </SurfaceBody>
-      </Surface>
-    );
+      <StateSurface
+        description="Indexed metadata and extracted facts could not be loaded."
+        stateDescription={errorMessage}
+        stateTitle="Document detail unavailable"
+        title="Extracted record unavailable"
+        variant="error"
+      />
+    )
   }
 
   if (!data) {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Extracted record</SurfaceTitle>
-            <SurfaceDescription>No document detail is available yet.</SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <EmptyState
-            title="No document record"
-            description="Open a catalog entry to inspect extracted facts, metadata, and provenance."
-          />
-        </SurfaceBody>
-      </Surface>
-    );
+      <StateSurface
+        description="No document detail is available yet."
+        stateDescription="Open a catalog entry to inspect extracted facts, metadata, and provenance."
+        stateTitle="No document record"
+        title="Extracted record"
+        variant="empty"
+      />
+    )
   }
 
-  const flagCount = data.questionsForUser.length + data.warnings.length;
+  const flagCount = data.questionsForUser.length + data.warnings.length
 
   return (
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)]">
@@ -159,7 +136,9 @@ export function DocumentRecordWidget({
                   {data.keyFacts.map((fact) => (
                     <DenseCard key={`${fact.label}:${fact.value}`} tone="muted">
                       <MetricLabel>{fact.label}</MetricLabel>
-                      <p className="text-[13.5px] text-fg-primary">{fact.value}</p>
+                      <p className="text-[13.5px] text-fg-primary">
+                        {fact.value}
+                      </p>
                     </DenseCard>
                   ))}
                 </div>
@@ -192,7 +171,11 @@ export function DocumentRecordWidget({
               />
               <KeyValueRow
                 label="Pages"
-                value={data.document.pageCount ? String(data.document.pageCount) : "n/a"}
+                value={
+                  data.document.pageCount
+                    ? String(data.document.pageCount)
+                    : "n/a"
+                }
               />
               <KeyValueRow label="MIME" value={data.document.mime} />
               <KeyValueRow
@@ -231,7 +214,10 @@ export function DocumentRecordWidget({
                 label="Extracted"
                 value={formatDocumentDateTime(data.document.extractedAt)}
               />
-              <KeyValueRow label="Extracted by" value={data.document.extractedBy} />
+              <KeyValueRow
+                label="Extracted by"
+                value={data.document.extractedBy}
+              />
               <KeyValueRow
                 label="Extractor version"
                 value={data.document.extractorVersion}
@@ -260,7 +246,7 @@ export function DocumentRecordWidget({
         />
       </div>
     </div>
-  );
+  )
 }
 
 function SummaryCard({
@@ -269,15 +255,15 @@ function SummaryCard({
   tone = "default",
   value,
 }: {
-  detail: string;
-  label: string;
-  tone?: "default" | "warning";
-  value: string;
+  detail: string
+  label: string
+  tone?: "default" | "warning"
+  value: string
 }) {
   return (
     <DenseCard
       className={cn(
-        tone === "warning" && "border-status-warning/25 bg-status-warning-bg/50",
+        tone === "warning" && "border-status-warning/25 bg-status-warning-bg/50"
       )}
       tone={tone === "default" ? "default" : "muted"}
     >
@@ -285,7 +271,7 @@ function SummaryCard({
       <MetricValue size="md">{value}</MetricValue>
       <span className="text-[11.5px] text-fg-subtle">{detail}</span>
     </DenseCard>
-  );
+  )
 }
 
 function MessageSurface({
@@ -295,16 +281,16 @@ function MessageSurface({
   title,
   tone = "neutral",
 }: {
-  description: string;
-  emptyTitle: string;
-  items: string[];
-  title: string;
-  tone?: "neutral" | "warning";
+  description: string
+  emptyTitle: string
+  items: string[]
+  title: string
+  tone?: "neutral" | "warning"
 }) {
   return (
     <Surface
       className={cn(
-        tone === "warning" && "border-status-warning/25 bg-status-warning-bg/30",
+        tone === "warning" && "border-status-warning/25 bg-status-warning-bg/30"
       )}
       density="comfortable"
       tone={tone === "warning" ? "muted" : "default"}
@@ -334,5 +320,5 @@ function MessageSurface({
         )}
       </SurfaceBody>
     </Surface>
-  );
+  )
 }

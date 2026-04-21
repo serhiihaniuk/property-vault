@@ -21,11 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/shared/ui/select"
-import {
-  EmptyState,
-  ErrorState,
-  LoadingState,
-} from "@/src/shared/ui/state-message"
+import { EmptyState, ErrorState } from "@/src/shared/ui/state-message"
+import { StateSurface } from "@/src/shared/ui"
 import {
   Surface,
   SurfaceBody,
@@ -133,46 +130,25 @@ export function AccessManagementWidget() {
 
   if (overviewQuery.isPending) {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Access overview</SurfaceTitle>
-            <SurfaceDescription>
-              Loading current members, pending invitations, and the invite-only
-              access ledger.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState
-            rows={8}
-            label="Loading access overview"
-            showHeader={false}
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Loading current members, pending invitations, and the invite-only access ledger."
+        label="Loading access overview"
+        rows={8}
+        title="Access overview"
+        variant="loading"
+      />
     )
   }
 
   if (overviewQuery.error) {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Access overview unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              Members and invitation records could not be loaded from the
-              auth-backed app data.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState
-            description={getApiErrorMessage(overviewQuery.error)}
-            title="Access data could not be loaded"
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Members and invitation records could not be loaded from the auth-backed app data."
+        stateDescription={getApiErrorMessage(overviewQuery.error)}
+        stateTitle="Access data could not be loaded"
+        title="Access overview unavailable"
+        variant="error"
+      />
     )
   }
 

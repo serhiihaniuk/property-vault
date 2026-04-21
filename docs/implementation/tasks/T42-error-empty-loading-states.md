@@ -56,6 +56,8 @@
 - Files changed:
   - `docs/implementation/tasks/T42-error-empty-loading-states.md`
   - `apps/web/src/shared/lib/dashboard-v0.ts`
+  - `apps/web/src/shared/ui/index.ts`
+  - `apps/web/src/shared/ui/state-surface.tsx`
   - `apps/web/src/views/dashboard/lib/dashboard-v0-adapter.ts`
   - `apps/web/src/views/dashboard/ui/dashboard-page.tsx`
   - `apps/web/src/widgets/access-management/ui/access-management-widget.tsx`
@@ -66,6 +68,9 @@
   - `apps/web/src/widgets/dashboard-monthly-trend/ui/dashboard-monthly-trend-widget.tsx`
   - `apps/web/src/widgets/dashboard-open-items/ui/dashboard-open-items-widget.tsx`
   - `apps/web/src/widgets/dashboard-primary-summary/ui/dashboard-primary-summary-widget.tsx`
+  - `apps/web/src/widgets/documents-catalog/ui/documents-catalog-widget.tsx`
+  - `apps/web/src/widgets/document-provenance/ui/document-provenance-widget.tsx`
+  - `apps/web/src/widgets/document-record/ui/document-record-widget.tsx`
   - `apps/web/src/widgets/invite-acceptance/ui/invite-acceptance-widget.tsx`
   - `apps/web/src/widgets/sign-in/ui/sign-in-widget.tsx`
 - Contracts changed: none
@@ -81,8 +86,6 @@
 - Architecture note: pending review
 - Coordinator notes review: pending review
 - Coordinator final review: pending review
-- Actions taken: none yet
+- Actions taken: extracted a shared `StateSurface` wrapper for top-level loading, error, and empty shells, then reused it across the redesigned dashboard, document, and access entry surfaces to address review feedback about repeated state layout markup.
 - Actions ignored: none yet
 - Next handoff note: start a reviewer chat on `codex/T42-error-empty-loading-states` and say `reviewer T42`.
-
-

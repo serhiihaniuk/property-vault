@@ -8,18 +8,7 @@ import {
   type Period,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import {
-  Badge,
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Surface,
-  SurfaceBody,
-  SurfaceDescription,
-  SurfaceHeader,
-  SurfaceHeading,
-  SurfaceTitle,
-} from "@/src/shared/ui"
+import { Badge, StateSurface } from "@/src/shared/ui"
 
 interface DashboardPrimarySummaryWidgetProps {
   currentMonthData: MonthData | null
@@ -40,71 +29,40 @@ export function DashboardPrimarySummaryWidget({
 }: DashboardPrimarySummaryWidgetProps) {
   if (state === "loading") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Current month snapshot</SurfaceTitle>
-            <SurfaceDescription>
-              Loading the latest monthly charge snapshot, comparison context,
-              and supporting references.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState
-            label="Loading current month snapshot"
-            rows={6}
-            showHeader={false}
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Loading the latest monthly charge snapshot, comparison context, and supporting references."
+        label="Loading current month snapshot"
+        rows={6}
+        title="Current month snapshot"
+        variant="loading"
+      />
     )
   }
 
   if (state === "error") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Current month snapshot unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              The latest monthly charge summary could not be loaded from the
-              indexed app data.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState
-            description={unavailableReason}
-            title="Monthly snapshot unavailable"
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="The latest monthly charge summary could not be loaded from the indexed app data."
+        stateDescription={unavailableReason ?? undefined}
+        stateTitle="Monthly snapshot unavailable"
+        title="Current month snapshot unavailable"
+        variant="error"
+      />
     )
   }
 
   if (state === "empty") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Current month snapshot</SurfaceTitle>
-            <SurfaceDescription>
-              The latest monthly charge summary appears here once charge
-              evidence has been indexed.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <EmptyState
-            title="No monthly charge data"
-            description={
-              unavailableReason ??
-              "Sync a monthly charge document to populate the current snapshot."
-            }
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="The latest monthly charge summary appears here once charge evidence has been indexed."
+        stateDescription={
+          unavailableReason ??
+          "Sync a monthly charge document to populate the current snapshot."
+        }
+        stateTitle="No monthly charge data"
+        title="Current month snapshot"
+        variant="empty"
+      />
     )
   }
 

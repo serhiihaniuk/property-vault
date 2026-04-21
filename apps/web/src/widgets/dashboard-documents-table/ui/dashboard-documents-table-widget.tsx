@@ -5,18 +5,7 @@ import {
   type DocumentListItem,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import {
-  Badge,
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Surface,
-  SurfaceBody,
-  SurfaceDescription,
-  SurfaceHeader,
-  SurfaceHeading,
-  SurfaceTitle,
-} from "@/src/shared/ui"
+import { Badge, StateSurface } from "@/src/shared/ui"
 import {
   Table,
   TableBody,
@@ -98,72 +87,41 @@ export function DashboardDocumentsTableWidget({
 }: DashboardDocumentsTableWidgetProps) {
   if (state === "loading") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Recent source documents</SurfaceTitle>
-            <SurfaceDescription>
-              Loading recent evidence and supporting source records tied to the
-              live dashboard state.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState
-            label="Loading recent source documents"
-            rows={6}
-            showHeader={false}
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Loading recent evidence and supporting source records tied to the live dashboard state."
+        label="Loading recent source documents"
+        rows={6}
+        title="Recent source documents"
+        variant="loading"
+      />
     )
   }
 
   if (state === "error") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Recent source documents unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              Supporting documents for the live dashboard state could not be
-              loaded.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState
-            description={unavailableReason}
-            title="Recent source documents unavailable"
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Supporting documents for the live dashboard state could not be loaded."
+        stateDescription={unavailableReason ?? undefined}
+        stateTitle="Recent source documents unavailable"
+        title="Recent source documents unavailable"
+        variant="error"
+      />
     )
   }
 
   if (state === "empty") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Recent source documents</SurfaceTitle>
-            <SurfaceDescription>
-              Recent evidence records appear here once the relevant catalog data
-              is available.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <EmptyState
-            icon={FileText}
-            title="No recent source documents"
-            description={
-              unavailableReason ??
-              "Index documents to surface the evidence supporting the live dashboard state."
-            }
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Recent evidence records appear here once the relevant catalog data is available."
+        icon={FileText}
+        stateDescription={
+          unavailableReason ??
+          "Index documents to surface the evidence supporting the live dashboard state."
+        }
+        stateTitle="No recent source documents"
+        title="Recent source documents"
+        variant="empty"
+      />
     )
   }
 

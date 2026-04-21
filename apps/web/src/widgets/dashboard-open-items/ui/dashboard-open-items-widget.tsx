@@ -13,18 +13,7 @@ import {
   type ReconciliationSummary,
 } from "@/src/shared/lib/dashboard-v0"
 import { cn } from "@/src/shared/lib/utils"
-import {
-  Badge,
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Surface,
-  SurfaceBody,
-  SurfaceDescription,
-  SurfaceHeader,
-  SurfaceHeading,
-  SurfaceTitle,
-} from "@/src/shared/ui"
+import { Badge, EmptyState, StateSurface } from "@/src/shared/ui"
 
 interface DashboardOpenItemsWidgetProps {
   anomalies: Anomaly[]
@@ -77,71 +66,40 @@ export function DashboardOpenItemsWidget({
 }: DashboardOpenItemsWidgetProps) {
   if (state === "loading") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Open items and anomalies</SurfaceTitle>
-            <SurfaceDescription>
-              Loading dated issues, unresolved reconciliation lines, and other
-              investigation leads.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState
-            label="Loading open items and anomalies"
-            rows={6}
-            showHeader={false}
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Loading dated issues, unresolved reconciliation lines, and other investigation leads."
+        label="Loading open items and anomalies"
+        rows={6}
+        title="Open items and anomalies"
+        variant="loading"
+      />
     )
   }
 
   if (state === "error") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Open items and anomalies unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              Open issues could not be loaded from anomalies and reconciliation
-              data.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState
-            description={unavailableReason}
-            title="Open items unavailable"
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Open issues could not be loaded from anomalies and reconciliation data."
+        stateDescription={unavailableReason ?? undefined}
+        stateTitle="Open items unavailable"
+        title="Open items and anomalies unavailable"
+        variant="error"
+      />
     )
   }
 
   if (state === "empty") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Open items and anomalies</SurfaceTitle>
-            <SurfaceDescription>
-              Investigation queues appear here after anomaly and reconciliation
-              data has been indexed.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <EmptyState
-            title="No open items yet"
-            description={
-              unavailableReason ??
-              "Sync anomaly and reconciliation data to populate this queue."
-            }
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Investigation queues appear here after anomaly and reconciliation data has been indexed."
+        stateDescription={
+          unavailableReason ??
+          "Sync anomaly and reconciliation data to populate this queue."
+        }
+        stateTitle="No open items yet"
+        title="Open items and anomalies"
+        variant="empty"
+      />
     )
   }
 

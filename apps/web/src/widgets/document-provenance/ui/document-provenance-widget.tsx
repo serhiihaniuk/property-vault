@@ -1,19 +1,18 @@
-import type { DocumentDetailData } from "@/src/shared/api/client";
+import type { DocumentDetailData } from "@/src/shared/api/client"
 import {
   formatDocumentDateTime,
   getDocumentPeriodLabel,
-} from "@/src/shared/lib/document-format";
+} from "@/src/shared/lib/document-format"
 import {
   Badge,
   EmptyState,
-  ErrorState,
   KeyValueGrid,
   KeyValueRow,
-  LoadingState,
   Money,
   ProvenanceBlock,
   ProvenanceHeader,
   ProvenanceItem,
+  StateSurface,
   Surface,
   SurfaceActions,
   SurfaceBody,
@@ -21,12 +20,12 @@ import {
   SurfaceHeader,
   SurfaceHeading,
   SurfaceTitle,
-} from "@/src/shared/ui";
+} from "@/src/shared/ui"
 
 export interface DocumentProvenanceWidgetProps {
-  data?: DocumentDetailData;
-  errorMessage?: string | null;
-  isLoading: boolean;
+  data?: DocumentDetailData
+  errorMessage?: string | null
+  isLoading: boolean
 }
 
 export function DocumentProvenanceWidget({
@@ -36,57 +35,38 @@ export function DocumentProvenanceWidget({
 }: DocumentProvenanceWidgetProps) {
   if (isLoading) {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Provenance and evidence</SurfaceTitle>
-            <SurfaceDescription>
-              Loading source observations and normalized financial evidence.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState label="Loading provenance and evidence" rows={8} />
-        </SurfaceBody>
-      </Surface>
-    );
+      <StateSurface
+        description="Loading source observations and normalized financial evidence."
+        label="Loading provenance and evidence"
+        rows={8}
+        title="Provenance and evidence"
+        variant="loading"
+      />
+    )
   }
 
   if (errorMessage) {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Provenance and evidence unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              Source observations and financial rows could not be loaded.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState title="Provenance unavailable" description={errorMessage} />
-        </SurfaceBody>
-      </Surface>
-    );
+      <StateSurface
+        description="Source observations and financial rows could not be loaded."
+        stateDescription={errorMessage}
+        stateTitle="Provenance unavailable"
+        title="Provenance and evidence unavailable"
+        variant="error"
+      />
+    )
   }
 
   if (!data) {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Provenance and evidence</SurfaceTitle>
-            <SurfaceDescription>No provenance detail is available yet.</SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <EmptyState
-            title="No provenance detail"
-            description="Source observations and normalized financial rows appear here when available."
-          />
-        </SurfaceBody>
-      </Surface>
-    );
+      <StateSurface
+        description="No provenance detail is available yet."
+        stateDescription="Source observations and normalized financial rows appear here when available."
+        stateTitle="No provenance detail"
+        title="Provenance and evidence"
+        variant="empty"
+      />
+    )
   }
 
   return (
@@ -96,8 +76,8 @@ export function DocumentProvenanceWidget({
           <SurfaceHeading>
             <SurfaceTitle>Financial evidence</SurfaceTitle>
             <SurfaceDescription>
-              Normalized monetary rows tied back to the document period, page, and
-              supporting note where available.
+              Normalized monetary rows tied back to the document period, page,
+              and supporting note where available.
             </SurfaceDescription>
           </SurfaceHeading>
           <SurfaceActions>
@@ -186,12 +166,14 @@ export function DocumentProvenanceWidget({
           <SurfaceHeading>
             <SurfaceTitle>Source observations</SurfaceTitle>
             <SurfaceDescription>
-              Where the canonical document was first seen before normalization into
-              the app index.
+              Where the canonical document was first seen before normalization
+              into the app index.
             </SurfaceDescription>
           </SurfaceHeading>
           <SurfaceActions>
-            <Badge variant="outline">{data.sourceObservations.length} sources</Badge>
+            <Badge variant="outline">
+              {data.sourceObservations.length} sources
+            </Badge>
           </SurfaceActions>
         </SurfaceHeader>
         <SurfaceBody className="gap-3">
@@ -202,18 +184,21 @@ export function DocumentProvenanceWidget({
             />
           ) : (
             data.sourceObservations.map((source, index) => (
-              <ProvenanceBlock key={`${source.sourceKind}:${source.seenAt}:${index}`}>
+              <ProvenanceBlock
+                key={`${source.sourceKind}:${source.seenAt}:${index}`}
+              >
                 <ProvenanceHeader
                   hint={formatDocumentDateTime(source.seenAt)}
                   label={source.sourceKindLabel}
                 />
                 <div className="flex flex-col gap-2">
-                  <p className="min-w-0 break-all font-mono text-[12px] text-fg-primary">
+                  <p className="min-w-0 font-mono text-[12px] break-all text-fg-primary">
                     {source.originalFilename ?? "Original filename unavailable"}
                   </p>
                   {source.reference.length === 0 ? (
                     <p className="text-[12px] text-fg-subtle">
-                      No structured source fields were stored for this observation.
+                      No structured source fields were stored for this
+                      observation.
                     </p>
                   ) : (
                     <div className="grid gap-2">
@@ -233,5 +218,5 @@ export function DocumentProvenanceWidget({
         </SurfaceBody>
       </Surface>
     </div>
-  );
+  )
 }

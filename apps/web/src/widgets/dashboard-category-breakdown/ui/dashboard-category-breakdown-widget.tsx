@@ -2,17 +2,7 @@ import {
   type CategoryBreakdown,
   type DashboardSurfaceStateKind,
 } from "@/src/shared/lib/dashboard-v0"
-import {
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Surface,
-  SurfaceBody,
-  SurfaceDescription,
-  SurfaceHeader,
-  SurfaceHeading,
-  SurfaceTitle,
-} from "@/src/shared/ui"
+import { StateSurface } from "@/src/shared/ui"
 
 import { CategoryCard } from "./category-card"
 
@@ -37,70 +27,40 @@ export function DashboardCategoryBreakdownWidget({
 }: DashboardCategoryBreakdownWidgetProps) {
   if (state === "loading") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Breakdown by category</SurfaceTitle>
-            <SurfaceDescription>
-              Loading this month versus last month category totals and
-              document-backed comparison context.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState
-            label="Loading category breakdown"
-            rows={8}
-            showHeader={false}
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Loading this month versus last month category totals and document-backed comparison context."
+        label="Loading category breakdown"
+        rows={8}
+        title="Breakdown by category"
+        variant="loading"
+      />
     )
   }
 
   if (state === "error") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Breakdown by category unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              Category-level month-over-month comparison could not be loaded.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState
-            description={unavailableReason}
-            title="Category breakdown unavailable"
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Category-level month-over-month comparison could not be loaded."
+        stateDescription={unavailableReason ?? undefined}
+        stateTitle="Category breakdown unavailable"
+        title="Breakdown by category unavailable"
+        variant="error"
+      />
     )
   }
 
   if (state === "empty") {
     return (
-      <Surface density="comfortable" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Breakdown by category</SurfaceTitle>
-            <SurfaceDescription>
-              Category cards appear here once indexed monthly charge rows are
-              available.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <EmptyState
-            title="No category breakdown yet"
-            description={
-              unavailableReason ??
-              "Sync the latest dashboard month to populate category comparison cards."
-            }
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        description="Category cards appear here once indexed monthly charge rows are available."
+        stateDescription={
+          unavailableReason ??
+          "Sync the latest dashboard month to populate category comparison cards."
+        }
+        stateTitle="No category breakdown yet"
+        title="Breakdown by category"
+        variant="empty"
+      />
     )
   }
 

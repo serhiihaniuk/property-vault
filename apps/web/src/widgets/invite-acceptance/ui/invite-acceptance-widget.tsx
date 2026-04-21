@@ -6,10 +6,11 @@ import { useState } from "react"
 
 import { usePropertyVaultApiClient } from "@/src/shared/api/api-client-provider"
 import { PropertyVaultApiError } from "@/src/shared/api/client"
+import { StateSurface } from "@/src/shared/ui"
 import { Button } from "@/src/shared/ui/button"
 import { Input } from "@/src/shared/ui/input"
 import { Label } from "@/src/shared/ui/label"
-import { ErrorState, LoadingState } from "@/src/shared/ui/state-message"
+import { ErrorState } from "@/src/shared/ui/state-message"
 import {
   Surface,
   SurfaceBody,
@@ -57,46 +58,27 @@ export function InviteAcceptanceWidget({ token }: InviteAcceptanceWidgetProps) {
 
   if (invitationQuery.isPending) {
     return (
-      <Surface className="w-full max-w-xl" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Accept invitation</SurfaceTitle>
-            <SurfaceDescription>
-              Loading invitation details so you can create your password and
-              activate access.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <LoadingState
-            rows={6}
-            label="Loading invitation"
-            showHeader={false}
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        className="w-full max-w-xl"
+        description="Loading invitation details so you can create your password and activate access."
+        label="Loading invitation"
+        rows={6}
+        title="Accept invitation"
+        variant="loading"
+      />
     )
   }
 
   if (invitationQuery.error) {
     return (
-      <Surface className="w-full max-w-xl" tone="elevated">
-        <SurfaceHeader>
-          <SurfaceHeading>
-            <SurfaceTitle>Invitation unavailable</SurfaceTitle>
-            <SurfaceDescription>
-              The invitation details could not be loaded, so access cannot be
-              activated yet.
-            </SurfaceDescription>
-          </SurfaceHeading>
-        </SurfaceHeader>
-        <SurfaceBody>
-          <ErrorState
-            description={getApiErrorMessage(invitationQuery.error)}
-            title="Invitation could not be loaded"
-          />
-        </SurfaceBody>
-      </Surface>
+      <StateSurface
+        className="w-full max-w-xl"
+        description="The invitation details could not be loaded, so access cannot be activated yet."
+        stateDescription={getApiErrorMessage(invitationQuery.error)}
+        stateTitle="Invitation could not be loaded"
+        title="Invitation unavailable"
+        variant="error"
+      />
     )
   }
 
